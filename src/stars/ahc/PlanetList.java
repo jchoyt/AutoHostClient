@@ -113,20 +113,25 @@ public class PlanetList
    }
 
    /**
+	Few change Made here to allow for testing and allowing duplicate values of Planet scans if they are newer than an existing report
+	Bryan Wiegand
     */
-   public void addPlanetData(String name, int year, String[] values)
-   {      
-      PlanetData data = new PlanetData();
-      data.year = year;
-      data.name = name;
-      data.values = values;
-      
-      String hashString = planetDataHashValue( name, year );
-      
-      if (planetData.get( hashString ) == null)
-      {
-         planetData.put( hashString, data );
-      }
+   public void addPlanetData(String name, int year, String[] values)    
+   {
+   		PlanetData data = new PlanetData();       
+   		data.year = year;       
+   		data.name = name;       
+   		data.values = values;       
+   		data.age = Utils.safeParseInt(values[Planet.PLANET_REPORTAGE],0);
+   		
+   		String hashString = planetDataHashValue( name, year );  
+
+   		PlanetData existingPlanetData = (PlanetData)planetData.get( hashString ); 
+   		
+   		if (data.isMoreReliableThan(existingPlanetData))
+   		{
+   		   planetData.put( hashString, data );
+   		}   		
    }
 
    /**
@@ -181,12 +186,12 @@ public class PlanetList
    {
       if (reportsLoaded.get( reportFile.getName()) != null)
       {
-         // Have already loaded this report so don't do so again
+          //Have already loaded this report so don't do so again
          return;
       }
       
-      try
-      {
+     try
+     {
          BufferedReader reader = new BufferedReader(new FileReader(reportFile));
          
          String titles = reader.readLine();
@@ -198,7 +203,7 @@ public class PlanetList
             String[] tokens = line.split("\t");
 
             String name = tokens[0];
-            
+                        
             addPlanetData( name, year, tokens );
          }
          

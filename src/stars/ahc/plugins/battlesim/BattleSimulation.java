@@ -442,7 +442,9 @@ public class BattleSimulation
    }
 
    /**
-    * Returns the distance between two stacks if one of them moves slightly  
+    * Returns the distance between two stacks if one of them moves slightly
+    * <p>
+    * @param xOffset, yOffset - changes to apply to stack 1's position before calculating the distance  
     */
    public int distanceBetween(ShipStack stack1, ShipStack stack2, int xOffset, int yOffset)
    {
@@ -947,11 +949,85 @@ public class BattleSimulation
       }
    }
    
+   /**
+    * Shows full details of all the stacks
+    * <p>
+    * Details are sent to all status listeners
+    */
    public void showStacksFull()
    {
       for (int n = 0; n < stackCount; n++)
       {
          statusUpdate( stacks[n].getStackAsString() );
+      }
+   }
+   
+   /**
+    * Returns the attractiveness of the specified target to the specified weapon on the attacker
+    * <p>
+    * Algorithm courtesy of Art Lathrop Stars! FAQ at http://www.starsfaq.com/advfaq/guts2.htm#4.14
+    * 
+    * @throws BattleSimulationError
+    */
+   public double getAttractiveness( ShipStack attacker, int weaponSlot, ShipStack target ) throws BattleSimulationError
+   {
+      double cost = target.design.getBoraniumCost() + target.design.getResourceCost();
+      
+      double attackPowerNeeded;
+      
+      int armour = target.design.getArmour() * (100 - target.getDamagePercent()) / 100;
+      int shields = target.shields / target.shipCount;
+      
+      double accuracy = attacker.design.getWeaponAccuracy(weaponSlot);
+      accuracy = getFinalAccuracy( accuracy, attacker.design, target.design );
+      
+      // Algorithm for attackPowerNeeded depends on weapon type 
+      switch (attacker.design.getWeaponType(weaponSlot))
+      {
+         case Weapon.TYPE_BEAM:
+            attackPowerNeeded = getBeamAttackPowerNeeded( armour + shields, target.design.getDeflectors() );
+            break;
+         
+         case Weapon.TYPE_SAPPER:
+            attackPowerNeeded = getBeamAttackPowerNeeded( shields, target.design.getDeflectors() );
+            break;
+         
+         case Weapon.TYPE_MISSILE:
+            attackPowerNeeded = getMissileAttackPowerNeeded( armour, shields, accuracy, 2 );
+            break;
+         
+         case Weapon.TYPE_TORPEDO:
+            attackPowerNeeded = getMissileAttackPowerNeeded( armour, shields, accuracy, 1 );
+            break;
+         
+         default:
+            throw new BattleSimulationError( "Unknown weapon type for slot " + weaponSlot ); 
+      }
+      
+      return cost / attackPowerNeeded;
+   }
+
+   /**
+    * Gets an estimate of the defences of a design against beam attack
+    */
+   private double getBeamAttackPowerNeeded(int defences, int deflectors)
+   {
+      double deflection = (deflectors == 0) ? 1.0 : Math.pow( 0.9, deflectors );
+      return defences / deflection;
+   }
+   
+   /**
+    * Gets an estimate of the defences of a design against missile/torpedo attack
+    */
+   private double getMissileAttackPowerNeeded( int armour, int shields, double accuracy, int typeModifier )
+   {
+      if (shields >= armour)
+      {
+         return armour * 2 / accuracy;
+      }
+      else
+      {
+         return (shields * 2 / accuracy) + (armour+shields) / (accuracy * typeModifier);
       }
    }
 }
