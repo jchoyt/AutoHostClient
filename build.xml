@@ -12,7 +12,13 @@
       <include name="**/*.jar" />
     </fileset>
   </path>
-
+    <!--
+      You must have junit.jar in ant's lib directory.  From the JUnit task descriptoin:
+      Note: You must have junit.jar and the class files for the <junit> task in the same classpath. You can do one of:
+          Put both junit.jar and the optional tasks jar file in ANT_HOME/lib.
+          Do not put either in ANT_HOME/lib, and instead include their locations in your CLASSPATH environment variable.
+          Do neither of the above, and instead, specify their locations using a <classpath> element in the build file. See the FAQ for deta
+    -->
   <target name="init">
     <tstamp />
     <mkdir dir="${build}" />
