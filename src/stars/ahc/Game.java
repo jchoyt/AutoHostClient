@@ -287,7 +287,6 @@ public class Game extends Object
         return ahStatus.getProperty( "status" );
     }
 
-
     /**
      *  Gets the statusFileName attribute of the Game object
      *
@@ -298,7 +297,22 @@ public class Game extends Object
         return getName() + ".status";
     }
 
-
+    /*
+     * Constants for use with getReportFile()
+     */
+    public static final int REPORTTYPE_MAP = 1;
+    public static final int REPORTTYPE_PLANET = 2;
+    public static final int REPORTTYPE_FLEET = 3;
+    
+    /**
+     * 
+     */
+    private File getReportFile( int reportType, int player, int year )
+    {
+       // TODO: implement this
+       return null;
+    }
+    
     /**
      *  Adds a feature to the Player attribute of the Game object
      *
