@@ -230,6 +230,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       
       mapPanel = new MapPanel( game, config );
       
+      mapPanel.setMapFrame( this );
       mapPanel.addMapLayers( layers );
       
       mapPanel.addMapMouseMoveListener( this );
@@ -353,7 +354,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       controlPanel.add( layerControlParent );
       
       //===============
-      
+            
       controlPanel.add( Box.createGlue() );
       
       getContentPane().add( controlPanel, BorderLayout.EAST );

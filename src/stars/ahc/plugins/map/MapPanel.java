@@ -40,8 +40,6 @@ import stars.ahcgui.pluginmanager.MapLayer;
 /**
  * Panel on which the map is drawn.
  * <p>
- * FIXME: current implementation cannot handle partial repaint requests (ie. where there is a clip region)
- * <p>
  * @author Steve Leach
  */
 public class MapPanel extends JComponent implements MouseListener, MouseMotionListener, MouseWheelListener, MapConfigChangeListener
@@ -52,6 +50,7 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
    private Point prevMousePos = null;
    private ArrayList layers = new ArrayList();
    private ArrayList mapMouseMoveListeners = new ArrayList();
+   private MapFrame mapFrame = null;
    
    /**
     * Default constructor for MapPanel.
@@ -74,9 +73,25 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
       setBackground( Color.BLACK );
    }
    
+   public void setMapFrame( MapFrame mapFrame )
+   {
+      this.mapFrame = mapFrame;
+   }
+   
    public void paint(Graphics g)
    {
       Graphics2D g2D = (Graphics2D)g;
+
+      // TODO: fix this
+      // Nasty hack to remove corruption when the UI wants to repaint just part of the map.
+      // Currently we ignore the request but schedule a full repaint instead.
+      // Eventually we want to handle partial redraws properly.
+      // Steve Leach (ashamed), 26 Oct 2004
+      if (g2D.getClipBounds().x + g2D.getClipBounds().y > 0)
+      {
+         repaint();
+         return;
+      }
       
       // Cycle through the layers
       for (int n = 0; n < layers.size(); n++)
@@ -112,7 +127,7 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
 
       int mapSize = config.gameMaxX - config.gameMinX;
       
-      xform.translate( this.getWidth() / 2, this.getHeight() / 2 );
+      xform.translate( this.getWidth() / 2, this.getHeight() / 2);
       xform.scale( config.mapScale, config.mapScale );         
       xform.translate( config.mapXpos - config.gameMinX - mapSize/2, config.mapYpos - config.gameMinY - mapSize / 2 );
       
@@ -263,6 +278,10 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
       this.layers.addAll( layers );
    }
 
+   /**
+    * Registers an object that wants to be informed when the mouse moves over the map 
+    * @param listener
+    */
    public void addMapMouseMoveListener( MapMouseMoveListener listener )
    {
       mapMouseMoveListeners.add( listener );
