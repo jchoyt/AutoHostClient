@@ -21,6 +21,7 @@ import java.io.*;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Properties;
 
 import stars.ahcgui.AhcGui;
 
@@ -503,6 +504,8 @@ public class Player extends Object
 
     /**
      *  Description of the Method
+     * 
+     * @deprecated setProperties() is used instead
      *
      *@param  out              Description of the Parameter
      *@exception  IOException  Description of the Exception
@@ -558,5 +561,17 @@ public class Player extends Object
        
        return color;
     }
+
+
+   /**
+    * @param props
+    */
+   public void setProperties(Properties props)
+   {
+      props.setProperty( game.getName() + ".player" + id + ".lastUpload", ""+lastUpload );
+      props.setProperty( game.getName() + ".player" + id + ".StarsPassword", starsPassword );
+      props.setProperty( game.getName() + ".player" + id + ".UploadPassword", uploadPassword );
+      props.setProperty( game.getName() + ".player" + id + ".upload", ""+toUpload );
+   }
 }
 

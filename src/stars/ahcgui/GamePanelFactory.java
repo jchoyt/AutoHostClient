@@ -625,8 +625,9 @@ class LaunchGameButton extends JButton implements ActionListener
     {
         try
         {
+           String starsExe = GamesProperties.getStarsExecutable();
             String[] cmds = new String[4];
-            cmds[0] = new File( GamesProperties.getStarsExecutable() ).getCanonicalPath();
+            cmds[0] = new File( starsExe ).getCanonicalPath();
             cmds[1] = player.getTurnFileName();
             cmds[2] = "-p";
             cmds[3] = player.getStarsPassword();

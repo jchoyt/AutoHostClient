@@ -34,6 +34,7 @@ public class Planet implements MapObject
    public static final int PLANET_NAME = 0;
    public static final int PLANET_OWNER = 1;
    public static final int PLANET_POPULATION = 4;
+   public static final int PLANET_GATERANGE = 33;
    
    /**
     * @param data
@@ -112,5 +113,20 @@ public class Planet implements MapObject
    public int getPopulation()
    {
       return getIntValue( PLANET_POPULATION, 0 );
+   }
+   
+   public int getGateRange()
+   {
+      return getIntValue( PLANET_GATERANGE, 0 );
+   }
+   
+   public int distanceFrom( MapObject obj )
+   {
+      int dx = this.getX() - obj.getX();
+      int dy = this.getY() - obj.getY();
+      
+      double distance = Math.sqrt( dx * dx + dy + dy );
+      
+      return (int)Math.round(distance);
    }
 }

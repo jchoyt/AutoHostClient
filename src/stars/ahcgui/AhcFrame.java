@@ -31,6 +31,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
 
@@ -53,6 +54,7 @@ import stars.ahc.AutoHostClient;
 import stars.ahc.Game;
 import stars.ahc.GamesProperties;
 import stars.ahc.Log;
+import stars.ahcgui.pluginmanager.PlugIn;
 import stars.ahcgui.pluginmanager.PlugInManager;
 import stars.ahcgui.pluginmanager.PluginLoadError;
 
@@ -325,6 +327,9 @@ public class AhcFrame extends javax.swing.JFrame
       try
       {
          PlugInManager.getPluginManager().findAndLoadPlugins();
+         
+         ArrayList plugins = PlugInManager.getPluginManager().getPlugins(PlugIn.class);
+         
       }
       catch (PluginLoadError e)
       {

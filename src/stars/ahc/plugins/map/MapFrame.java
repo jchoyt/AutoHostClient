@@ -20,6 +20,9 @@ package stars.ahc.plugins.map;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,14 +41,16 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 
 import stars.ahc.Game;
+import stars.ahc.GamesProperties;
 import stars.ahcgui.pluginmanager.MapLayer;
+import stars.ahcgui.pluginmanager.PlugInManager;
 
 /**
  * Swing frame in which the game map is displayed
  * 
  * @author Steve Leach
  */
-public class MapFrame extends JFrame implements MapConfigChangeListener
+public class MapFrame extends JFrame implements MapConfigChangeListener, WindowListener
 {
    protected Game game = null;
    protected MapConfig config = new MapConfig();
@@ -53,6 +58,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener
    private JSlider scaleSlider;
    private MapPanel mapPanel;
    private JLabel scaleLabel; 
+   private ArrayList layers = new ArrayList();
    
    /**
     * Other classes should use viewGameMap() instead of the constructor.
@@ -65,9 +71,13 @@ public class MapFrame extends JFrame implements MapConfigChangeListener
       config.mapScale = 1.0;
       
       config.addChangeListener( this );
+      addWindowListener( this );
       
       setupMapFrame();
+      setupLayers();
       setupMapControls();
+      
+      writeProperties();
    }
    
    /**
@@ -96,13 +106,44 @@ public class MapFrame extends JFrame implements MapConfigChangeListener
       mf.show();
       
    }
+ 
+   
+   /**
+    */
+   private void setupLayers() throws MapDisplayError
+   {
+      ArrayList plugins = PlugInManager.getPluginManager().getPlugins( MapLayer.class );
+      
+      for (int n = 0; n < plugins.size(); n++)
+      {
+         try
+         {
+	         Class plugin = (Class)plugins.get(n);
+	         MapLayer layer = (MapLayer)plugin.newInstance();
+	         
+	         layer.initialize( game, config );
+	         
+	         layers.add( layer );
+         }
+         catch (Exception e)
+         {
+            throw new MapDisplayError( "Error creating layer", e  );
+         }
+      }
+   }
 
+   
    /**
     * Sets up the frame itself (borders, title, etc)
     */
    private void setupMapFrame()
    {
-      setBounds( 20, 20, 720, 580 );
+      String base = "Plugins.MapFrame."+game.getName();
+      int x = GamesProperties.getIntProperty( base+".xpos", 20 );
+      int y = GamesProperties.getIntProperty( base+".ypos", 20 );
+      int height = GamesProperties.getIntProperty( base+".height", 720 );
+      int width = GamesProperties.getIntProperty( base+".width", 580 );
+      setBounds( x, y, width, height );
       setTitle( "Map for " + game.getName() + " (" + game.getCurrentYear() + ")" );
       
       getContentPane().setLayout(new BorderLayout());
@@ -121,6 +162,8 @@ public class MapFrame extends JFrame implements MapConfigChangeListener
       toolbar.add( btn );
       
       mapPanel = new MapPanel( game, config );
+      
+      mapPanel.addMapLayers( layers );
 
       getContentPane().add( mapPanel, BorderLayout.CENTER );
       
@@ -191,6 +234,90 @@ public class MapFrame extends JFrame implements MapConfigChangeListener
       scaleSlider.setValue( (int)Math.round(config.mapScale * 100) );
       mapPanel.repaint();
    }
+   
+   public MapLayer[] getMapLayers()
+   {
+      return (MapLayer[])layers.toArray( new MapLayer[0] );
+   }
+   
+   private void writeProperties()
+   {
+      GamesProperties.setProperty( "Plugins.MapFrame."+game.getName()+".xpos", this.getX() );
+      GamesProperties.setProperty( "Plugins.MapFrame."+game.getName()+".ypos", this.getY() );
+      GamesProperties.setProperty( "Plugins.MapFrame."+game.getName()+".height", this.getHeight() );
+      GamesProperties.setProperty( "Plugins.MapFrame."+game.getName()+".width", this.getWidth() );
+      
+      for (int n = 0; n < layers.size(); n++)
+      {
+         MapLayer layer = (MapLayer)layers.get(n);
+         
+         String layer_id = layer.getName().replaceAll( " ", "_" );
+         GamesProperties.setProperty( "Plugins.MapLayers."+game.getName()+"." + layer_id + ".enabled", layer.isEnabled() );
+      }
+      
+      GamesProperties.writeProperties();
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.WindowListener#windowActivated(java.awt.event.WindowEvent)
+    */
+   public void windowActivated(WindowEvent arg0)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.WindowListener#windowClosed(java.awt.event.WindowEvent)
+    */
+   public void windowClosed(WindowEvent arg0)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.WindowListener#windowClosing(java.awt.event.WindowEvent)
+    */
+   public void windowClosing(WindowEvent arg0)
+   {
+      writeProperties();      
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.WindowListener#windowDeactivated(java.awt.event.WindowEvent)
+    */
+   public void windowDeactivated(WindowEvent arg0)
+   {
+      writeProperties();
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.WindowListener#windowDeiconified(java.awt.event.WindowEvent)
+    */
+   public void windowDeiconified(WindowEvent arg0)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.WindowListener#windowIconified(java.awt.event.WindowEvent)
+    */
+   public void windowIconified(WindowEvent arg0)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.WindowListener#windowOpened(java.awt.event.WindowEvent)
+    */
+   public void windowOpened(WindowEvent arg0)
+   {
+      // TODO Auto-generated method stub
+      
+   }
 }
 
 
@@ -210,7 +337,7 @@ class LayerTableModel extends AbstractTableModel
     */
    private void initialize()
    {
-      layers = new MapLayer[0];      
+      this.layers = mapFrame.getMapLayers();
    }
 
 

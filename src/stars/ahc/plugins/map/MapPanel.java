@@ -34,7 +34,6 @@ import javax.swing.JPanel;
 
 import stars.ahc.Game;
 import stars.ahcgui.pluginmanager.MapLayer;
-import stars.ahcgui.pluginmanager.PlugInManager;
 
 /**
  * @author Steve Leach
@@ -53,38 +52,11 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
       this.game = game;
       this.config = config;
       
-      initializeLayers();
-      
       addMouseListener( this );
       addMouseMotionListener( this );
       addMouseWheelListener( this );
       
       config.addChangeListener( this );
-   }
-
-   /**
-    * 
-    */
-   private void initializeLayers() throws MapDisplayError
-   {
-      ArrayList plugins = PlugInManager.getPluginManager().getPlugins( MapLayer.class );
-      
-      for (int n = 0; n < plugins.size(); n++)
-      {
-         try
-         {
-	         Class plugin = (Class)plugins.get(n);
-	         MapLayer layer = (MapLayer)plugin.newInstance();
-	         
-	         layer.initialize( game, config );
-	         
-	         layers.add( layer );
-         }
-         catch (Exception e)
-         {
-            throw new MapDisplayError( "Error creating layer", e  );
-         }
-      }
    }
    
    public void paint(Graphics g)
@@ -225,6 +197,13 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
    public void mapConfigChanged(MapConfig config)
    {
       repaint();
+   }
+
+   /**
+    */
+   public void addMapLayers(ArrayList layers)
+   {
+      this.layers.addAll( layers );
    }
 
 }

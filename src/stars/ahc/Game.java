@@ -514,6 +514,8 @@ public class Game extends Object
 
     /**
      *  Description of the Method
+     * 
+     * @deprecated setProperties() is used instead
      *
      *@param  out              Description of the Parameter
      *@exception  IOException  Description of the Exception
@@ -710,6 +712,32 @@ public class Game extends Object
       
       // Otherwise, return null
       return null;
+   }
+
+
+   /**
+    * Updates all the properties for this game
+    */
+   public void setProperties(Properties props)
+   {
+      String playerNumbers = "";
+      
+      for ( int i = 0; i < players.size(); i++ )
+      {
+         Player player = (Player)players.get(i);
+         
+          playerNumbers += player.getId();
+          
+          if ( i < players.size() - 1 )
+          {
+              playerNumbers += ",";
+          }
+          
+          player.setProperties( props );
+          //( ( Player ) players.get( i ) ).writeProperties( out );
+      }
+      props.setProperty( name + ".GameDir", directory );
+      props.setProperty( name + ".PlayerNumbers", playerNumbers );
    }
 }
 

@@ -14,16 +14,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahc;
-import java.beans.*;
-import java.io.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
-
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Properties;
-import stars.ahc.Game;
-import stars.ahc.Player;
 
 import stars.ahcgui.AhcGui;
 
@@ -33,7 +33,7 @@ import stars.ahcgui.AhcGui;
  *@author     jchoyt
  *@created    November 27, 2002
  */
-public class GamesProperties extends Object
+public class GamesProperties
 {
     /**
      *  Description of the Field
@@ -43,17 +43,16 @@ public class GamesProperties extends Object
     /**
      *  Description of the Field
      */
-    static Game currentGame;
-    static ArrayList games = new ArrayList();
-    static boolean initiated = false;
-    static String lineEnding = System.getProperty( "line.separator" );
-    static Properties props;
-    static String propsFile;
-    static String proxyHost;
-    static String proxyPort;
-    static String starsExecutable;
-    static PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
-
+    private static Game currentGame;
+    private static ArrayList games = new ArrayList();
+    private static boolean initiated = false;
+    private static String lineEnding = System.getProperty( "line.separator" );
+    private static Properties props;
+    private static String propsFile;
+    //private static String proxyHost;
+    //private static String proxyPort;
+    //private static String starsExecutable;
+    private static PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
 
     /**
      *  Constructor for the GamesProperties object
@@ -90,6 +89,8 @@ public class GamesProperties extends Object
     public static void setCurrentGame( Game _currentGame )
     {
         currentGame = _currentGame;
+        props.setProperty( "currentGame", currentGame.name );
+        currentGame.setProperties( props );
     }
 
 
@@ -106,7 +107,7 @@ public class GamesProperties extends Object
             game = ( Game ) games.get( i );
             if ( game.getName().equals( gameName ) )
             {
-                currentGame = game;
+                setCurrentGame( game );
                 break;
             }
         }
@@ -155,7 +156,7 @@ public class GamesProperties extends Object
      */
     public static void setProxyHost( String proxyHost )
     {
-        GamesProperties.proxyHost = proxyHost;
+       props.setProperty( "ProxyHost", proxyHost );
     }
 
 
@@ -166,7 +167,7 @@ public class GamesProperties extends Object
      */
     public static void setProxyPort( String proxyPort )
     {
-        GamesProperties.proxyPort = proxyPort;
+        props.setProperty( "ProxyPort", proxyPort );
     }
 
 
@@ -177,7 +178,7 @@ public class GamesProperties extends Object
      */
     public static void setStarsExecutable( String starsExecutable )
     {
-        GamesProperties.starsExecutable = starsExecutable;
+       props.setProperty( "StarsExecutable", starsExecutable );
     }
 
 
@@ -264,7 +265,7 @@ public class GamesProperties extends Object
      */
     public static String getProxyHost()
     {
-        return proxyHost;
+        return props.getProperty( "ProxyHost" );
     }
 
 
@@ -275,7 +276,7 @@ public class GamesProperties extends Object
      */
     public static String getProxyPort()
     {
-        return proxyPort;
+        return props.getProperty("ProxyPort");
     }
 
 
@@ -286,7 +287,7 @@ public class GamesProperties extends Object
      */
     public static String getStarsExecutable()
     {
-        return starsExecutable;
+        return props.getProperty("StarsExecutable");
     }
 
 
@@ -298,6 +299,7 @@ public class GamesProperties extends Object
     public static void addGame( Game newGame )
     {
         games.add( newGame );
+        newGame.setProperties( props );
         writeProperties();
     }
 
@@ -357,17 +359,17 @@ public class GamesProperties extends Object
             /*
              *  proxy info
              */
-            proxyHost = props.getProperty( "ProxyHost" );
+            String proxyHost = props.getProperty( "ProxyHost" );
             if ( proxyHost != null )
             {
-                proxyPort = props.getProperty( "ProxyPort" );
+                String proxyPort = props.getProperty( "ProxyPort" );
                 System.getProperties().put( "http.proxyHost", proxyHost );
                 System.getProperties().put( "http.proxyPort", proxyPort );
             }
             /*
              *  Games Properties info
              */
-            starsExecutable = props.getProperty( "StarsExecutable" );
+            String starsExecutable = props.getProperty( "StarsExecutable" );
             if ( starsExecutable != "" )
             {
                 Utils.setStarsExecutable( new File( starsExecutable ) );
@@ -421,6 +423,18 @@ public class GamesProperties extends Object
         }
     }
 
+    /**
+     * Ensures that the properties reflect the current status of all the games
+     */
+    private static void refreshGamesProperties()
+    {
+       for ( int i = 0; i < games.size(); i++ )
+       {
+          Game game = (Game)games.get(i);
+          
+          game.setProperties( props );
+       }
+    }
 
     /**
      *  Saves the properties to disk
@@ -432,9 +446,15 @@ public class GamesProperties extends Object
          */
         try
         {
-            FileWriter out = new FileWriter( propsFile );
-            writeProperties( out );
-            out.close();
+            //FileWriter out = new FileWriter( propsFile );
+            //writeProperties( out );
+            //out.close();
+           
+           refreshGamesProperties();
+           
+           FileOutputStream fos = new FileOutputStream( propsFile );
+           props.store( fos, "AutoHostClient properties" );
+           fos.close();
         }
         catch ( Exception e )
         {
@@ -453,32 +473,56 @@ public class GamesProperties extends Object
     public static void writeProperties( Writer out )
         throws IOException
     {
-        /*
-         *  GamesProperties stuff
-         */
-        out.write( "StarsExecutable=" + starsExecutable + lineEnding );
-        if ( proxyHost != null )
-        {
-            out.write( "ProxyHost=" + proxyHost + lineEnding );
-            out.write( "ProxyPort=" + proxyPort + lineEnding );
-        }
-        /*
-         *  write the properties for each game
-         */
-        if ( games != null && games.size() > 0 )
-        {
-            String gameNames = "";
-            for ( int i = 0; i < games.size(); i++ )
-            {
-                gameNames += ( ( Game ) games.get( i ) ).getName();
-                if ( i < games.size() - 1 )
-                {
-                    gameNames += ",";
-                }
-                ( ( Game ) games.get( i ) ).writeProperties( out );
-            }
-            out.write( "Games=" + gameNames );
-        }
+//       
+//        /*
+//         *  GamesProperties stuff
+//         */
+//        out.write( "StarsExecutable=" + starsExecutable + lineEnding );
+//        if ( proxyHost != null )
+//        {
+//            out.write( "ProxyHost=" + proxyHost + lineEnding );
+//            out.write( "ProxyPort=" + proxyPort + lineEnding );
+//        }
+//        /*
+//         *  write the properties for each game
+//         */
+//        if ( games != null && games.size() > 0 )
+//        {
+//            String gameNames = "";
+//            for ( int i = 0; i < games.size(); i++ )
+//            {
+//                gameNames += ( ( Game ) games.get( i ) ).getName();
+//                if ( i < games.size() - 1 )
+//                {
+//                    gameNames += ",";
+//                }
+//                ( ( Game ) games.get( i ) ).writeProperties( out );
+//            }
+//            out.write( "Games=" + gameNames + lineEnding );
+//        }
+//        
+    }
+
+    /**
+     * Sets an ad-hoc property 
+     */
+    public static void setProperty( String name, Object value )
+    {
+       props.setProperty( name, value.toString() );
+    }
+    public static void setProperty( String name, int value )
+    {
+       props.setProperty( name, ""+value );
+    }
+    public static void setProperty( String name, boolean value )
+    {
+       props.setProperty( name, value ? "true" : "false" );
+    }
+    
+    public static int getIntProperty( String key, int defaultValue )
+    {
+       String s = props.getProperty( key );
+       return Utils.safeParseInt( s, defaultValue );
     }
 }
 

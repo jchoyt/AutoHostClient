@@ -69,8 +69,8 @@ public class PlugInManager
    private ArrayList directories = new ArrayList();
    private Vector loaders = new Vector();
    private ArrayList plugins = new ArrayList();
-   private ArrayList gamePanelButtons = new ArrayList();
-   private ArrayList mapLayers = new ArrayList();
+//   private ArrayList gamePanelButtons = new ArrayList();
+//   private ArrayList mapLayers = new ArrayList();
 
    public void addPluginDirectory( String directory )
    {
@@ -197,14 +197,14 @@ public class PlugInManager
          
          PlugIn plugin = (PlugIn)pluginClass.newInstance();
 
-         if (plugin instanceof GamePanelButtonPlugin)
-         {
-            gamePanelButtons.add( pluginClass );
-         }
-         else if (plugin instanceof MapLayer)
-         {
-            mapLayers.add( pluginClass );
-         }
+//         if (plugin instanceof GamePanelButtonPlugin)
+//         {
+//            gamePanelButtons.add( pluginClass );
+//         }
+//         else if (plugin instanceof MapLayer)
+//         {
+//            mapLayers.add( pluginClass );
+//         }
       }
       catch (ClassNotFoundException e)
       {
@@ -240,4 +240,8 @@ public class PlugInManager
       return matchingPlugins;
    }
    
+   public ArrayList getAllPlugins()
+   {
+      return getPlugins( PlugIn.class );
+   }
 }
