@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import stars.ahc.Game;
+import stars.ahc.ReportLoaderException;
+
 
 /**
  * @author Steve Leach
@@ -34,6 +37,8 @@ public abstract class AbstractAnalyzerReport implements AnalyzerReport
    private static final String UNDERLINE = "========================================================================";
    public static final int PAD_LEFT = 1;
    public static final int PAD_RIGHT = 0;
+   public static final int SORT_AZ = 1;
+   public static final int SORT_ZA = -1;
 
    /* (non-Javadoc)
     * @see stars.ahcgui.pluginmanager.PlugIn#isEnabled()
@@ -57,7 +62,7 @@ public abstract class AbstractAnalyzerReport implements AnalyzerReport
     * @param title
     * @param width
     */
-   public void defineColumn( String title, int width, int justification )
+   protected void defineColumn( String title, int width, int justification )
    {
       ReportColumn column = new ReportColumn();
       column.title = title;
@@ -67,12 +72,12 @@ public abstract class AbstractAnalyzerReport implements AnalyzerReport
       columns.add( column );
    }
    
-   public void defineColumn( String title, int width )
+   protected void defineColumn( String title, int width )
    {
       defineColumn( title, width, PAD_RIGHT );
    }
    
-   public String getHeaderText()
+   protected String getHeaderText()
    {
       String text1 = "";
       String text2 = "";
@@ -87,19 +92,19 @@ public abstract class AbstractAnalyzerReport implements AnalyzerReport
       return text1 + "\n" + text2 + "\n";
    }
    
-   public String padRight( String text, int width )
+   protected String padRight( String text, int width )
    {
       return (text + MANY_SPACES).substring( 0, width );
    }
    
-   public String padLeft( String text, int width)
+   protected String padLeft( String text, int width)
    {
       if (text == null) text = "";
       text = MANY_SPACES + text;
       return text.substring( text.length() - width );
    }
    
-   public String pad( String text, ReportColumn column )
+   protected String pad( String text, ReportColumn column )
    {
       switch (column.justification)
       {
@@ -110,7 +115,7 @@ public abstract class AbstractAnalyzerReport implements AnalyzerReport
       }
    }
    
-   public void clearColumnValues()
+   protected void clearColumnValues()
    {
       for (int n = 0; n < columns.size(); n++)
       {
@@ -119,7 +124,7 @@ public abstract class AbstractAnalyzerReport implements AnalyzerReport
       }      
    }
    
-   private ReportColumn getColumn( String title )
+   protected ReportColumn getColumn( String title )
    {
       for (int n = 0; n < columns.size(); n++)
       {
@@ -132,17 +137,17 @@ public abstract class AbstractAnalyzerReport implements AnalyzerReport
       return null;
    }
    
-   public void setColumnValue(String title, String value)
+   protected void setColumnValue(String title, String value)
    {
       getColumn( title ).value = value;
    }
    
-   public void setColumnValue(String title, int value)
+   protected void setColumnValue(String title, int value)
    {
       setColumnValue( title, ""+value );
    }
 
-   public String getReportLine()
+   protected String getReportLine()
    {
       String text = "";
       
@@ -155,15 +160,20 @@ public abstract class AbstractAnalyzerReport implements AnalyzerReport
       return text + "\n";
    }   
    
-   public void sortLines( ArrayList lines )
+   protected void sortLines( ArrayList lines )
    {
-      Collections.sort( lines, new StringComparator(1) );
+      sortLines( lines, SORT_AZ );
+   }
+   
+   protected void sortLines( ArrayList lines, int direction )
+   {
+      Collections.sort( lines, new StringComparator(direction) );
    }
    
    /**
     * Collapses an ArrayList of Strings down into a single string
     */
-   public String collapse( ArrayList lines )
+   protected String collapse( ArrayList lines )
    {
       String text = "";
       for (int n = 0; n < lines.size(); n++)
@@ -177,9 +187,25 @@ public abstract class AbstractAnalyzerReport implements AnalyzerReport
    /**
     * Initialise the report columns data structures
     */
-   public void initColumns()
+   protected void initColumns()
    {
       columns.clear();
+   }
+
+   /**
+    * @param game
+    * @throws AnalyzerReportError
+    */
+   protected void loadReports(Game game) throws AnalyzerReportError
+   {
+      try
+      {
+         game.loadReports();
+      }
+      catch (ReportLoaderException e)
+      {
+         throw new AnalyzerReportError( "Error loading game data", e );
+      }
    }
 }
 

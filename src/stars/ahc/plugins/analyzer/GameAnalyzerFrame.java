@@ -22,6 +22,10 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.print.PrinterJob;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,18 +33,22 @@ import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import stars.ahc.Game;
+import stars.ahc.Log;
+import stars.ahc.Utils;
 import stars.ahcgui.pluginmanager.PlugInManager;
 
 /**
  * @author Steve Leach
- *
  */
 public class GameAnalyzerFrame extends JFrame implements ActionListener
 {
@@ -52,8 +60,13 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
    private JButton printButton;
    private JTextArea text;
    private ArrayList reports = new ArrayList();
+   private JButton copyButton;
+   private JLabel statusBar;
+   private JPanel blankControlPanel;
+   private JComponent currentControlPanel = null;
 
    /**
+    * Displays an Analyzer window for running reports about a specific Stars! game.
     */
    public static JFrame showAnalyzer(Game game)
    {
@@ -143,20 +156,30 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
       }
       
       combo = new JComboBox( reportNames );
+      combo.addActionListener( this );
       controlPanel.add( combo );
     
       runButton = new JButton( "Run" );
       runButton.addActionListener( this );
+      runButton.setToolTipText( "Run the selected report" );
       controlPanel.add( runButton );
       
-      saveButton = new JButton( "Save" );
+      copyButton = new JButton( "Copy" );
+      copyButton.addActionListener( this );
+      copyButton.setEnabled( false );
+      copyButton.setToolTipText( "Copy report text to clipboard" );
+      controlPanel.add( copyButton );
+      
+      saveButton = new JButton( "Save..." );
       saveButton.addActionListener( this );
       saveButton.setEnabled( false );
+      saveButton.setToolTipText( "Save report text to disk" );
       controlPanel.add( saveButton );
 
       printButton = new JButton( "Print" );
       printButton.addActionListener( this );
       printButton.setEnabled( false );
+      printButton.setToolTipText( "Print report to default printer" );
       controlPanel.add( printButton );
       
       getContentPane().add( controlPanel, BorderLayout.NORTH );
@@ -168,6 +191,56 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
       text.setEditable( false );
 
       getContentPane().add( scroller, BorderLayout.CENTER );
+      
+      statusBar = new JLabel("Ready");
+      getContentPane().add( statusBar, BorderLayout.SOUTH );
+      
+      showReportControls();
+   }
+   
+   private AnalyzerReport getSelectedReport()
+   {
+      int reportIndex = combo.getSelectedIndex();
+      return (AnalyzerReport)reports.get(reportIndex);      
+   }
+   
+   /**
+    * 
+    */
+   private void showReportControls()
+   {
+      if (currentControlPanel != null)
+      {
+         getContentPane().remove( currentControlPanel );
+      }
+
+      AnalyzerReport report = getSelectedReport();
+      
+      if (report instanceof ConfigurableReport)
+      {
+         ConfigurableReport rpt = (ConfigurableReport)report;
+         rpt.initControls( game );
+         currentControlPanel = rpt.getControls();
+      }
+      else
+      {
+         if (blankControlPanel == null)
+         {
+            blankControlPanel = new JPanel();
+         }
+         
+         currentControlPanel = blankControlPanel;
+      }
+      
+
+      getContentPane().add( currentControlPanel, BorderLayout.EAST );
+      
+      validate();
+   }
+
+   public void setStatus( String message )
+   {
+      statusBar.setText( message );
    }
    
    /**
@@ -183,10 +256,37 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
     */
    public void actionPerformed(ActionEvent event)
    {
-      if (event.getSource() == runButton)
+      if (event.getSource() == combo)
+      {
+         showReportControls();
+      }
+      else if (event.getSource() == runButton)
       {
          runReport();
       }
+      else if (event.getSource() == copyButton)
+      {
+         copyReportToClipboard();
+      }
+      else if (event.getSource() == saveButton)
+      {
+         saveReportText();
+      }
+      else if (event.getSource() == printButton)
+      {
+         printReportText();
+      }
+   }
+
+   /**
+    * 
+    */
+   private void copyReportToClipboard()
+   {
+      text.setSelectionStart(0);
+      text.setSelectionEnd( text.getText().length() );
+      text.copy();
+      setStatus( "Report text copied to clipboard." );
    }
 
    /**
@@ -194,15 +294,17 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
     */
    private void runReport()
    {
-      int reportIndex = combo.getSelectedIndex();
-      
-      AnalyzerReport report = (AnalyzerReport)reports.get(reportIndex);
+      AnalyzerReport report = getSelectedReport();
       
       try
       {
          String output = report.run( game, new Properties() );
          
          text.setText( output );
+         
+         enableButtons();
+         
+         setStatus( "Report completed: " + report.getDescription() );
       }
       catch (AnalyzerReportError e)
       {
@@ -212,4 +314,71 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
       text.setCaretPosition( 0 );
    }
 
+   /**
+    * 
+    */
+   private void enableButtons()
+   {
+      boolean enabled = Utils.empty( text.getText() ) == false;
+      
+      copyButton.setEnabled( enabled );
+      saveButton.setEnabled( enabled );
+      printButton.setEnabled( enabled );
+   }
+
+   private void saveReportText()
+   {
+      JFileChooser chooser = new JFileChooser( "." );
+      chooser.setDialogTitle( "Save report text" );
+      //chooser.setFileFilter( new FileExtensionFilter(".txt","Text files (*.txt)") );
+      chooser.setFileSelectionMode( JFileChooser.FILES_ONLY );      
+      
+      int result = chooser.showSaveDialog( this );
+      
+      if (result == JFileChooser.APPROVE_OPTION)
+      {
+         File file = chooser.getSelectedFile();
+       
+         saveReportText( file );
+      }
+   }      
+   
+   private void saveReportText( File file )
+   {
+      try
+      {
+         PrintStream ps = new PrintStream( new FileOutputStream( file ) );
+         ps.print( text.getText() );
+         ps.close();
+      }
+      catch (Throwable t)
+      {
+         Log.log( Log.ERROR, this, "An error occurred while saving the report" );               
+         JOptionPane.showMessageDialog( this, "An error occurred while saving the report" );
+      }      
+   }
+
+   private void printReportText()
+   {
+      Properties printProperties = new Properties();
+      PrinterJob job = PrinterJob.getPrinterJob();
+
+      if (job != null)
+      {
+	      ReportPrinter rp = new ReportPrinter();
+	      rp.setReportText( text.getText() );
+	      
+	      try
+	      {
+	         rp.printReport( job );
+	         
+	         setStatus( "Report printed" );
+	      }
+	      catch (Exception e)
+	      {
+	         e.printStackTrace();
+	      }
+      }
+   }
+   
 }

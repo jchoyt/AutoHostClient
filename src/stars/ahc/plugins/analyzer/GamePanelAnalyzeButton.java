@@ -24,8 +24,15 @@ import stars.ahcgui.pluginmanager.GamePanelButtonExecutionError;
 import stars.ahcgui.pluginmanager.GamePanelButtonPlugin;
 
 /**
+ * Plugin that adds support for running analysis reports for Stars! games.
+ * <p>
+ * This class simply adds the button to the game details panel.  The button
+ * creates an instance of GameAnalyzerFrame which is used to run reports that
+ * implement the AnalyzerReport interface. 
+ * 
+ * @see GameAnalyzerFrame, AnalyzerReport
+ * 
  * @author Steve Leach
- *
  */
 public class GamePanelAnalyzeButton implements GamePanelButtonPlugin
 {

@@ -31,13 +31,43 @@ public class Planet implements MapObject
    private int year;
    private Point position;
    
+   //
+   // Constants for field indexes
+   //
    public static final int PLANET_NAME = 0;
    public static final int PLANET_OWNER = 1;
+   public static final int PLANET_BASE = 2;
+   public static final int PLANET_REPORTAGE = 3;
    public static final int PLANET_POPULATION = 4;
+   public static final int PLANET_VALUE = 5;
+   public static final int PLANET_QUEUE = 6;
+   public static final int PLANET_MINES = 7;
+   public static final int PLANET_FACTORIES = 8;
+   public static final int PLANET_DEFENCE = 9;
+   public static final int PLANET_SURF_I = 10;
+   public static final int PLANET_SURF_B = 11;
+   public static final int PLANET_SURF_G = 12;
+   public static final int PLANET_RATE_I = 13;
+   public static final int PLANET_RATE_B = 14;
+   public static final int PLANET_RATE_G = 15;
+   public static final int PLANET_CONC_I = 16;
+   public static final int PLANET_CONC_B = 17;
+   public static final int PLANET_CONC_G = 18;
+   public static final int PLANET_RESOURCES = 19;
+   public static final int PLANET_GRAV = 20; // Start of newreports
+   public static final int PLANET_TEMP = 21;
+   public static final int PLANET_RAD = 22;
+   public static final int PLANET_GRAV_BASE = 23; 
+   public static final int PLANET_TEMP_BASE = 24;
+   public static final int PLANET_RAD_BASE = 25;
+   public static final int PLANET_TERRA = 26;
+   public static final int PLANET_CAPACITY = 27;
+   public static final int PLANET_SCANRANGE = 28;
+   public static final int PLANET_PENSCAN = 29;
    public static final int PLANET_GATERANGE = 33;
+   public static final int PLANET_GATEMASS = 34;
    
    /**
-    * @param data
     */
    public Planet(String name,int year,Point position,PlanetData data)
    {
@@ -107,6 +137,11 @@ public class Planet implements MapObject
    {
       return Utils.empty( getOwner() );
    }
+   
+   public boolean isOccupied()
+   {
+      return Utils.empty( getOwner() ) == false;
+   }
 
    /**
     */
@@ -120,6 +155,11 @@ public class Planet implements MapObject
       return getIntValue( PLANET_GATERANGE, 0 );
    }
    
+   public int getGateMass()
+   {
+      return getIntValue( PLANET_GATEMASS, 0 );
+   }
+   
    public int distanceFrom( MapObject obj )
    {
       int dx = this.getX() - obj.getX();
@@ -128,5 +168,20 @@ public class Planet implements MapObject
       double distance = Math.sqrt( dx * dx + dy + dy );
       
       return (int)Math.round(distance);
+   }
+   
+   public int getGerConc()
+   {
+      return getIntValue( PLANET_CONC_G, 0 );
+   }
+   
+   public int getIroConc()
+   {
+      return getIntValue( PLANET_CONC_I, 0 );
+   }
+   
+   public int getBorConc()
+   {
+      return getIntValue( PLANET_CONC_B, 0 );
    }
 }

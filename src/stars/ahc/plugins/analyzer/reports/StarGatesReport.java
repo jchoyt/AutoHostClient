@@ -1,5 +1,5 @@
 /*
- * Created on Oct 14, 2004
+ * Created on Oct 15, 2004
  *
  * Copyright (c) 2004, Steve Leach
  * 
@@ -14,7 +14,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-*/
+ * 
+ */
 package stars.ahc.plugins.analyzer.reports;
 
 import java.util.ArrayList;
@@ -26,10 +27,11 @@ import stars.ahc.plugins.analyzer.AbstractAnalyzerReport;
 import stars.ahc.plugins.analyzer.AnalyzerReportError;
 
 /**
+ * Produces a list of stargates, sorted by player then planet name.
+ * 
  * @author Steve Leach
- *
  */
-public class TestReport extends AbstractAnalyzerReport
+public class StarGatesReport extends AbstractAnalyzerReport
 {
 
    /* (non-Javadoc)
@@ -44,16 +46,18 @@ public class TestReport extends AbstractAnalyzerReport
       loadReports(game);
       
       // Write the report title
-      reportText += "Test Report \n";
-      reportText += "=========== \n\n";
+      reportText += "Stargates Report \n";
+      reportText += "================ \n\n";
+      
+      reportText += game.getName() + ", " + game.getYear() + "\n\n";
 
       // Initialise the report columns infrastructure
       initColumns();
       
       // Define the report columns (title,width)
-      defineColumn( "Planet", 20 );
       defineColumn( "Owner", 15 );
-      defineColumn( "Population", 10, PAD_LEFT );
+      defineColumn( "Planet", 20 );
+      defineColumn( "Stargate", 10 );
       
       // Add the header text
       reportText += getHeaderText();
@@ -61,22 +65,28 @@ public class TestReport extends AbstractAnalyzerReport
       // Set up an array to hold the detail lines so we can sort them later
       ArrayList reportLines = new ArrayList();
       
+      int gateCount = 0;
+      
       // Now loop through all the planets in the game
       for (int n = 1; n <= game.getPlanetCount(); n++)
       {
          // Get the next planet
          Planet planet = game.getPlanet( n );
          
-         // Is it occupied ?  This is a very basic filter
-         if ( planet.isOccupied() )
+         if ( planet.getGateRange() != 0 )
          {
+            gateCount++;
+            
             // Set the value of all columns to blank (as a precaution)
             clearColumnValues();
          
             // Set the value of each column
             setColumnValue( "Planet", planet.getName() );
             setColumnValue( "Owner", planet.getOwner() );
-            setColumnValue( "Population", planet.getPopulation() );
+            
+            String gateText = "" + planet.getGateMass() + "/" + planet.getGateRange();
+            
+            setColumnValue( "Stargate", gateText );
          
             // Add the text of the report line to the array we made earlier
             reportLines.add( getReportLine() );            
@@ -89,6 +99,8 @@ public class TestReport extends AbstractAnalyzerReport
       // Then collapse the lines into a single string and add to the report text
       reportText += collapse( reportLines );
          
+      reportText += "\nTotal gates: " + gateCount;
+      
       // And return the report text to the analyzer for displaying to the user
       return reportText;
    }
@@ -98,7 +110,7 @@ public class TestReport extends AbstractAnalyzerReport
     */
    public String getName()
    {
-      return "Test report";
+      return "Stargates report";
    }
 
    /* (non-Javadoc)
@@ -106,22 +118,7 @@ public class TestReport extends AbstractAnalyzerReport
     */
    public String getDescription()
    {
-      return "Test report";
-   }
-
-   /* (non-Javadoc)
-    * @see stars.ahcgui.pluginmanager.PlugIn#isEnabled()
-    */
-   public boolean isEnabled()
-   {
-      return true;
-   }
-
-   /* (non-Javadoc)
-    * @see stars.ahcgui.pluginmanager.PlugIn#setEnabled(boolean)
-    */
-   public void setEnabled(boolean enabled)
-   {
+      return "Stargates";
    }
 
 }

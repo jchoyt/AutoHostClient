@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Properties;
 
 /**
@@ -774,6 +775,14 @@ public class Game extends Object
          
          race.getProperties( props );
       }
+   }
+
+
+   /**
+    */
+   public Iterator getRaces()
+   {
+      return races.iterator();
    }
 }
 

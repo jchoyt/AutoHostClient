@@ -1,2 +1,3 @@
 plugin=stars.ahc.plugins.analyzer.GamePanelAnalyzeButton
-plugin=stars.ahc.plugins.analyzer.reports.TestReport
+plugin=stars.ahc.plugins.analyzer.reports.StarGatesReport
+plugin=stars.ahc.plugins.analyzer.reports.MiningCapacityReport
