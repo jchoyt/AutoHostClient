@@ -158,7 +158,7 @@ public class BattleSimulation
       stack.naturalOrder = stackCount;
       stacks[stackCount++] = stack;
    }
-   
+  
    /**
     * Adds a new ship stack, using the specified design and ship count
     * <p>
@@ -367,7 +367,7 @@ public class BattleSimulation
             break;
          // TODO: complete for 5 to 16 races
          default:
-            throw new BattleSimulationError( "Cannot handle more than 2 races yet" );
+            throw new BattleSimulationError( "Cannot handle more than 4 races yet" );
       }
 
       for (int n = 0; n < stackCount; n++)
@@ -393,7 +393,7 @@ public class BattleSimulation
          {
             raceCount++;
             index = new Integer(raceCount);
-            races.put( stacks[n], index );            
+            races.put( stacks[n].owner, index );            
          }
          stacks[n].raceIndex = index.intValue();
       }
@@ -1122,6 +1122,8 @@ public class BattleSimulation
     */
    private void moveStack( ShipStack stack )
    {
+      if (stack.getShipCount() == 0) return;		// stack is dead
+      
       int bestRangeOffset = Integer.MAX_VALUE;
       
       // Store the original position

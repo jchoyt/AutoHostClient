@@ -570,7 +570,7 @@ public class StandAloneBattleSimulator extends JFrame
          {
             text += "(R)";
          }
-         text += ", Speed=" + (design.getSpeed4() / 4);
+         text += ", Speed=" + (design.getSpeed4() / 4.0);
          text += ", Initiative=" + design.getInitiative();
          text += ", Jamming=" + design.getJamming();
          text += ", Capacitors=" + design.getCapacitors();

@@ -18,6 +18,8 @@
  */
 package stars.ahc.plugins.base;
 
+import java.util.Random;
+
 import javax.swing.JFrame;
 
 import stars.ahc.Planet;
@@ -43,6 +45,14 @@ public class HabCalculator implements BasePlugIn
    public static final int TEMP = 2;
    public static final int RAD = 3;
 
+   private long randomSeed = 0L;
+   private Random rnd = null;
+   
+   public HabCalculator()
+   {
+      rnd = new Random();
+   }
+   
    /**
     * Calculates the maximum hab value for the specified race on the specified planet after terraforming.
     * <p>
@@ -160,9 +170,9 @@ public class HabCalculator implements BasePlugIn
       return (int)habValue;
    }
 
-   private static int randIntUpTo( int max )
+   private int randIntUpTo( int max )
    {
-      return (int)Math.round( Math.floor( (Math.random() * max) ) );
+      return (int)Math.round( Math.floor( (rnd.nextDouble() * max) ) );
    }
 
    /**
@@ -172,7 +182,7 @@ public class HabCalculator implements BasePlugIn
     * <p>
     * The result is in "clicks" rather than an actual environmental value 
     */
-   private static int getRandomHabVal( int which )
+   private int getRandomHabVal( int which )
    {
       // var planetval = (id==3) ? (Math.floor(Math.random()*99)+1) : (Math.floor(Math.random()*90) + Math.floor(Math.random()*10) + 1);   // Corrected formula - CR 26102004
       long val;
@@ -189,19 +199,19 @@ public class HabCalculator implements BasePlugIn
       return (int)val;
    }
    
-   public static float getRandomGrav()
+   public float getRandomGrav()
    {
       int clicks = getRandomHabVal(GRAV);
       return StarsRuleSet.gravFromClicks(clicks);
    }
    
-   public static int getRandomTemp()
+   public int getRandomTemp()
    {
       int clicks = getRandomHabVal(TEMP);
       return StarsRuleSet.tempFromClicks(clicks);
    }
 
-   public static int getRandomRad()
+   public int getRandomRad()
    {
       int clicks = getRandomHabVal(RAD);
       return StarsRuleSet.radFromClicks(clicks);
@@ -254,5 +264,19 @@ public class HabCalculator implements BasePlugIn
    {
       // Not implemented
       // This is a passive plugin so there is no need to disable it
+   }
+
+   /**
+    * @param seed
+    */
+   public void setRandomSeed(long seed)
+   {
+      this.randomSeed = seed;
+      this.rnd = new Random(seed);
+   }
+   
+   public long getRandomSeed()
+   {
+      return randomSeed;
    }
 }

@@ -397,9 +397,9 @@ class RaceConfigEditor extends JPanel
       
       for (int n = 0; n < testSize; n++)
       {
-         float grav = HabCalculator.getRandomGrav();
-         int temp = HabCalculator.getRandomTemp();
-         int rad = HabCalculator.getRandomRad();
+         float grav = calc.getRandomGrav();
+         int temp = calc.getRandomTemp();
+         int rad = calc.getRandomRad();
 
          Planet planet = createPlanet( "x", ""+grav, ""+temp, ""+rad );
          

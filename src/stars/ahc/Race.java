@@ -313,4 +313,46 @@ public class Race
       if (lrts == null) return 15;
       return (lrts.toUpperCase().indexOf("TT") >= 0) ? 30 : 15;
    }
+   
+   public int getMaxPlanetResources()
+   {
+      return getUserIntProperty("maxPlanetResources",0);
+   }
+   public void setMaxPlanetResources( int resources )
+   {
+      setUserProperty( "maxPlanetResources", ""+resources );
+   }
+   public void calcMaxPlanetResources( int popEffic, int facEffic, int facOperated, boolean obrm, boolean joat )
+   {
+      int maxPop = 1000000;
+      
+      if (obrm) maxPop *= 1.1;
+      if (joat) maxPop *= 1.2;
+      
+      setMaxPlanetPop( maxPop );
+      
+      int popRes = maxPop / popEffic;
+      int numFac = maxPop * facOperated / 10000;
+      int facRes = numFac * facEffic / 10;
+      
+      setMaxPlanetResources( popRes + facRes );
+   }
+   
+   public void setMaxPlanetPop( int maxPop )
+   {
+      setUserProperty( "maxPlanetPop", ""+maxPop );
+   }   
+   public int getMaxPlanetPop()
+   {
+      return getUserIntProperty( "maxPlanetPop", 0 );
+   }
+   
+   public void setGrowthRate( int growthRate )
+   {
+      setUserProperty( "growthRate", ""+growthRate );
+   }
+   public int getGrowthRate()
+   {
+      return getUserIntProperty( "growthRate", 0 );
+   }
 }

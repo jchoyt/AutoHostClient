@@ -66,12 +66,14 @@ public class HabCalculatorTest extends TestCase
       humanoids.setGravRange( 0.25, 3.92, false );
       humanoids.setTempRange( -128, 128, false );
       humanoids.setRadRange( 22, 82, false );
+      
+      HabCalculator calc = new HabCalculator();
 
       for (int n = 0; n < testSize; n++)
       {
-         float grav = HabCalculator.getRandomGrav();
-         int temp = HabCalculator.getRandomTemp();
-         int rad = HabCalculator.getRandomRad();
+         float grav = calc.getRandomGrav();
+         int temp = calc.getRandomTemp();
+         int rad = calc.getRandomRad();
          
          Planet planet = createPlanet( "x", ""+grav, ""+temp, ""+rad );
          
@@ -102,4 +104,5 @@ public class HabCalculatorTest extends TestCase
       
       assertTrue( "with 15% terraforming is about 90%", Math.abs(percent15-90) < 5 );
    }
+   
 }

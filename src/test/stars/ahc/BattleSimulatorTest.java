@@ -284,7 +284,7 @@ public class BattleSimulatorTest extends TestCase
       battle.addNewStack( blueColloidalBC, 50 );
       battle.addNewStack( armBB, 4 );
       
-      battle.addStatusListener( consoleStatusListener );
+      //battle.addStatusListener( consoleStatusListener );
       
       battle.simulate();
       
@@ -358,6 +358,7 @@ public class BattleSimulatorTest extends TestCase
       cynic.side = 1;
       
       ShipStack staz = new ShipStack( interceptor2, 3 );
+      staz.owner = "others";
       staz.side = 2;
       
       BattleSimulation battle = new BattleSimulation(2);
@@ -426,15 +427,18 @@ public class BattleSimulatorTest extends TestCase
       int klingons = 1;
       int borg = 2;
       ShipStack armBBstack = new ShipStack( armBB_2, 30, klingons );
+      armBBstack.owner = "Klingons";
       ShipStack chaffStack = new ShipStack( chaff, 500, borg );
+      chaffStack.owner = "Borg";
       ShipStack cccStack = new ShipStack( armBB_2, 20, borg );
+      cccStack.owner = "Borg";
       
       BattleSimulation sim = new BattleSimulation();
       sim.addStack( armBBstack );
       sim.addStack( chaffStack );
       sim.addStack( cccStack );
       
-      System.out.println( armBBstack.getStackAsString() );
+      //System.out.println( armBBstack.getStackAsString() );
       
       //sim.addStatusListener( consoleStatusListener );
       
@@ -493,6 +497,61 @@ public class BattleSimulatorTest extends TestCase
       BattleSimulation sim = new BattleSimulation( simFile );
       
       //sim.addStatusListener( consoleStatusListener );
+      
+      sim.simulate();
+   }
+   
+   public void testStarbaseCombat() throws Exception
+   {
+      ShipDesign hip = new ShipDesign();
+      hip.setName("Hip To Be Square");
+      hip.setOwner("Rush'n");
+      hip.addComputer( ShipDesign.BATTLE_COMPUTER, 8 );
+      hip.setBattleSpeed( 0 );
+      hip.setInitiative(22);
+      hip.setArmour( 1300 );
+      hip.setShields( 1120 );
+      hip.addWeapon( Weapon.BETA, 16 );
+      hip.addWeapon( Weapon.BETA, 16 );
+      hip.addWeapon( Weapon.LASER, 16 );
+      hip.addWeapon( Weapon.LASER, 16 );
+      
+      
+      ShipDesign ddx = new ShipDesign();
+      ddx.setName("Destroyer X");
+      ddx.setOwner("Drom");
+      ddx.setBattleSpeed( 1.5 );
+      ddx.setInitiative( 3 );
+      ddx.setArmour( 200 );
+      ddx.setShields( 0 );
+      ddx.addWeapon( Weapon.X_RAY, 1 );
+      ddx.addWeapon( Weapon.X_RAY, 1 );
+      ddx.setRegenShields( true );
+      ddx.setBoraniumCost(13);
+      ddx.setResourceCost(74);
+      
+      ShipDesign grn = new ShipDesign();
+      grn.setName( "Grn Destroyer" );
+      grn.setOwner("Buccaneer");
+      grn.setBattleSpeed( 1.5 );
+      grn.setInitiative( 3 );
+      grn.setArmour( 200 );
+      grn.setShields( 0 );
+      grn.addWeapon( Weapon.YAKIMORA, 1 );
+      grn.addWeapon( Weapon.YAKIMORA, 1 );
+      grn.addWeapon( Weapon.YAKIMORA, 1 );
+      grn.setRegenShields( true );
+      grn.setBoraniumCost(21);
+      grn.setResourceCost(65);
+      
+      BattleSimulation sim = new BattleSimulation();
+      sim.addNewStack( hip, 1, 1 );
+      sim.addNewStack( ddx, 9, 2 );
+      sim.addNewStack( ddx, 3, 2 );
+      sim.addNewStack( grn, 8, 2 );
+      sim.addNewStack( grn, 10, 2 );
+      
+      sim.addStatusListener( consoleStatusListener );
       
       sim.simulate();
    }

@@ -66,6 +66,11 @@ public class Game extends Object
         init( "", "" );
     }
 
+    public Game( boolean sahHosted )
+    {
+       ahStatus = new Properties();
+       ahStatus.setProperty( ".sahHosted", "false" );
+    }
 
     /**
      *  Constructor for the Game object
@@ -430,7 +435,11 @@ public class Game extends Object
      */
     public void loadProperties()
     {
-       ahStatus = new Properties();
+       if (ahStatus == null)
+       {
+          ahStatus = new Properties();
+       }
+       
        if (controller != null)
        {
           controller.loadStatusProperties( ahStatus );
