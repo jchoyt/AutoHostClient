@@ -1,3 +1,4 @@
 plugin=stars.ahc.plugins.analyzer.GamePanelAnalyzeButton
 plugin=stars.ahc.plugins.analyzer.reports.StarGatesReport
 plugin=stars.ahc.plugins.analyzer.reports.MiningCapacityReport
+plugin=stars.ahc.plugins.analyzer.reports.PopulationHoldReport

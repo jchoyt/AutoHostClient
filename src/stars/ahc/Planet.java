@@ -104,7 +104,8 @@ public class Planet implements MapObject
    
    private int getIntValue( int index, int defaultValue )
    {
-      return Utils.safeParseInt( getValue(index), defaultValue );
+      String value = getValue(index).replaceAll( "%", "" );
+      return Utils.safeParseInt( value, defaultValue );
    }
    
    /* (non-Javadoc)
@@ -186,6 +187,11 @@ public class Planet implements MapObject
    public int getBorConc()
    {
       return getIntValue( PLANET_CONC_B, 0 );
+   }
+
+   public int getHabValue()
+   {
+      return getIntValue( PLANET_VALUE, 0 );
    }
    
    private String getUserDefinedPropertyFullName( String shortName )
