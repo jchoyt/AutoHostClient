@@ -551,4 +551,13 @@ public class ShipDesign
       
       return shortest;
    }
+
+
+   /**
+    * @return
+    */
+   public String getHullName()
+   {
+      return getHullTypeNames()[ getHullType() ];
+   }
 }

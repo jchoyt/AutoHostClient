@@ -147,7 +147,7 @@ public class BattleSimulation
     */
    protected void initStacks( int maxStacks )
    {
-      stacks = new ShipStack[maxStacks];  
+      stacks = new ShipStack[MAX_STACKS];  
    }
    
    /**
@@ -207,9 +207,9 @@ public class BattleSimulation
     */
    public void simulate() throws BattleSimulationError
    {
-      statusUpdate( "Battle started" );
-      
       initialiseBattleBoard();
+      
+      statusUpdate( "Battle started" );
       
       pickTargets();
       
@@ -217,6 +217,8 @@ public class BattleSimulation
       {
          simulateNextRound();
       }
+      
+      naturalSortStacks();
       
       // Show the results of the battle
       if (showFinalSummary)
@@ -552,7 +554,7 @@ public class BattleSimulation
          if (stacks[n].design.isRegenShields())
          {
             int beforeRegen = stacks[n].shields;
-            int originalShields = stacks[n].design.getShields() * stacks[n].shipCount;
+            int originalShields = stacks[n].design.getShields() * stacks[n].getShipCount();
             int regen = originalShields / 10;
             
             stacks[n].shields += regen;
@@ -790,7 +792,7 @@ public class BattleSimulation
    protected void fireWeapon(ShipStack stack, int slot) throws BattleSimulationError
    {
       // Stacks with no ships left can't fire
-      if (stack.shipCount <= 0)
+      if (stack.getShipCount() <= 0)
       {
          return;
       }
@@ -837,7 +839,7 @@ public class BattleSimulation
       {
          if (stacks[n].side != stack.side)
          {
-            if (stacks[n].shipCount > 0)
+            if (stacks[n].getShipCount() > 0)
             {
 	            if (distanceBetween(stack,stacks[n]) <= range)
 	            {
@@ -987,7 +989,7 @@ public class BattleSimulation
       {
          if (stacks[n].side != stack.side)	// don't target if on our side
          {
-            if (stacks[n].shipCount > 0)	// don't target dead stacks
+            if (stacks[n].getShipCount() > 0)	// don't target dead stacks
             {
 	            if (includeAlreadyTargeted || (stacks[n].targetedBy == null))
 	            {
@@ -1046,7 +1048,7 @@ public class BattleSimulation
       double attackPowerNeeded;
       
       int armour = target.design.getArmour() * (100 - target.getDamagePercent()) / 100;
-      int shields = target.shields / target.shipCount;
+      int shields = target.shields / target.getShipCount();
       
       double accuracy = attacker.design.getWeaponAccuracy(weaponSlot);
       accuracy = getFinalAccuracy( accuracy, attacker.design, target.design );
@@ -1219,7 +1221,7 @@ public class BattleSimulation
       ShipDesign design = stack.design;
       
       // Get the base damage done by the weapon
-      int baseDamage = design.getWeaponPower(slot) * design.getWeaponCount(slot) * stack.shipCount;
+      int baseDamage = design.getWeaponPower(slot) * design.getWeaponCount(slot) * stack.getShipCount();
 
       for (int n = 0; n < stackCount; n++) // examine all stacks
       {         
@@ -1245,7 +1247,7 @@ public class BattleSimulation
       ShipDesign design = stack.design;
       
       // Get the base damage done by the weapon
-      int baseDamage = design.getWeaponPower(slot) * design.getWeaponCount(slot) * stack.shipCount;
+      int baseDamage = design.getWeaponPower(slot) * design.getWeaponCount(slot) * stack.getShipCount();
 
       while (baseDamage > 0)	// while we have unallocated damage
       {
@@ -1354,25 +1356,25 @@ public class BattleSimulation
    private int applyArmourDamage(ShipStack target, int baseDamage, double damageMultiplier, DamageRecord damageRecord) throws BattleSimulationError
    {
       // How much damage has each ship sustained so far ?
-      int damagePerShip = target.damage / target.shipCount;            
+      int damagePerShip = target.damage / target.getShipCount();            
       int remainingArmourPerShip = target.design.getArmour() - damagePerShip;
       
       int kills = (int)(baseDamage * damageMultiplier / remainingArmourPerShip);
 
-      if (kills > target.shipCount)
+      if (kills > target.getShipCount())
       {
-         kills = target.shipCount;
+         kills = target.getShipCount();
       }
       
       baseDamage -= kills * remainingArmourPerShip / damageMultiplier;
       
       damageRecord.armourDamage = kills * remainingArmourPerShip;
-  			
-      target.shipCount = target.shipCount - kills;
+
+      target.killShips( kills ); 
 
       damageRecord.kills = kills;
 
-      if (target.shipCount > 0)
+      if (target.getShipCount() > 0)
       {
          int damageUnits = Math.max( target.design.getArmour() / DAMAGE_UNIT, 1 );
 
@@ -1382,10 +1384,10 @@ public class BattleSimulation
          // Round up to units of 1/500
          int damage2 = (int)(Math.ceil(1.0 * damage / damageUnits) * damageUnits);
       
-         int newDamagePerShip = damage2 / target.shipCount;
+         int newDamagePerShip = damage2 / target.getShipCount();
          
          // Apply damage to the target
-         target.damage = (damagePerShip+newDamagePerShip) * target.shipCount;
+         target.damage = (damagePerShip+newDamagePerShip) * target.getShipCount();
 
          // There can't be any base damage left at this point as we have applied it all to armour
          baseDamage = 0;
@@ -1432,14 +1434,14 @@ public class BattleSimulation
             damageRec.shieldDamage += shieldDamage;
             armourDamage += damage - shieldDamage;
 
-            int damagePerShip = target.damage / target.shipCount;            
+            int damagePerShip = target.damage / target.getShipCount();            
             int remainingArmourPerShip = target.design.getArmour() - damagePerShip;
             
             if (armourDamage >= remainingArmourPerShip)
             {
-               target.shields -= target.shields / target.shipCount;
+               target.shields -= target.shields / target.getShipCount();
                armourDamage -= remainingArmourPerShip;
-               target.shipCount -= 1;
+               target.killShips( 1 );
                damageRec.kills++;
                damageRec.armourDamage += remainingArmourPerShip;
                
@@ -1448,7 +1450,7 @@ public class BattleSimulation
                   armourDamage = 0;
                }
                
-               if (target.shipCount == 0)
+               if (target.getShipCount() == 0)
                {
                   sendShotNotification( stack, slot, damageRec, target );
                   damageRec = new DamageRecord();
@@ -1484,7 +1486,7 @@ public class BattleSimulation
       if (armourDamage > 0)
       {
          // TODO: make sure target has at least damage_units armour left
-         int damage_units = Math.max( target.design.getArmour() * target.shipCount / DAMAGE_UNIT, target.shipCount );
+         int damage_units = Math.max( target.design.getArmour() * target.getShipCount() / DAMAGE_UNIT, target.getShipCount() );
          int dmg = Math.max( armourDamage / damage_units, 1 ) * damage_units;
          target.damage += dmg;         
          damageRec.armourDamage += dmg;         
@@ -1691,5 +1693,16 @@ public class BattleSimulation
       }
       
       return estimate;
+   }
+
+   /**
+    * 
+    */
+   public void reset()
+   {
+      for (int n = 0; n < stackCount; n++)
+      {
+         stacks[n].reset();
+      }
    }
 }

@@ -88,7 +88,7 @@ public class BattleBoard extends JComponent implements BattleSimulationListener
       {
          ShipStack stack = simulation.stacks[n];
          
-         if (stack.shipCount > 0)
+         if (stack.getShipCount() > 0)
          {
             drawStack(g, stack);
          }
@@ -150,7 +150,7 @@ public class BattleBoard extends JComponent implements BattleSimulationListener
       
       g.drawLine( x1, y1, x2, y2 );
       
-      int bangSize = (lastNotification.targetStack.shipCount > 0 ) ? 3 : 5;
+      int bangSize = (lastNotification.targetStack.getShipCount() > 0 ) ? 3 : 5;
       
       g.fillOval( x2-bangSize, y2-bangSize, bangSize*2+1, bangSize*2+1 );
    }

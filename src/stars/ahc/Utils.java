@@ -211,6 +211,16 @@ public class Utils
         return filename.substring( 0, extensionPoint ) + "." + year + filename.substring( extensionPoint );
     }
 
+    /**
+     * @param newExtension - the new file extension including the period 
+     */
+    public static String changeFileExtension( File file, String newExtension )
+    {
+       String filename = file.getAbsolutePath();
+       int extensionPoint = filename.lastIndexOf( "." );
+
+       return filename.substring( 0, extensionPoint ) + newExtension;
+    }
 
     /**
      *  Description of the Method
@@ -566,5 +576,6 @@ public class Utils
       text = new String( a, 0, digits );
       return safeParseFloat( text, defaultValue );
    }
+   
 }
 

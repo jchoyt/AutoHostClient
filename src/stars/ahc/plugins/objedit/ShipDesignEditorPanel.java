@@ -114,6 +114,11 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       add( splitter, BorderLayout.CENTER );
    }
 
+   public void initialize( ShipDesign design )
+   {
+      
+   }
+   
    private JComponent createToolbar()
    {
       Box toolbar = Box.createHorizontalBox();

@@ -39,7 +39,7 @@ public class ShipStack
    public static final int ORDERS_MAX = 5;			// Maximize damage
    public static final int ORDERS_DIS_CHAL = 6;		// Disengage if challenged
    
-   public int shipCount = 0;
+   private int shipCount = 0;
    public ShipDesign design = null;
    /**
     * total number of points of damage for the stack
@@ -199,7 +199,7 @@ public class ShipStack
    {
       String base = "Stacks." + index;
 
-      props.setProperty( base+".shipCount", ""+shipCount );
+      props.setProperty( base+".shipCount", ""+originalShipCount );
       props.setProperty( base+".owner", owner );
       props.setProperty( base+".side", ""+side );
       props.setProperty( base+".orders", ""+battleOrders );
@@ -227,5 +227,21 @@ public class ShipStack
       
       naturalOrder = Utils.safeParseInt( props.getProperty( base + ".naturalOrder" ) );
       battleOrders = Utils.safeParseInt( props.getProperty( base + ".orders" ) );
+   }
+   
+   public void setShipCount( int ships )
+   {
+      shipCount = ships;
+      originalShipCount = ships;
+   }
+   
+   public int getShipCount()
+   {
+      return shipCount;
+   }
+
+   public void killShips(int kills)
+   {
+      shipCount -= kills;
    }
 }

@@ -187,10 +187,10 @@ public class BattleSimulatorTest extends TestCase
       //
       
       // CC stack is wiped out
-      assertEquals( 0, battle.getStack("Colloidal CC").shipCount );
+      assertEquals( 0, battle.getStack("Colloidal CC").getShipCount() );
       
       // BCC stack suffers no ship losses
-      assertEquals( 12, battle.getStack("Colloidal BCC").shipCount );
+      assertEquals( 12, battle.getStack("Colloidal BCC").getShipCount() );
       
       // Damage won't always be exactly the same, but should be in the same region
       assertTrue( "BCCs about 50% damaged", battle.getStack("Colloidal BCC").getDamagePercent() > 40 );
@@ -216,11 +216,11 @@ public class BattleSimulatorTest extends TestCase
       //
       
       // CCC stack is undamaged
-      assertEquals( 14, ccStack.shipCount );
+      assertEquals( 14, ccStack.getShipCount() );
       assertTrue( "CCC stack undamaged or lightly damaged", ccStack.getDamagePercent() < 5 );
       
       // Rabid Dog stack is wiped out
-      assertEquals( 0, bccStack.shipCount );
+      assertEquals( 0, bccStack.getShipCount() );
       
    }
    

@@ -23,12 +23,16 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -51,7 +55,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
 
+import stars.ahc.ShipDesign;
 import stars.ahc.Utils;
+import stars.ahc.plugins.objedit.ShipDesignEditor;
 
 
 /**
@@ -72,13 +78,17 @@ public class StandAloneBattleSimulator extends JFrame
    private AbstractAction copyAction;
    private JLabel statusLabel;
    private JTextField seedField;
-   private String currentFileName = null;
    private StackTableModel stackTableModel;
    private JTable stacksTable;
    private AbstractAction addStackAction;
    private AbstractAction editStackAction;
    private AbstractAction removeStackAction;
    private Box controlPanel;
+   private JFrame stackEditor = null;
+   private ShipDesignEditor designEditor;
+   private File currentSimFile = null;
+   private JCheckBox showDesignsField;
+   private AbstractAction newFileAction;
 
    public static void main( String[] args ) throws Exception
    {      
@@ -127,6 +137,14 @@ public class StandAloneBattleSimulator extends JFrame
             exit();
          }
       };
+
+      newFileAction = new AbstractAction("New") {
+         public void actionPerformed(ActionEvent event)
+         {
+            newFile();
+         }
+      };
+      newFileAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK) );
       
       openAction = new AbstractAction("Open") {
          public void actionPerformed(ActionEvent event)
@@ -139,9 +157,18 @@ public class StandAloneBattleSimulator extends JFrame
       saveAction = new AbstractAction("Save") {
          public void actionPerformed(ActionEvent event)
          {
+            if (currentSimFile == null)
+            {
+               saveSimulationGui();
+            }
+            else
+            {
+               saveSimulation();
+            }
          }
       };
       saveAction.setEnabled(false);
+      saveAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK) );
       
       copyAction = new AbstractAction("Copy") {
          public void actionPerformed(ActionEvent event)
@@ -171,7 +198,7 @@ public class StandAloneBattleSimulator extends JFrame
       addStackAction = new AbstractAction("Add") {
          public void actionPerformed(ActionEvent event)
          {
-            notImplemented();
+            addStack();
          }
       };
       addStackAction.setEnabled(false);
@@ -179,7 +206,7 @@ public class StandAloneBattleSimulator extends JFrame
       editStackAction = new AbstractAction("Edit") {
          public void actionPerformed(ActionEvent event)
          {
-            notImplemented();
+            editStack();
          }
       };
       editStackAction.setEnabled(false);
@@ -201,6 +228,7 @@ public class StandAloneBattleSimulator extends JFrame
       JMenu fileMenu = new JMenu("File");      
       mainMenu.add( fileMenu );
 
+      fileMenu.add( new JMenuItem(newFileAction) );
       fileMenu.add( new JMenuItem(openAction) );
       fileMenu.add( new JMenuItem(saveAction) );
       fileMenu.addSeparator();
@@ -245,6 +273,14 @@ public class StandAloneBattleSimulator extends JFrame
       seedBox.add( Box.createHorizontalGlue() );
       controlPanel.add( seedBox );
       
+      Box box = Box.createHorizontalBox();
+      box.setBorder( new EmptyBorder(6,6,6,6) );
+      showDesignsField = new JCheckBox("Show designs");
+      showDesignsField.setSelected( true );
+      box.add( showDesignsField );
+      box.add( Box.createHorizontalGlue() );
+      controlPanel.add( box );
+      
       controlPanel.add( Box.createVerticalStrut(8) );
       
       Box stacksPanel = Box.createVerticalBox();
@@ -284,6 +320,15 @@ public class StandAloneBattleSimulator extends JFrame
       BattleSimulation s = (sim == null) ? new BattleSimulation() : sim;
       
       seedField.setText( ""+s.randomSeed );
+
+      if (currentSimFile == null)
+      {
+         setTitle( "Stars! Battle Simulator" );
+      }
+      else
+      {
+         setTitle( "Stars! Battle Simulator - " + currentSimFile.getName() );
+      }
       
       stackSelected();
    }
@@ -323,6 +368,17 @@ public class StandAloneBattleSimulator extends JFrame
       this.dispose();
    }
    
+   private void newFile()
+   {      
+      sim = new BattleSimulation();
+      runSimAction.setEnabled( true );
+      stackTableModel.setSimulation( sim );
+      currentSimFile = null;
+      saveAction.setEnabled( true );
+      refreshControls();
+      repaint();      
+   }
+   
    private void openFileGui()
    {
       JFileChooser chooser = new JFileChooser();
@@ -337,10 +393,6 @@ public class StandAloneBattleSimulator extends JFrame
       {
          openSimulation( chooser.getSelectedFile().getAbsolutePath() );
 
-         currentFileName = chooser.getSelectedFile().getAbsolutePath(); 
-         
-         setTitle( "Stars! Battle Simulator - " + chooser.getSelectedFile().getName() );
-         
          refreshControls();
          
          setStatus( "Simulation opened: " + chooser.getSelectedFile().getName() );
@@ -351,10 +403,12 @@ public class StandAloneBattleSimulator extends JFrame
    {
       try
       {
+         currentSimFile = new File(fileName);
          sim = new BattleSimulation( fileName );
          sim.addStatusListener( new TextAreaStatusListener(resultsArea) );
          runSimAction.setEnabled( true );
          stackTableModel.setSimulation( sim );
+         saveAction.setEnabled( true );
          repaint();
       }
       catch (Throwable t)
@@ -364,15 +418,80 @@ public class StandAloneBattleSimulator extends JFrame
       }
    }
    
+   public void saveSimulationGui()
+   {
+      JFileChooser chooser = new JFileChooser();
+
+      chooser.setDialogTitle( "Save simulation" );
+      chooser.addChoosableFileFilter( new SimFileFilter() );
+      chooser.setCurrentDirectory( new File(System.getProperty("user.home")) ); 
+      
+      int rc = chooser.showSaveDialog( this );
+      
+      if (rc == JFileChooser.APPROVE_OPTION)
+      {
+         saveSimulationAs( chooser.getSelectedFile() );
+      }
+   }
+   
+   public void saveSimulationAs( File newFile )
+   {
+      currentSimFile = newFile;
+      saveSimulation();
+   }
+   
+   public void saveSimulation()
+   {
+      try
+      {
+         backupSimFile();
+         getFieldValues();
+         sim.saveTo( currentSimFile.getAbsolutePath() );
+         setStatus( "Simulation saved: " + currentSimFile.getName() );
+      }
+      catch (Throwable t)
+      {
+         t.printStackTrace();
+      }
+   }
+   
+   private void backupSimFile()
+   {
+      if (currentSimFile == null)
+      {
+         return;
+      }
+      if (currentSimFile.exists())
+      {
+         String backupFileName = Utils.changeFileExtension( currentSimFile, ".bkp" );
+         
+         try
+         {
+            Utils.fileCopy( currentSimFile, new File(backupFileName) );
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+      }
+   }
+   
    private void runSimulation()
    {
       try
       {
          getFieldValues();
-         
-         setStatus( "Running simulation..." );
+
          resultsArea.setText("Stars! Battle Simulator\n\n");
          
+         sim.reset();
+         
+         if (showDesignsField.isSelected())
+         {
+            showDesigns();
+         }
+         
+         setStatus( "Running simulation..." );
          sim.showFinalSummary = false;
          
          sim.simulate();
@@ -384,6 +503,58 @@ public class StandAloneBattleSimulator extends JFrame
       {
          t.printStackTrace();
       }
+   }
+   
+   public void showDesigns()
+   {
+      String text = "";
+      
+      for (int n = 0; n < sim.stackCount; n++)
+      {
+         ShipDesign design = sim.stacks[n].design;
+         
+         text += sim.stacks[n].owner + " ";
+         text += design.getName() + " x ";
+         text += sim.stacks[n].getShipCount();
+         text += "\n";
+         
+         text += "   " + design.getHullName();
+         text += ", Armour=" + design.getArmour();
+         text += ", Shields=" + design.getShields();
+         if (design.isRegenShields())
+         {
+            text += "(R)";
+         }
+         text += ", Speed=" + (design.getSpeed4() / 4);
+         text += ", Initiative=" + design.getInitiative();
+         text += ", Jamming=" + design.getJamming();
+         text += ", Capacitors=" + design.getCapacitors();
+         text += ", Deflectors=" + design.getDeflectors();
+         text += ", Computers=";
+         text += design.getComputers(ShipDesign.BATTLE_COMPUTER) + "/";
+         text += design.getComputers(ShipDesign.SUPER_COMPUTER) + "/";
+         text += design.getComputers(ShipDesign.BATTLE_NEXUS);
+         
+         text += "\n   ";
+         if (design.getWeaponSlots() == 0)
+         {
+            text += "unarmed";
+         }
+         else
+         {
+            for (int s = 0; s < design.getWeaponSlots(); s++)
+            {
+               text += (s == 0) ? "" : ", ";
+               text += design.getWeaponCount(s) + " x " + design.getWeaponName(s);
+            }
+         }
+         
+         text += "\n";
+      }
+      
+      text += "\n";
+      
+      resultsArea.setText( resultsArea.getText() + text );
    }
    
    private void getFieldValues()
@@ -404,13 +575,13 @@ public class StandAloneBattleSimulator extends JFrame
          text += stack.owner + " ";
          text += stack.design.getName() + " : ";
          
-         if (stack.shipCount == 0)
+         if (stack.getShipCount() == 0)
          {
             text += "*dead*";
          }
          else
          {
-            text += stack.shipCount + " left, ";
+            text += stack.getShipCount() + " left, ";
             text += stack.getDamagePercent() + "% damage, ";
             text += stack.shields + " shields left";
          }
@@ -457,13 +628,75 @@ public class StandAloneBattleSimulator extends JFrame
 
       addStackAction.setEnabled( true );
       
-      editStackAction.setEnabled( index < sim.stackCount );
-      removeStackAction.setEnabled( index < sim.stackCount );
+      boolean stackSelected = (index >= 0) && (index < sim.stackCount);
+      
+      editStackAction.setEnabled( stackSelected );
+      removeStackAction.setEnabled( stackSelected );
    }
    
    private void notImplemented()
    {
       JOptionPane.showMessageDialog(this, "Not yet implemented" );
+   }
+   
+   private ShipStack getSelectedStack( boolean allowNull )
+   {
+      ShipStack stack = null;
+      
+      int row = stacksTable.getSelectedRow();
+      
+      if (row >= 0)
+      {
+         stack = sim.stacks[row];
+      }
+      
+      if ((stack == null) && (allowNull == false))
+      {
+         stack = new ShipStack( new ShipDesign(), 0 );
+      }
+      
+      return stack;
+   }
+   
+   private void addStack()
+   {
+      ShipStack stack = sim.addNewStack( new ShipDesign(), 0 );
+      stack.side = 1;
+    
+      int newRow = sim.stackCount - 1;
+      stackTableModel.fireTableRowsInserted( newRow, newRow );
+      stacksTable.getSelectionModel().setSelectionInterval( newRow, newRow );
+      
+      editStack();
+   }
+   
+   private void editStack()
+   {
+      if (stackEditor == null)
+      {
+         stackEditor = new JFrame();         
+         stackEditor.getContentPane().setLayout( new BorderLayout() );
+         stackEditor.setTitle( "Stack Editor" );
+         stackEditor.setLocation( 80, 80 );
+         stackEditor.setSize( 600, 400 );
+         
+         stackEditor.addWindowListener( new WindowAdapter() {
+            public void windowClosing(WindowEvent e)
+            {
+               designEditor.getFieldValues();               
+               stackTableModel.fireTableDataChanged();
+               stacksTable.repaint();
+            }
+         });
+         
+         designEditor = new ShipDesignEditor();
+         designEditor.setupControls();
+         stackEditor.getContentPane().add( designEditor, BorderLayout.CENTER );
+      }
+      
+      designEditor.setDesign( getSelectedStack(false).design );
+      
+      stackEditor.show();
    }
 }
 
@@ -570,9 +803,9 @@ class StackTableModel extends AbstractTableModel
       
       switch (col)
       {
-         case OWNER_COL:	return stack.owner;
+         case OWNER_COL:	return stack.design.getOwner();
          case NAME_COL:		return stack.design.getName();
-         case SHIPS_COL:	return new Integer(stack.shipCount);
+         case SHIPS_COL:	return new Integer(stack.originalShipCount);
          case SIDE_COL:		return new Integer(stack.side);
          default:			return "";
       }
@@ -599,6 +832,32 @@ class StackTableModel extends AbstractTableModel
          case SHIPS_COL:	return "Ships";
          case SIDE_COL:		return "Side";
          default:			return "";
+      }
+   }
+   public boolean isCellEditable(int row, int col)
+   {
+      switch (col)
+      {
+         case OWNER_COL:	return false;
+         case NAME_COL:		return false;
+         case SHIPS_COL:	return true;
+         case SIDE_COL:		return true;
+         default:			return false;
+      }
+   }
+   
+   public void setValueAt(Object obj, int row, int col)
+   {
+      ShipStack stack = sim.getStack(row);
+      
+      switch (col)
+      {
+         case SHIPS_COL:	
+            stack.setShipCount( ((Integer)obj).intValue() );
+            break;
+         case SIDE_COL:		
+            stack.side = ((Integer)obj).intValue();
+            break;
       }
    }
 }
