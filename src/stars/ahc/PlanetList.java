@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -213,6 +214,58 @@ public class PlanetList
       {
          throw new ReportLoaderException( "Error reading file: " + reportFile.getName(), e, reportFile.getName() );
       }      
+   }
+
+   /**
+    * Finds the closes planet to the given position.
+    * <p>
+    * No planet over the specified threshold distance will be considered. If 
+    * threshold is 0 or less then a default of 10ly will be used. 
+    */
+   public Planet findClosestPlanet(Point mapPos, int threshold)
+   {
+      if (threshold <= 0)
+      {
+         threshold = 10;
+      }
+      
+      String matchingName = null;
+      Planet result = null;
+      
+      Iterator positions = planetPositions.keySet().iterator();
+
+      double min = Double.MAX_VALUE;     
+
+      while (positions.hasNext())
+      {
+         String name = (String)positions.next();
+         
+         Point planetPos = (Point)planetPositions.get(name);
+         
+         int dx = Math.abs(planetPos.x-mapPos.x);
+         int dy = Math.abs(planetPos.y-mapPos.y);
+         
+         if ((dx <= threshold) && (dy <= threshold))
+         {
+            double dist = Math.sqrt( dx*dx + dy*dy );
+            
+            if (dist < threshold)
+            {
+               if (dist < min)
+               {
+                  min = dist;
+                  matchingName = name;
+               }
+            }
+         }
+      }
+      
+      if (matchingName != null)
+      {
+         result = getPlanet( matchingName, game.getYear() );
+      }
+      
+      return result;
    }
    
 }

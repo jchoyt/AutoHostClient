@@ -63,15 +63,15 @@ public class MapConfig
       return screenPos;
    }
    
-   public void setHoverPos( Point screenPos )
+   public Point screenToMap( Point screenPos )
    {
-      // TODO: implement this properly
-      // We want to take the supplied screen co-ordinates and transform them
-      // into map co-ordinates.
-      // This must take into account the centre point and map scale/
+      Point s = screenPos;
+      Point m = new Point();
       
-      hoverX = screenPos.x + centreX;
-      hoverY = centreY - screenPos.y;
+      m.x = s.x + centreX;
+      m.y = centreY - s.y;
+      
+      return m;
    }
    
    /**

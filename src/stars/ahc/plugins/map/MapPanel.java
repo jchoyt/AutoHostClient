@@ -29,6 +29,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.util.ArrayList;
 
 import javax.swing.JComponent;
@@ -105,6 +106,19 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
       }
    }
 
+   private AffineTransform getMapTransform()
+   {
+      AffineTransform xform = new AffineTransform();
+
+      int mapSize = config.gameMaxX - config.gameMinX;
+      
+      xform.translate( this.getWidth() / 2, this.getHeight() / 2 );
+      xform.scale( config.mapScale, config.mapScale );         
+      xform.translate( config.mapXpos - config.gameMinX - mapSize/2, config.mapYpos - config.gameMinY - mapSize / 2 );
+      
+      return xform;
+   }
+   
    /**
     * Sets the transformation (movement and scaling) for the graphics device
     * 
@@ -113,15 +127,15 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
     */
    private void setupTransform(MapLayer layer, Graphics2D g2d)
    {
-      AffineTransform xform = new AffineTransform();
+      AffineTransform xform;
       
       if (layer.isScaled())
       {
-         int mapSize = config.gameMaxX - config.gameMinX;
-         
-         xform.translate( this.getWidth() / 2, this.getHeight() / 2 );
-         xform.scale( config.mapScale, config.mapScale );         
-         xform.translate( config.mapXpos - config.gameMinX - mapSize/2, config.mapYpos - config.gameMinY - mapSize / 2 );
+         xform = getMapTransform();
+      }
+      else
+      {
+         xform = new AffineTransform();
       }
 
       g2d.setTransform( xform );      
@@ -191,8 +205,29 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
     */
    public void mouseMoved(MouseEvent event)
    {      
-      config.setHoverPos( event.getPoint() );
-      notifyMapMouseMoveListeners();
+      Point screenPos = event.getPoint();
+
+      // First, apply the reverse of the current transform
+      
+      AffineTransform xform;
+      try
+      {
+         xform = getMapTransform().createInverse();
+      }
+      catch (NoninvertibleTransformException e)
+      {
+         // currently ignore this as if it happens it will happen a lot
+         return;
+      }
+            
+      Point mapPos = new Point();
+      xform.transform( screenPos, mapPos );
+      
+      // Then do the basic screen to map conversion on the detransformed co-ords
+      
+      mapPos = config.screenToMap( mapPos );
+      
+      notifyMapMouseMoveListeners( screenPos, mapPos );
    }
 
    /* (non-Javadoc)
@@ -232,15 +267,16 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
    {
       mapMouseMoveListeners.add( listener );
    }
-   
-   private void notifyMapMouseMoveListeners()
+
+   /**
+    * Notify all listeners that the mouse has been moved to the specified coordinates 
+    */
+   private void notifyMapMouseMoveListeners( Point screenPos, Point mapPos )
    {
-      Point mapPos = new Point( config.hoverX, config.hoverY );
-      
       for (int n = 0; n < mapMouseMoveListeners.size(); n++)
       {
          MapMouseMoveListener listener = (MapMouseMoveListener)mapMouseMoveListeners.get(n);
-         listener.mouseMovedOverMap( mapPos );
+         listener.mouseMovedOverMap( screenPos, mapPos );
       }
    }
 }

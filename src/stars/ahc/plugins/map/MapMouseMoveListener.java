@@ -13,5 +13,5 @@ import java.awt.Point;
  */
 public interface MapMouseMoveListener
 {
-   public void mouseMovedOverMap( Point mapPos );
+   public void mouseMovedOverMap( Point screenPos, Point mapPos );
 }

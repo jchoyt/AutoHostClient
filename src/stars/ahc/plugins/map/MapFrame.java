@@ -63,6 +63,7 @@ import javax.swing.table.AbstractTableModel;
 
 import stars.ahc.Game;
 import stars.ahc.GamesProperties;
+import stars.ahc.Planet;
 import stars.ahc.Race;
 import stars.ahc.Utils;
 import stars.ahcgui.ColorRenderer;
@@ -608,9 +609,34 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    /* (non-Javadoc)
     * @see stars.ahc.plugins.map.MapMouseMoveListener#mouseMovedOverMap(java.awt.Point)
     */
-   public void mouseMovedOverMap(Point mapPos)
+   public void mouseMovedOverMap( Point screenPos, Point mapPos )
    {
-      //setStatus( "Mouse over " + mapPos.x + "," + mapPos.y );
+      // The mouse has moved over the map, so update the status bar.
+      // Always display the new co-ords (in map space).
+      // If near a planet, display it's name as well.
+      // If the planet is occupied, display it's owner.
+      
+      String posText = mapPos.x + "," + mapPos.y;
+      
+      Planet planet = game.findClosestPlanet( mapPos, 6 );
+
+      if (planet != null)
+      {
+         posText += "  " + planet.getName();
+
+         // Re-get the planet's details for the currently viewed year
+         planet = game.getPlanet( planet.getName(), config.year );
+         
+         if (planet != null)
+         {
+            if (planet.isOccupied())
+            {
+               posText += " (" + planet.getOwner() + ")";
+            }
+         }
+      }
+      
+      setStatus( posText );
    }
 
 }

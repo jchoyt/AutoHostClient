@@ -15,6 +15,7 @@
  */
 package stars.ahc;
 import java.awt.Color;
+import java.awt.Point;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -960,6 +961,17 @@ public class Game extends Object
    public int getRaceCount()
    {
       return races.size();
+   }
+
+
+   /**
+    * Finds the closes planet to the given position.
+    * <p>
+    * No planet over the specified threshold distance will be considered. 
+    */
+   public Planet findClosestPlanet(Point mapPos, int threshold)
+   {
+      return planets.findClosestPlanet( mapPos, threshold );
    }
 }
 

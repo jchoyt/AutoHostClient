@@ -52,4 +52,24 @@ public class MapConfigTest extends TestCase
       assertEquals( 1000, config.getUniverseSize() );
    }
    
+   private void testMapToScreenToMap( int x, int y )
+   {
+      Point mapPos = new Point( x, y );
+      
+      Point screenPos = config.mapToScreen( mapPos );
+      
+      Point mapPos2 = config.screenToMap( screenPos );
+      
+      assertTrue( mapPos2.equals( mapPos ) );      
+   }
+   
+   public void testMapToScreenToMap()
+   {
+      testMapToScreenToMap( 1023, 1836 );
+      testMapToScreenToMap( 733, 6353 );
+      testMapToScreenToMap( 1000, 1000 );
+      testMapToScreenToMap( 1500, 1500 );
+      testMapToScreenToMap( 2000, 2000 );
+   }
+   
 }
