@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import stars.ahcgui.AhcGui;
+import stars.ahcgui.pluginmanager.ConfigurablePlugIn;
 
 /**
  *  Description of the Class
@@ -45,6 +46,7 @@ public class GamesProperties
      */
     private static Game currentGame;
     private static ArrayList games = new ArrayList();
+    private static ArrayList plugins = new ArrayList();
     private static boolean initiated = false;
     private static String lineEnding = System.getProperty( "line.separator" );
     private static Properties props;
@@ -409,6 +411,9 @@ public class GamesProperties
                         players[j] = newPlayer;
                     }
                     currentGame.setPlayers( players );
+                    
+                    currentGame.loadGameProperties( props );
+                    
                     games.add( currentGame );
                 }
                 if ( gameNames.length == 1 )
@@ -461,6 +466,7 @@ public class GamesProperties
             //out.close();
            
            refreshGamesProperties();
+           refreshPluginConfig();
            
            FileOutputStream fos = new FileOutputStream( propsFile );
            props.store( fos, "AutoHostClient properties" );
@@ -533,6 +539,39 @@ public class GamesProperties
     {
        String s = props.getProperty( key );
        return Utils.safeParseInt( s, defaultValue );
+    }
+    
+    public static Properties getProperties()
+    {
+       return props;
+    }
+    
+    /**
+     * Register a configurable plugin.
+     * <p>
+     * Will also load any saved configuration for the plugin.
+     * 
+     * @author Steve Leach 
+     */
+    public static void registerConfigurablePlugin( ConfigurablePlugIn plugin )
+    {
+       plugin.loadConfiguration( props );
+       
+       plugins.add( plugin );
+    }
+    
+    /**
+     * Tells each registered plugin to save it's properties
+     * 
+     * @author Steve Leach
+     */
+    private static void refreshPluginConfig()
+    {
+       for (int n = 0; n < plugins.size(); n++)
+       {
+          ConfigurablePlugIn plugin = (ConfigurablePlugIn)plugins.get(n);
+          plugin.saveConfiguration( props );
+       }
     }
 }
 

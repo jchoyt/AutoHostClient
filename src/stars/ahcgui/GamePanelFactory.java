@@ -42,6 +42,7 @@ import stars.ahc.GamesProperties;
 import stars.ahc.Log;
 import stars.ahc.Player;
 import stars.ahc.Utils;
+import stars.ahcgui.pluginmanager.ConfigurablePlugIn;
 import stars.ahcgui.pluginmanager.GamePanelButtonPlugin;
 import stars.ahcgui.pluginmanager.PlugInManager;
 
@@ -250,6 +251,11 @@ class GamePanel extends JPanel implements PropertyChangeListener
 	            plug = (GamePanelButtonPlugin)pluginClass.newInstance();
 	            plug.init( game );
 
+	            if (plug instanceof ConfigurablePlugIn)
+	            {
+	               GamesProperties.registerConfigurablePlugin( (ConfigurablePlugIn)plug );
+	            }
+	            
 	            b1 = new PluginButton( plug );
 	            c.gridx++;
 	            gridbag.setConstraints( b1, c );

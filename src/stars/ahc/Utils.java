@@ -407,7 +407,7 @@ public class Utils
     */
    public static String getColorStr(Color color)
    {
-      return "" + color.getRed() + ":" + color.getGreen() + ":" + color.getBlue();
+      return "" + color.getRed() + "," + color.getGreen() + "," + color.getBlue();
    }
    
    /**
@@ -422,7 +422,7 @@ public class Utils
    {
       try
       {
-         String[] tokens = str.split(":");
+         String[] tokens = str.split(",");
          
          int r = Integer.parseInt(tokens[0]);
          int g = Integer.parseInt(tokens[1]);

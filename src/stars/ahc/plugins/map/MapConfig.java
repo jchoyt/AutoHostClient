@@ -94,4 +94,5 @@ public class MapConfig
    {
       return Math.max( gameMaxX - gameMinX, gameMaxY - gameMinY );
    }
+
 }

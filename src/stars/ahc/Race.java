@@ -6,6 +6,8 @@
 package stars.ahc;
 
 import java.awt.Color;
+import java.text.ParseException;
+import java.util.Properties;
 import java.util.Random;
 
 /**
@@ -20,7 +22,12 @@ public class Race
    private Color color = null;
    private String raceName = null;
    private String racePlural = null;
+   private Game game;
    
+   public Race( Game game )
+   {
+      this.game = game;
+   }
    
    public Color getColor()
    {
@@ -28,17 +35,25 @@ public class Race
       {
          // Create new random colour
 
-         Random rnd = new Random();
-         
-         float h = Utils.getRandomFloat();						// hue is totally random (0 to 1.0)
-         float s = 1.0f;										// saturation is always maximum (1.0)
-         float v = Utils.getRandomFloat() * 0.5f + 0.5f;		// value is random but high (0.5 to 1.0)
-         
-         color = Color.getHSBColor( h, s, v );         
+         pickRandomColor();         
       }
       
       return color;
    }
+   /**
+    * 
+    */
+   private void pickRandomColor()
+   {
+      Random rnd = new Random();
+      
+      float h = Utils.getRandomFloat();						// hue is totally random (0 to 1.0)
+      float s = 1.0f;										// saturation is always maximum (1.0)
+      float v = Utils.getRandomFloat() * 0.5f + 0.5f;		// value is random but high (0.5 to 1.0)
+      
+      color = Color.getHSBColor( h, s, v );
+   }
+
    public void setColor(Color color)
    {
       this.color = color;
@@ -76,5 +91,34 @@ public class Race
    public boolean equals( String raceName )
    {
       return this.raceName.equalsIgnoreCase( raceName );
+   }
+   
+   private String propertiesBase()
+   {
+      return game.getName() + ".Races." + raceName.replaceAll(" ","_");
+   }
+   
+   /**
+    */
+   public void setProperties(Properties props)
+   {
+       props.setProperty( propertiesBase() + ".color", Utils.getColorStr(color) );
+   }
+
+   /**
+    * @param props
+    */
+   public void getProperties(Properties props)
+   {
+      String s = props.getProperty( propertiesBase() + ".color" );
+      
+      try
+      {
+         color = Utils.getColorFromString( s );
+      }
+      catch (ParseException e)
+      {
+         pickRandomColor();
+      }
    }
 }

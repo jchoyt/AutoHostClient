@@ -25,6 +25,7 @@ import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -42,6 +43,7 @@ import javax.swing.table.AbstractTableModel;
 
 import stars.ahc.Game;
 import stars.ahc.GamesProperties;
+import stars.ahcgui.pluginmanager.ConfigurablePlugIn;
 import stars.ahcgui.pluginmanager.MapLayer;
 import stars.ahcgui.pluginmanager.PlugInManager;
 
@@ -53,22 +55,23 @@ import stars.ahcgui.pluginmanager.PlugInManager;
 public class MapFrame extends JFrame implements MapConfigChangeListener, WindowListener
 {
    protected Game game = null;
-   protected MapConfig config = new MapConfig();
+   protected MapConfig config = null;
    protected static Map mapFrames = new HashMap();
    private JSlider scaleSlider;
    private MapPanel mapPanel;
    private JLabel scaleLabel; 
    private ArrayList layers = new ArrayList();
+   private Properties savedProperties;
    
    /**
     * Other classes should use viewGameMap() instead of the constructor.
     * @param game
     */
-   protected MapFrame( Game game ) throws MapDisplayError
+   protected MapFrame( Game game, MapConfig config ) throws MapDisplayError
    {
       this.game = game;
       
-      config.mapScale = 1.0;
+      this.config = config;
       
       config.addChangeListener( this );
       addWindowListener( this );
@@ -77,7 +80,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       setupLayers();
       setupMapControls();
       
-      writeProperties();
+      //writeProperties();
    }
    
    /**
@@ -88,7 +91,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
     * @param game
     * @throws MapDisplayError
     */
-   public static void viewGameMap( Game game ) throws MapDisplayError
+   public static MapFrame viewGameMap( Game game, MapConfig config ) throws MapDisplayError
    {
       if (game == null)
       {
@@ -99,12 +102,13 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       
       if (mf == null)
       {
-         mf = new MapFrame( game );
+         mf = new MapFrame( game, config );
          mapFrames.put( game.getName(), mf );
       }
       
       mf.show();
       
+      return mf;
    }
  
    
@@ -122,6 +126,12 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
 	         MapLayer layer = (MapLayer)plugin.newInstance();
 	         
 	         layer.initialize( game, config );
+	         
+	         if (layer instanceof ConfigurablePlugIn)
+	         {
+	            ConfigurablePlugIn cp = (ConfigurablePlugIn)layer;
+	            cp.loadConfiguration( savedProperties );
+	         }
 	         
 	         layers.add( layer );
          }
@@ -242,6 +252,8 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    
    private void writeProperties()
    {
+      // This should all really happen in saveConfiguration()
+      
       GamesProperties.setProperty( "Plugins.MapFrame."+game.getName()+".xpos", this.getX() );
       GamesProperties.setProperty( "Plugins.MapFrame."+game.getName()+".ypos", this.getY() );
       GamesProperties.setProperty( "Plugins.MapFrame."+game.getName()+".height", this.getHeight() );
@@ -317,6 +329,52 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    {
       // TODO Auto-generated method stub
       
+   }
+
+   /**
+    */
+   public void loadConfiguration(Properties properties)
+   {
+      this.savedProperties = properties;
+
+      for (int n = 0; n < layers.size(); n++)
+      {
+         MapLayer layer = (MapLayer)layers.get(n);
+         
+         String key = "Plugins.MapLayers." + game.getName() + "." + layer.getName().replaceAll("_"," ")+".enabled";
+         String enabled = savedProperties.getProperty( key );
+         if (enabled != null)
+         {
+            layer.setEnabled( enabled == "true" );
+         }
+         
+      }     
+      
+   }
+
+   /**
+    * @param properties
+    */
+   public void saveConfiguration(Properties properties)
+   {
+      properties.setProperty( "Plugins.MapFrame."+game.getName()+".xpos", ""+this.getX() );
+      properties.setProperty( "Plugins.MapFrame."+game.getName()+".ypos", ""+this.getY() );
+      properties.setProperty( "Plugins.MapFrame."+game.getName()+".height", ""+this.getHeight() );
+      properties.setProperty( "Plugins.MapFrame."+game.getName()+".width", ""+this.getWidth() );
+      
+      for (int n = 0; n < layers.size(); n++)
+      {
+         MapLayer layer = (MapLayer)layers.get(n);
+         
+         String layer_id = layer.getName().replaceAll( " ", "_" );
+         properties.setProperty( "Plugins.MapLayers."+game.getName()+"." + layer_id + ".enabled", ""+layer.isEnabled() );
+         
+         if (layer instanceof ConfigurablePlugIn)
+         {
+            ConfigurablePlugIn cp = (ConfigurablePlugIn)layer;
+            cp.saveConfiguration( properties );
+         }
+      }      
    }
 }
 

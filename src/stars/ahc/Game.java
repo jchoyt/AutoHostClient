@@ -705,7 +705,7 @@ public class Game extends Object
       // Next, if it has not been found then create it (if this is what is requested)
       if (create)
       {         
-         Race newRace = new Race();
+         Race newRace = new Race( this );
          newRace.setRaceName( raceName );
          races.add( newRace );
          return newRace;
@@ -737,8 +737,43 @@ public class Game extends Object
           player.setProperties( props );
           //( ( Player ) players.get( i ) ).writeProperties( out );
       }
+      
+      props.setProperty( name + ".RaceCount", ""+races.size() );
+      
+      String raceNames = "";
+      
+      for (int n = 0; n < races.size(); n++)
+      {
+         Race race = (Race)races.get(n);
+
+         if (n > 0) raceNames += ",";
+         raceNames += race.getRaceName().replaceAll( " ", "_" );
+
+         race.setProperties( props );
+      }
+      
+      props.setProperty( name + ".RaceNames", raceNames );
+      
       props.setProperty( name + ".GameDir", directory );
       props.setProperty( name + ".PlayerNumbers", playerNumbers );
+   }
+
+
+   /**
+    * Load game properties
+    */
+   public void loadGameProperties(Properties props)
+   {
+      String[] races = props.getProperty( name + ".RaceNames" ).split(",");
+      
+      for (int n = 0; n < races.length; n++)
+      {
+         races[n] = races[n].replaceAll( "_", " " );
+         
+         Race race = getRace( races[n], true );
+         
+         race.getProperties( props );
+      }
    }
 }
 

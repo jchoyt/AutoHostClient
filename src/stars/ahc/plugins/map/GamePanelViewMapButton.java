@@ -18,7 +18,10 @@
  */
 package stars.ahc.plugins.map;
 
+import java.util.Properties;
+
 import stars.ahc.Game;
+import stars.ahcgui.pluginmanager.ConfigurablePlugIn;
 import stars.ahcgui.pluginmanager.GamePanelButtonExecutionError;
 import stars.ahcgui.pluginmanager.GamePanelButtonPlugin;
 
@@ -26,10 +29,12 @@ import stars.ahcgui.pluginmanager.GamePanelButtonPlugin;
  * @author Steve Leach
  *
  */
-public class GamePanelViewMapButton implements GamePanelButtonPlugin
+public class GamePanelViewMapButton implements GamePanelButtonPlugin, ConfigurablePlugIn
 {
    private boolean enabled = true;
    private Game game = null;
+   private MapFrame mapFrame = null;
+   private MapConfig mapConfig = new MapConfig();
    
    /* (non-Javadoc)
     * @see stars.ahcgui.GamePanelButtonPlugin#getButtonText()
@@ -46,7 +51,7 @@ public class GamePanelViewMapButton implements GamePanelButtonPlugin
    {
       try
       {
-         MapFrame.viewGameMap( game );
+         mapFrame = MapFrame.viewGameMap( game, mapConfig );
       }
       catch (MapDisplayError e)
       {
@@ -92,6 +97,43 @@ public class GamePanelViewMapButton implements GamePanelButtonPlugin
    public void init(Game game)
    {
       this.game = game;
+      
+      mapConfig.mapScale = 1.0;
+   }
+
+   private String getPropertiesBaseName()
+   {
+      return "Plugins.MapFrame." + game.getName();
+   }
+   
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.ConfigurablePlugIn#saveConfiguration(java.util.Properties)
+    */
+   public void saveConfiguration(Properties properties)
+   {
+      String base = getPropertiesBaseName();
+      properties.setProperty( base + ".zoom", ""+mapConfig.mapScale );
+      
+      if (mapFrame != null)
+      {
+         mapFrame.saveConfiguration( properties );
+      }
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.ConfigurablePlugIn#loadConfiguration(java.util.Properties)
+    */
+   public void loadConfiguration(Properties properties)
+   {
+      String base = getPropertiesBaseName();
+      
+      String s = properties.getProperty( base + ".zoom", "1.0" );      
+      mapConfig.mapScale = Float.parseFloat( s ); 
+      
+      if (mapFrame != null)
+      {
+         mapFrame.loadConfiguration( properties );
+      }
    }
 
 }
