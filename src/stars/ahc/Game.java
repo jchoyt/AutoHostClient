@@ -241,7 +241,7 @@ public class Game extends Object
                     out.append( ", " );
                 }
                 out.append( ahStatus.getProperty( "player" + i + "-race" ) );
-                out.append( " ( ");
+                out.append( " ( skipped ");
                 out.append( ret.substring(8) );
                 out.append( " )" );
             }
