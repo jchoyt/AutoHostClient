@@ -318,11 +318,8 @@ public class ShipDesignEditor extends JPanel
       
       if (design == null) return;
       
-      if (design.getWeaponSlots() < design.getMaxSlots())
-      {
-         design.addWeapon( Weapon.COLLOIDAL_PHASER, 1 );
-         weaponsTable.revalidate();
-      }
+      design.addWeapon( Weapon.COLLOIDAL_PHASER, 1 );
+      weaponsTable.revalidate();
    }
    
    public ShipDesign getCurrentDesign( boolean allowNull)

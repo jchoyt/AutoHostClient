@@ -53,6 +53,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
@@ -75,7 +76,7 @@ import stars.ahc.plugins.objedit.ShipDesignEditor;
  */
 public class StandAloneBattleSimulator extends JFrame
 {
-   private static double version = 0.15;
+   private static double version = 0.16;
    private Action exitAction;
    private AbstractAction openAction;
    private AbstractAction runSimAction;
@@ -117,6 +118,7 @@ public class StandAloneBattleSimulator extends JFrame
       setupWindow();
       setupActions();
       setupMenu();
+      setupToolbar();
       setupControlPanel();
       setupResultsPanel();
       setupMainArea();
@@ -145,6 +147,7 @@ public class StandAloneBattleSimulator extends JFrame
             exit();
          }
       };
+      exitAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK) );
 
       newFileAction = new AbstractAction("New") {
          public void actionPerformed(ActionEvent event)
@@ -153,6 +156,7 @@ public class StandAloneBattleSimulator extends JFrame
          }
       };
       newFileAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK) );
+      newFileAction.putValue( Action.SHORT_DESCRIPTION, "Start a new simulation" );
       
       openAction = new AbstractAction("Open") {
          public void actionPerformed(ActionEvent event)
@@ -161,6 +165,7 @@ public class StandAloneBattleSimulator extends JFrame
          }
       };
       openAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK) );
+      openAction.putValue( Action.SHORT_DESCRIPTION, "Open a saved simulation" );
 
       saveAction = new AbstractAction("Save") {
          public void actionPerformed(ActionEvent event)
@@ -177,6 +182,7 @@ public class StandAloneBattleSimulator extends JFrame
       };
       saveAction.setEnabled(false);
       saveAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK) );
+      saveAction.putValue( Action.SHORT_DESCRIPTION, "Save simulation configuration" );
       
       copyAction = new AbstractAction("Copy") {
          public void actionPerformed(ActionEvent event)
@@ -185,6 +191,7 @@ public class StandAloneBattleSimulator extends JFrame
          }
       };
       copyAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK) );
+      copyAction.putValue( Action.SHORT_DESCRIPTION, "Copy results to clipboard" );
       
       
       runSimAction = new AbstractAction("Run") {
@@ -195,6 +202,7 @@ public class StandAloneBattleSimulator extends JFrame
       };
       runSimAction.setEnabled( false );
       runSimAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0) );
+      runSimAction.putValue( Action.SHORT_DESCRIPTION, "Run the simulation" );
 
       helpAction = new AbstractAction("Documentation") {
          public void actionPerformed(ActionEvent event)
@@ -210,6 +218,7 @@ public class StandAloneBattleSimulator extends JFrame
             showAboutWindow();
          }
       };
+      aboutAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F1, ActionEvent.ALT_MASK) );
       
       addStackAction = new AbstractAction("Add") {
          public void actionPerformed(ActionEvent event)
@@ -269,17 +278,32 @@ public class StandAloneBattleSimulator extends JFrame
       
       setJMenuBar( mainMenu );
    }
-   
+
+   private void setupToolbar()
+   {
+      JToolBar toolbar = new JToolBar();
+      
+      toolbar.add( newFileAction );
+      toolbar.add( openAction );
+      toolbar.add( saveAction );
+      toolbar.addSeparator();
+      toolbar.add( copyAction );
+      toolbar.addSeparator();
+      toolbar.add( runSimAction );
+      
+      getContentPane().add( toolbar, BorderLayout.NORTH );
+   }
+
    private void setupControlPanel()
    {
       controlPanel = Box.createVerticalBox();
       controlPanel.setBorder( new CompoundBorder( new EtchedBorder(), new EmptyBorder(4,4,4,4) ) );
       
-      Box startBox = Box.createHorizontalBox();
-      startBox.setBorder( new EmptyBorder(6,6,6,6) );
-      startBox.add( new JButton(runSimAction) );
-      startBox.add( Box.createHorizontalGlue() );
-      controlPanel.add( startBox );
+//      Box startBox = Box.createHorizontalBox();
+//      startBox.setBorder( new EmptyBorder(6,6,6,6) );
+//      startBox.add( new JButton(runSimAction) );
+//      startBox.add( Box.createHorizontalGlue() );
+//      controlPanel.add( startBox );
       
       Box seedBox = Box.createHorizontalBox();
       seedBox.setBorder( new EmptyBorder(6,6,6,6) );
@@ -431,7 +455,8 @@ public class StandAloneBattleSimulator extends JFrame
       }
       catch (Throwable t)
       {
-         t.printStackTrace();
+         logError( t );
+         showError( t );
          sim = null;
       }
    }
@@ -469,7 +494,8 @@ public class StandAloneBattleSimulator extends JFrame
       }
       catch (Throwable t)
       {
-         t.printStackTrace();
+         logError( t );
+         showError( t );
       }
    }
    
@@ -489,7 +515,7 @@ public class StandAloneBattleSimulator extends JFrame
          }
          catch (IOException e)
          {
-            e.printStackTrace();
+            logError( e );
          }
       }
    }
@@ -519,6 +545,7 @@ public class StandAloneBattleSimulator extends JFrame
       }
       catch (Throwable t)
       {
+         logError( t );
          showError( t );
       }
    }
@@ -632,7 +659,8 @@ public class StandAloneBattleSimulator extends JFrame
       String title = "Stars! Battle Simulator v" + version;
       String text = "An Open Source Project\n" + 
       				"Lead developer: Steve Leach\n" +
-      				"Assistance from: LEit, Kotk, mazda, Ptolemy, Micha, et.al.\n\n" +
+      				"Assistance from: LEit, Kotk, mazda, Ptolemy, Micha, et.al.\n" +
+      				"Testing by: Fescar\n\n" +
       				"Visit the Academy forum at \n    http://starsautohost.org/sahforum/ \n\n" +
       				"Copyright (c) 2004, Steve Leach";   
       JOptionPane.showMessageDialog(this, text, title, JOptionPane.PLAIN_MESSAGE );
@@ -761,11 +789,22 @@ public class StandAloneBattleSimulator extends JFrame
 	         stackEditor.addWindowListener( new WindowAdapter() {
 	            public void windowClosing(WindowEvent e)
 	            {
-	               designEditor.getFieldValues();               
-	               stackTableModel.fireTableDataChanged();
-	               stacksTable.repaint();
+	               getDesignChanges();
 	            }
 	         });
+
+	         AbstractAction closeAction = new AbstractAction("Close") {
+               public void actionPerformed(ActionEvent event)
+               {
+                  getDesignChanges();
+                  stackEditor.setVisible(false);
+               }
+	         };
+	         
+	         JToolBar toolbar = new JToolBar();
+	         toolbar.add( closeAction );
+	         
+	         stackEditor.getContentPane().add( toolbar, BorderLayout.NORTH );
 	         
 	         designEditor = new ShipDesignEditor();
 	         designEditor.setupControls();
@@ -780,6 +819,16 @@ public class StandAloneBattleSimulator extends JFrame
       {
          logError( t );
          showError( t );
+      }
+   }
+   
+   private void getDesignChanges()
+   {
+      if (designEditor != null)
+      {
+         designEditor.getFieldValues();               
+         stackTableModel.fireTableDataChanged();
+         stacksTable.repaint();
       }
    }
 }
