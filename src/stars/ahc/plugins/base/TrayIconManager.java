@@ -336,6 +336,8 @@ class RestoreListener implements ActionListener
 	   {
 	      // Make main window visible if it was hidden
 	      parent.setVisible(true);
+	      // Bring to front
+	      parent.toFront();
 	      // Request input focus
 	      parent.requestFocus();
 	   }
