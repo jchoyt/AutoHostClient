@@ -95,7 +95,7 @@ public class EssaiPostURLConnection
                 long reportedSize = Long.parseLong( m.group( 1 ) );
                 if ( reportedSize == uploadSize )
                 {
-                    Log.log(Log.WARNING,EssaiPostURLConnection.class,fileToUpload.getName() + "uploaded.  The file size matches the upload size reported by AutoHost - your upload should be fine (you should proably check though - this is beta-ware" );
+                    Log.log(Log.WARNING,EssaiPostURLConnection.class,fileToUpload.getName() + "uploaded.  The file size matches the upload size reported by AutoHost - your upload should be fine." );
                     AhcGui.setStatus( fileToUpload.getName()+" uploaded" );
                 }
             }
