@@ -34,18 +34,8 @@ import stars.ahc.plugins.base.HabCalculator;
 public class Race
 {
    private Game game;
-   private String playerName = null;
    private Color color = null;
    private String raceName = null;
-   private String racePlural = null;
-   private String prt = "";
-   private String lrts = "";
-   private int grav_min_clicks = 0;
-   private int grav_max_clicks = 0;
-   private int temp_min_clicks = 0;
-   private int temp_max_clicks = 0;
-   private int rad_min_clicks = 0;
-   private int rad_max_clicks = 0;
    
    public Race( Game game )
    {
@@ -84,11 +74,11 @@ public class Race
    }
    public String getPlayerName()
    {
-      return playerName;
+      return getUserProperty("playerName");
    }
    public void setPlayerName(String playerName)
    {
-      this.playerName = playerName;
+      setUserProperty("playerName",playerName);
    }
    public String getRaceName()
    {
@@ -97,14 +87,15 @@ public class Race
    public void setRaceName(String raceName)
    {
       this.raceName = raceName;
+      setUserProperty( "raceName", raceName );
    }
    public String getRacePlural()
    {
-      return racePlural;
+      return getUserProperty("racePlural");
    }
    public void setRacePlural(String racePlural)
    {
-      this.racePlural = racePlural;
+      setUserProperty("racePlural",racePlural);
    }
    
    public boolean equals( Race race )
@@ -166,6 +157,16 @@ public class Race
       game.setUserDefinedProperty( propertyName, value );
    }
    
+   public void setUserProperty( String property, int value )
+   {
+      setUserProperty( property, ""+value );
+   }
+
+   public void setUserProperty( String property, double value )
+   {
+      setUserProperty( property, ""+value );
+   }
+   
    public void save()
    {
       GamesProperties.writeProperties();
@@ -181,52 +182,88 @@ public class Race
    
    public void setGravRange( double min, double max )
    {
-      grav_min_clicks = HabCalculator.gravToClicks( min );
-      grav_max_clicks = HabCalculator.gravToClicks( max );
+      setUserProperty( "gravMinClicks", HabCalculator.gravToClicks( min ) );
+      setUserProperty( "gravMaxClicks", HabCalculator.gravToClicks( max ) );
+   }
+   
+   public int getUserIntProperty( String name, int defaultValue )
+   {
+      String s = getUserProperty( name );
+      return Utils.safeParseInt( s, defaultValue );      
    }
    
    public int getMinGravClicks()
    {
-      return grav_min_clicks;
+      return getUserIntProperty( "gravMinClicks", 0 );
    }
 
    public int getMaxGravClicks()
    {
-      return grav_max_clicks;
+      return getUserIntProperty( "gravMaxClicks", 0 );
    }
    
    public void setTempRange( int min, int max )
    {
-      temp_min_clicks = HabCalculator.tempToClicks(min);
-      temp_max_clicks = HabCalculator.tempToClicks(max);
+      setUserProperty( "tempMinClicks", HabCalculator.tempToClicks(min) );
+      setUserProperty( "tempMaxClicks", HabCalculator.tempToClicks(max) );
    }
 
    public int getMinTempClicks()
    {
-      return temp_min_clicks;
+      return getUserIntProperty( "tempMinClicks", 0 );
    }
 
    public int getMaxTempClicks()
    {
-      return temp_max_clicks;
+      return getUserIntProperty( "tempMaxClicks", 0 );
    }
 
    public void setRadRange( int min, int max )
    {
-      rad_min_clicks = HabCalculator.radToClicks(min);
-      rad_max_clicks = HabCalculator.radToClicks(max);
+      setUserProperty( "radMinClicks", HabCalculator.radToClicks(min) );
+      setUserProperty( "radMaxClicks", HabCalculator.radToClicks(max) );
    }
    
    public int getMinRadClicks()
    {
-      return rad_min_clicks;
+      return getUserIntProperty( "radMinClicks", 0 );
    }
 
    public int getMaxRadClicks()
    {
-      return rad_max_clicks;
+      return getUserIntProperty( "radMaxClicks", 0 );
+   }
+   
+   public float getGravMin()
+   {
+      return HabCalculator.gravFromClicks( getMinGravClicks() );
+   }
+   
+   public float getGravMax()
+   {
+      return HabCalculator.gravFromClicks( getMaxGravClicks() );
    }
 
+   public int getTempMin()
+   {
+      return HabCalculator.tempFromClicks( getMinTempClicks() );
+   }
+
+   public int getTempMax()
+   {
+      return HabCalculator.tempFromClicks( getMaxTempClicks() );
+   }
+
+   public int getRadMin()
+   {
+      return HabCalculator.radFromClicks( getMinRadClicks() );
+   }
+
+   public int getRadMax()
+   {
+      return HabCalculator.radFromClicks( getMaxRadClicks() );
+   }
+   
    public boolean gravImmune()
    {
       // TODO Auto-generated method stub
@@ -252,6 +289,7 @@ public class Race
     */
    public int getMaxTerraForm()
    {
+      String lrts = getUserProperty( "lrts" );
       return (lrts.toUpperCase().indexOf("TT") >= 0) ? 30 : 15;
    }
 }

@@ -7,6 +7,7 @@ package test.stars.ahc;
 
 import java.awt.Point;
 
+import stars.ahc.Game;
 import stars.ahc.Planet;
 import stars.ahc.PlanetData;
 import stars.ahc.Race;
@@ -20,6 +21,7 @@ import junit.framework.TestCase;
 public class HabCalculatorTest extends TestCase
 {
    private HabCalculator calc = new HabCalculator();
+   private Game game = new Game("","");
    
    private Planet createPlanet( String name, String grav, String temp, String rad )
    {
@@ -38,7 +40,8 @@ public class HabCalculatorTest extends TestCase
    {
       int habValue;
       
-      Race humanoids = new Race(null);
+      Race humanoids = new Race(game);
+      humanoids.setRaceName( "Humanoids" );
       humanoids.setGravRange( 0.25, 3.92 );
       humanoids.setTempRange( -128, 128 );
       humanoids.setRadRange( 22, 82 );
@@ -58,7 +61,8 @@ public class HabCalculatorTest extends TestCase
       int totalHabitable15 = 0;
       int testSize = 1000;
       
-      Race humanoids = new Race(null);
+      Race humanoids = new Race(game);
+      humanoids.setRaceName( "Humanoids" );
       humanoids.setGravRange( 0.25, 3.92 );
       humanoids.setTempRange( -128, 128 );
       humanoids.setRadRange( 22, 82 );

@@ -49,7 +49,7 @@ public class GamesProperties
     private static ArrayList plugins = new ArrayList();
     private static boolean initiated = false;
     private static String lineEnding = System.getProperty( "line.separator" );
-    private static Properties props;
+    private static Properties props = new Properties();
     private static String propsFile;
     //private static String proxyHost;
     //private static String proxyPort;

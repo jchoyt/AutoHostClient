@@ -32,6 +32,7 @@ import java.util.Vector;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -64,6 +65,9 @@ public class RaceEditorPanel extends JPanel implements ListSelectionListener, Ac
    private JTextField colorField;
    private JButton saveButton;
    private JButton pickColorButton;
+   private HabEditor gravEditor;
+   private HabEditor tempEditor;
+   private HabEditor radEditor;
 
    public RaceEditorPanel( Game game )
    {
@@ -140,36 +144,88 @@ public class RaceEditorPanel extends JPanel implements ListSelectionListener, Ac
       raceNameField.setBackground( Color.LIGHT_GRAY );
       raceNameField.setEditable( false );
       gbc.gridx++;
+      gbc.gridwidth = 4;
       editPanel.add( raceNameField, gbc );
       
       gbc.gridy++;
       gbc.gridx = 1;
+      gbc.gridwidth = 1;
       editPanel.add( new JLabel("Color:"), gbc );
       
       colorField = new JTextField( 20 );
       colorField.setBackground( Color.LIGHT_GRAY );
       colorField.setEditable( false );
       gbc.gridx++;
+      gbc.gridwidth = 4;
       editPanel.add( colorField, gbc );
       
       pickColorButton = new JButton("Pick");
       pickColorButton.addActionListener( this );
-      gbc.gridx++;
+      gbc.gridx += gbc.gridwidth;
+      gbc.gridwidth = 1;
       editPanel.add( pickColorButton, gbc );
       
       gbc.gridy++;
       gbc.gridx = 1;
+      gbc.gridwidth = 1;
       editPanel.add( new JLabel("PRT:"), gbc );
       
       prtField = new JTextField( 12 );
       propertyFieldMap.put( "PRT", prtField );
       gbc.gridx++;
+      gbc.gridwidth = 4;
       editPanel.add( prtField, gbc );      
+      
+      gbc.gridy++;
+      gbc.gridx = 1;
+      gbc.gridwidth = 1;
+      editPanel.add( new JLabel("Grav:"), gbc );
+
+      gbc.gridx += gbc.gridwidth;
+      gbc.gridwidth = 4;
+      gravEditor = new HabEditor();
+      editPanel.add( gravEditor, gbc );
+
+      gbc.gridy++;
+      gbc.gridx = 1;
+      gbc.gridwidth = 1;
+      editPanel.add( new JLabel("Temp:"), gbc );
+
+      gbc.gridx += gbc.gridwidth;
+      gbc.gridwidth = 4;
+      tempEditor = new HabEditor();
+      editPanel.add( tempEditor, gbc );
+
+      gbc.gridy++;
+      gbc.gridx = 1;
+      gbc.gridwidth = 1;
+      editPanel.add( new JLabel("Rad:"), gbc );
+
+      gbc.gridx += gbc.gridwidth;
+      gbc.gridwidth = 4;
+      radEditor = new HabEditor();
+      editPanel.add( radEditor, gbc );
+      
+//      gravImmuneField = new JCheckBox( "Immune" );
+//      gbc.gridx += gbc.gridwidth;
+//      editPanel.add( gravImmuneField, gbc );
+//      
+//      gravMinField = new JTextField( 5 );
+//      gbc.gridx += gbc.gridwidth;
+//      editPanel.add( gravMinField, gbc );
+//      
+//      gbc.gridx++;
+//      editPanel.add( new JLabel(" to "), gbc );
+//
+//      gravMaxField = new JTextField(5);
+//      gbc.gridx += gbc.gridwidth;
+//      editPanel.add( gravMaxField, gbc );     
       
       saveButton = new JButton("Save changes");
       saveButton.addActionListener( this );
       gbc.gridy++;
       gbc.gridx = 1;
+      gbc.gridwidth = 2;
       editPanel.add( saveButton, gbc );
       
       gbc.gridy++;
@@ -193,9 +249,20 @@ public class RaceEditorPanel extends JPanel implements ListSelectionListener, Ac
    {
       Race race = getSelectedRace();
       
+      // Set color
       raceNameField.setText( race.getRaceName() );
       colorField.setText( Utils.getColorStr(race.getColor()) );
       colorField.setBackground( race.getColor() );
+      
+      // Set hab ranges
+      gravEditor.setMinText( ""+race.getGravMin() );
+      gravEditor.setMaxText( ""+race.getGravMax() );
+
+      tempEditor.setMinText( ""+race.getTempMin() );
+      tempEditor.setMaxText( ""+race.getTempMax() );
+      
+      radEditor.setMinText( ""+race.getRadMin() );
+      radEditor.setMaxText( ""+race.getRadMax() );
       
       Iterator keys = propertyFieldMap.keySet().iterator();
       while (keys.hasNext())
@@ -236,6 +303,24 @@ public class RaceEditorPanel extends JPanel implements ListSelectionListener, Ac
    {
       Race race = getSelectedRace();
       
+      //
+      // Save hab ranges
+      //
+      double grav_min = Utils.safeParseFloat( gravEditor.getMinText(), 0 );
+      double grav_max = Utils.safeParseFloat( gravEditor.getMaxText(), 0 );
+      race.setGravRange( grav_min, grav_max );
+      
+      int temp_min = Utils.safeParseInt( tempEditor.getMinText(), 0 );
+      int temp_max = Utils.safeParseInt( tempEditor.getMaxText(), 0 );
+      race.setTempRange( temp_min, temp_max );
+
+      int rad_min = Utils.safeParseInt( radEditor.getMinText(), 0 );
+      int rad_max = Utils.safeParseInt( radEditor.getMaxText(), 0 );
+      race.setRadRange( rad_min, rad_max );
+      
+      //
+      // Save mapped properties
+      //
       Iterator keys = propertyFieldMap.keySet().iterator();
       while (keys.hasNext())
       {
@@ -248,7 +333,9 @@ public class RaceEditorPanel extends JPanel implements ListSelectionListener, Ac
             
             race.setUserProperty( property, value );
          }
-      }      
+      }
+      
+      
    }
    
    private void pickColor()
@@ -276,5 +363,58 @@ public class RaceEditorPanel extends JPanel implements ListSelectionListener, Ac
       {
          refreshData();
       }
+   }   
+}
+
+class HabEditor extends JPanel
+{
+   public JCheckBox immuneField;
+   public JTextField minField;
+   public JTextField maxField;
+
+   public HabEditor()
+   {
+      setLayout( new BoxLayout(this,BoxLayout.X_AXIS) );
+      
+      immuneField = new JCheckBox("Immune");
+      add( immuneField );
+      
+      minField = new JTextField(5);
+      add( minField );
+      
+      add( new JLabel( "to") );
+      
+      maxField = new JTextField(5);
+      add( maxField );
+   }
+   
+   public String getMinText()
+   {
+      return minField.getText();
+   }
+   
+   public String getMaxText()
+   {
+      return maxField.getText();
+   }
+   
+   public boolean getImmune()
+   {
+      return immuneField.isSelected();
+   }
+   
+   public void setImmune( boolean isImmune )
+   {
+      immuneField.setSelected( isImmune );
+   }
+   
+   public void setMinText( String text )
+   {
+      minField.setText( text );
+   }
+   
+   public void setMaxText( String text )
+   {
+      maxField.setText( text );
    }
 }
