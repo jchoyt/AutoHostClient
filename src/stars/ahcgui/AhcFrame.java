@@ -16,27 +16,30 @@
 package stars.ahcgui;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Timer;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import java.awt.event.ActionListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import stars.ahc.*;
 
 /**
@@ -80,9 +83,11 @@ public class AhcFrame extends javax.swing.JFrame
         /*
          *  set up the game pages
          */
+        addBlankSpace(ret);
         for ( int i = 0; i < games.length; i++ )
         {
             ret.add( GamePanelFactory.createPanel( games[i] ), games[i].getName() );
+            addBlankSpace(ret);
         }
         JPanel scrollRet = new JPanel();
         JScrollPane scrollPane = new JScrollPane(
@@ -102,7 +107,7 @@ public class AhcFrame extends javax.swing.JFrame
                         new AHPoller().run();
                     }
                 } );
-            scrollRet.add(but);
+            scrollRet.add( but );
         }
         AhcGui.setGameCards( ret );
         return scrollRet;
@@ -180,9 +185,9 @@ public class AhcFrame extends javax.swing.JFrame
             optionPanes.put( games[i].getName() + " Options", temp );
         }
         JScrollPane scrollPane = new JScrollPane(
-            cards,
-            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
+                cards,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
         ret.add( scrollPane, BorderLayout.CENTER );
         AhcGui.setGameOptionCards( cards );
         /*
@@ -248,7 +253,8 @@ public class AhcFrame extends javax.swing.JFrame
         if ( iconURL != null )
         {
             ImageIcon icon = new ImageIcon( iconURL );
-            JLabel ret = new JLabel( icon );
+            JLabel ret = new JLabel( icon, SwingConstants.CENTER );
+            //doesn't work -> JLabel ret = new JLabel("<html><a href=\"http://autohost.com\"><img src=\"" + iconURL +"\"></a></html>");
             return ret;
         }
         else
@@ -266,9 +272,24 @@ public class AhcFrame extends javax.swing.JFrame
     protected JPanel buildStatusPane()
     {
         JPanel retPane = new JPanel();
+        retPane.setLayout( new BoxLayout( retPane, BoxLayout.Y_AXIS ) );
+        status.setBorder( BorderFactory.createTitledBorder( "Current Status" ) );
         retPane.add( status );
-        retPane.add( new JLabel( "<html>Thanks to AutoHost by Ron Miller - http://library.southern.edu/stars/stars.htm</html>" ) );
+        retPane.add( new JLabel( "<html>Thanks to Ron Miller for AutoHost - http://library.southern.edu/stars/stars.htm</html>" ) );
         return retPane;
+    }
+
+
+    /**
+     *  Adds a feature to the BlankSpace attribute of the GamePanelFactory
+     *  object
+     *
+     *@param  panel  The feature to be added to the BlankSpace attribute
+     */
+    private void addBlankSpace( JPanel panel )
+    {
+        Component blank = Box.createVerticalStrut( 20 );
+        panel.add( blank );
     }
 }
 
