@@ -175,7 +175,8 @@ public class OneOnOneBattle extends BattleSimulation
    
    private void fireWeapons()
    {
-      // Randomly arrange the fleets so that init+range ties can go either way
+      // Randomly arrange the fleets so that init+range ties can go either way.
+      // TODO: Is this the correct thing to do ?
       randomSortFleets();
       
       // Count down from maximum initiative
@@ -217,14 +218,28 @@ public class OneOnOneBattle extends BattleSimulation
       }
    }
    
+   /**
+    * TODO: handle torps and missiles 
+    */
    private void fireWeapon( ShipStack stack, int slot )
    {
+      if (stack.shipCount <= 0)
+      {
+         return;
+      }
+      
       int shieldDamage = 0;
       int armourDamage = 0;
       int kills = 0;
       
       ShipDesign design = stack.design;
+      
       ShipStack target = stack.target;
+      
+      if (target.shipCount <= 0)
+      {
+         return;
+      }
       
       int range = distanceBetween( stack, target );
       
@@ -262,6 +277,8 @@ public class OneOnOneBattle extends BattleSimulation
          int remainingArmourPerShip = target.design.getArmour() - damagePerShip;
          
          kills = (int)Math.floor( armourDamage / remainingArmourPerShip );
+                  
+         if (kills > target.shipCount) kills = target.shipCount;
          
          int killDamage = kills * remainingArmourPerShip;
          

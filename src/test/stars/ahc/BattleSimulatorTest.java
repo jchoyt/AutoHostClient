@@ -18,6 +18,7 @@
 package test.stars.ahc;
 
 import stars.ahc.ShipDesign;
+import stars.ahc.Weapon;
 import stars.ahc.plugins.battlesim.BattleSimulation;
 import stars.ahc.plugins.battlesim.OneOnOneBattle;
 import junit.framework.TestCase;
@@ -53,9 +54,9 @@ public class BattleSimulatorTest extends TestCase
       design1.setShields( 240 );
       design1.setBattleSpeed( 1.75 );
       design1.setInitiative( 5 );
-      design1.addWeapon( 3, ShipDesign.WPNTYPE_BEAM, 26, 3, 5, 100, "Colloidal Phaser" );
-      design1.addWeapon( 3, ShipDesign.WPNTYPE_SAPPER, 82, 3, 14, 100, "Pulsed Sapper" );
-      design1.addWeapon( 3, ShipDesign.WPNTYPE_BEAM, 26, 3, 5, 100, "Colloidal Phaser" );
+      design1.addWeapon( Weapon.COLLOIDAL_PHASER, 3 );
+      design1.addWeapon( Weapon.PULSED_SAPPER, 3 );
+      design1.addWeapon( Weapon.COLLOIDAL_PHASER, 3 );
       
       ShipDesign design2 = new ShipDesign( ShipDesign.HULLTYPE_CRUISER, "CCC" );
       design2.setMass( 130 );
@@ -64,9 +65,9 @@ public class BattleSimulatorTest extends TestCase
       design2.setRegenShields(true);
       design2.setBattleSpeed( 1.25 );
       design2.setInitiative( 5 );
-      design2.addWeapon( 2, ShipDesign.WPNTYPE_BEAM, 26, 3, 5, 100, "Colloidal Phaser" );
-      design2.addWeapon( 2, ShipDesign.WPNTYPE_SAPPER, 82, 3, 14, 100, "Pulsed Sapper" );
-      design2.addWeapon( 2, ShipDesign.WPNTYPE_BEAM, 26, 3, 5, 100, "Colloidal Phaser" );
+      design2.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
+      design2.addWeapon( Weapon.PULSED_SAPPER, 2 );
+      design2.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
       
       BattleSimulation battle = new OneOnOneBattle( design1, 10, design2, 14 );
       
@@ -76,5 +77,7 @@ public class BattleSimulatorTest extends TestCase
       {
          battle.simulateNextRound();
       }
+      
+      battle.debugShowStacks();
    }
 }

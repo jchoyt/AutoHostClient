@@ -52,7 +52,9 @@ public class ShipStack
    
    public String toString()
    {
-      int damagePerShip = damage / shipCount;
+      if (shipCount == 0) return design.getName() + " [dead]";
+      
+      int damagePerShip = (shipCount == 0) ? 0 : damage / shipCount;
       int damagePct = 100 * damagePerShip / design.getArmour();
       return design.getName() + " [" + shipCount + "@" + damagePct + "%,"+shields+"]";
    }

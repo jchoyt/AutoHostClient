@@ -72,7 +72,7 @@ public class ShipDesign
       
       setupWeaponSlots();
    }
-
+   
    private void setupWeaponSlots()
    {
       weaponsSlots = hullWeaponSlots[ hullType ];
@@ -95,6 +95,11 @@ public class ShipDesign
       weaponAccuracy[weaponSlotsUsed] = accuracy;
       weaponName[weaponSlotsUsed] = name;
       weaponSlotsUsed++;
+   }
+   
+   public void addWeapon( Weapon weapon, int count )
+   {
+      addWeapon( count, weapon.category, weapon.power, weapon.range, weapon.initiative, weapon.accuracy, weapon.name );
    }
    
    public void setBattleSpeed( double speed )

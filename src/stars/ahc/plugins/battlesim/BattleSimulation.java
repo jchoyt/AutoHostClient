@@ -95,4 +95,11 @@ public abstract class BattleSimulation
       return 1.0 - n;
    }
 
+   public void debugShowStacks()
+   {
+      for (int n = 0; n < stackCount; n++)
+      {
+         debug( stacks[n].toString() );
+      }
+   }
 }
