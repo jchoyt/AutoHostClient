@@ -19,6 +19,7 @@
 package stars.ahc.plugins.battlesim;
 
 import stars.ahc.ShipDesign;
+import stars.ahc.Utils;
 
 /**
  * Represents a stack of ships on the battle board.
@@ -37,6 +38,11 @@ public class ShipStack
    /**
     * total number of points of damage for the stack
     */
+   public String owner = null;
+   public int raceIndex = 0;
+   /**
+    * The total number of points of damage sustained by the target so far
+    */
    public int damage = 0;
    public int shields = 0;
    public int xpos = 0;
@@ -51,6 +57,7 @@ public class ShipStack
    public int sortValue = 0;
    public int side = 0;
    public int originalShipCount = 0;
+   public int firingOrderValue = 0;
    
    // For storing results of multiple runs by the simulator
    public int cumulativeSimulations = 0;
@@ -77,6 +84,8 @@ public class ShipStack
       if (design != null)
       {
          this.shields = design.getShields() * count;
+         
+         this.owner = design.getOwner();
       }
    }
    
@@ -88,6 +97,7 @@ public class ShipStack
       shipCount = originalShipCount;
       damage = 0;		// TODO: ships don't necesarily start undamaged
       shields = design.getShields() * shipCount;
+      firingOrderValue = Utils.getRandomInt();
    }
    
    /**
@@ -102,7 +112,7 @@ public class ShipStack
    {
       if (shipCount == 0) return design.getName() + " [dead]";
       
-      return design.getName() + " [" + shipCount + "@" + getDamagePercent() + "%,"+shields+"]";
+      return owner + " " + design.getName() + " [" + shipCount + "@" + getDamagePercent() + "%,"+shields+"]";
    }
    
    public int getDamagePercent()

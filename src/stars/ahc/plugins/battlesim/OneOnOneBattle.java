@@ -92,7 +92,7 @@ public class OneOnOneBattle extends BattleSimulation
     * 
     * @deprecated the new moveStack() has replaced this  
     */
-   private void moveStackOld( int index )
+   public void moveStackOld( int index )
    {
       ShipStack mover = stacks[index];
       ShipStack target = mover.target;

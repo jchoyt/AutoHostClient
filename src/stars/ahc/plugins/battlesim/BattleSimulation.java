@@ -22,17 +22,30 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import stars.ahc.ShipDesign;
 import stars.ahc.Utils;
 import stars.ahc.Weapon;
 
 /**
+ * Simulate a Stars! battle
  * 
- * @author Steve Leach
+ * @author Steve Leach, with help from LEit, Kotk, mazda, Ptolemy, Micha, et.al. from Home World Forum
  */
 public class BattleSimulation
 {
+   /**
+    * Records the damage done by a weapons salvo 
+    */
+   public class DamageRecord
+   {
+      int shieldDamage = 0;
+      int armourDamage = 0;
+      int kills = 0;
+   }
+   
    /**
     * Battles are divided into up to 16 rounds, with each weapon firing once per round
     */
@@ -65,6 +78,8 @@ public class BattleSimulation
    
    public static final int BBOARD_MIN_X = 1;
    public static final int BBOARD_MAX_X = 10;
+   public static final int BBOARD_MIN_Y = 1;
+   public static final int BBOARD_MAX_Y = 10;
    
    private ArrayList statusListers = new ArrayList();
 
@@ -206,46 +221,90 @@ public class BattleSimulation
     */
    protected void initialiseBattleBoard() throws BattleSimulationError
    {
-      round = 1;
+      round = 0;
       
       for (int n = 0; n < stackCount; n++)
       {
-         setInitialPosition( stacks[n], n );
-         
          stacks[n].reset();
       }
+      
+      setInitialPositions();
    }
       
    /**
     * Sets the initial position of the stacks 
     */
-   protected void setInitialPosition( ShipStack stack, int index ) throws BattleSimulationError
+   protected void setInitialPositions() throws BattleSimulationError
    {
-      int sides = countSides();
+      int races = countRaces();
       
-      if (sides == 2)
+      Point[] positions = {};
+      
+      switch (races)
       {
-         stack.ypos = 5;
-         
-         if (stack.side == 1)
-         {
-            stack.xpos = BBOARD_MIN_X+1;
-         }
-         else
-         {
-            stack.xpos = BBOARD_MAX_X-1;
-         }
+         case 2:
+            positions = new Point[] { new Point(2,5), new Point(8,5) };
+            break;
+         case 3:
+            positions = new Point[] { new Point(5,2), new Point(2,9), new Point(9,9) };
+            break;
+         case 4:
+            positions = new Point[] { new Point(2,2), new Point(9,9), new Point(2,9), new Point(9,2) };
+            break;
+         // TODO: complete for 5 to 16 races
+         default:
+            throw new BattleSimulationError( "Cannot handle more than 2 sides yet" );
       }
-      else
+
+      for (int n = 0; n < stackCount; n++)
       {
-         // TODO: allow more than 2 sides when setting up initial positions
-         throw new BattleSimulationError( "Cannot handle more than 2 sides yet" );
-      }
+         Point pos = positions[ stacks[n].raceIndex-1 ];
+         stacks[n].xpos = pos.x;
+         stacks[n].ypos = pos.y;
+      }      
    }
    
-   public int countSides()
+   /**
+    * Counts the races involved in the battle, and assigns each stack a race index number  
+    */
+   private int countRaces()
    {
-      return 2;
+      Map races = new HashMap();
+      int raceCount = 0;
+      
+      for (int n = 0; n < stackCount; n++)
+      {
+         Integer index = (Integer)races.get(stacks[n].owner); 
+         if (index == null)
+         {
+            raceCount++;
+            index = new Integer(raceCount);
+            races.put( stacks[n], index );            
+         }
+         stacks[n].raceIndex = index.intValue();
+      }
+      
+      return raceCount;
+   }
+   
+   /**
+    * Returns the number of sides in the battle 
+    */
+   private int countSides()
+   {
+      int sides = 0;
+      
+      // TODO: remove assumption that side numbers are contiguous
+      
+      for (int n = 0; n < stackCount; n++)
+      {
+         if (stacks[n].side > sides)
+         {
+            sides++;
+         }
+      }
+      
+      return sides;
    }
    
    /**
@@ -402,7 +461,10 @@ public class BattleSimulation
                stacks[n].shields = originalShields;
             }
             
-            statusUpdate( stacks[n].toString() + " shields regenerate from " + beforeRegen + " to " + stacks[n].shields + " dp" );            
+            if (stacks[n].shields != originalShields)
+            {
+               statusUpdate( stacks[n].toString() + " shields regenerate from " + beforeRegen + " to " + stacks[n].shields + " dp" );
+            }
          }
       }
    }
@@ -490,26 +552,7 @@ public class BattleSimulation
       int dx = Math.abs( (stack1.xpos + xOffset) - stack2.xpos );
       int dy = Math.abs( (stack1.ypos + yOffset) - stack2.ypos );
    
-      return Math.max( dx, dy );
-      
-      // Use a distance table lookup for distances.
-      // This limits the number of expensive Math.sqrt calls to 100.
-      // Will only make a difference in large battles.
-      
-//      if (distanceTable == null)
-//      {
-//         distanceTable = new int[10][10];
-//         for (int x = 0; x < 10; x++)
-//         {
-//            for (int y = 0; y < 10; y++)
-//            {
-//               int d =  (int)Math.round( Math.floor( Math.sqrt( x * x + y * y ) ) );
-//               distanceTable[x][y] = d;
-//            }
-//         }
-//      }
-//      
-//      return distanceTable[dx][dy];
+      return Math.max( dx, dy );      
    }
 
    /**
@@ -603,7 +646,14 @@ public class BattleSimulation
       {
          if (movesInRound(stacks[n].design.getSpeed4(),round) >= threshold)
          {
-            moveStack(n);
+            if (stacks[n].battleOrders == ShipStack.ORDERS_DISENGAGE)
+            {
+               moveDisengagingStack( stacks[n] );               
+            }
+            else
+            {
+               moveStack( stacks[n] );
+            }
          }
       }      
    }
@@ -671,8 +721,15 @@ public class BattleSimulation
       {
          return;
       }
+      
+      // Empty weapon slots can't fire
+      if (stack.design.getWeaponCount(slot) == 0)
+      {
+         return;
+      }
    
       // If the target stack has no ships left, don't fire
+      // TODO: remove this once fireBeamWeapon() and fireTorpedo() can pick an alternative target
       if (stack.target.shipCount <= 0)
       {
          return;
@@ -695,9 +752,12 @@ public class BattleSimulation
 
    /**
     * Simulates firing beam weapons
+    * 
     * @throws BattleSimulationError
+    * 
+    * @deprecated - see fireBeamWeapon()
     */
-   private void fireBeamWeapon(ShipStack stack, int slot) throws BattleSimulationError
+   private void fireBeamWeaponOld(ShipStack stack, int slot) throws BattleSimulationError
    {
       int shieldDamage = 0;		// initially there is no shield damage
       int armourDamage = 0; 	// initially there is no armour damage
@@ -714,7 +774,12 @@ public class BattleSimulation
       // Are we out of range ?
       if (range > stack.design.getWeaponRange(slot))
       {
-         // TODO: pick another target if possible
+         target = pickTargetInRange( stack, slot );
+      }
+      
+      if (target == null)
+      {
+         // There is no valid target within range
          return;
       }
       
@@ -722,10 +787,14 @@ public class BattleSimulation
       {
          if (target.shields == 0)
          {
-            // Don't bother firing sappers if the target has no shields left
-            // TODO: pick another target if possible
-            return;
+            target = pickTargetInRange( stack, slot );
          }
+      }
+      
+      if (target == null)
+      {
+         // pickTargetInRange() could not find any suitable target, so don't fire
+         return;
       }
       
       // Calculate the total firepower of the salvo 
@@ -786,7 +855,52 @@ public class BattleSimulation
 
       sendShotNotification(stack, slot, shieldDamage, armourDamage, kills, target);
    }
+   
+   /**
+    * Finds the most attractive target that is within range of the specified weapon slot
+    * <p>
+    * Returns null if no viable target is found.  If the weapon is a sapper then stacks without
+    * shields are ignored. 
+    */
+   public ShipStack pickTargetInRange( ShipStack stack, int slot ) throws BattleSimulationError
+   {
+      ShipStack target = null;
+      double mostAttractive = 0;
+      
+      int range = stack.design.getWeaponRange(slot);
+      boolean isSapper = stack.design.getWeaponType(slot) == Weapon.TYPE_SAPPER;
+      
+      for (int n = 0; n < stackCount; n++)
+      {
+         if (stacks[n].side != stack.side)
+         {
+            if (stacks[n].shipCount > 0)
+            {
+	            if (distanceBetween(stack,stacks[n]) < range)
+	            {
+	               if ((isSapper == false) || (stacks[n].shields > 0))
+	               {
+	                  double attraction = getAttractiveness( stack, slot, stacks[n] );
+	                  
+	                  if (attraction > mostAttractive)
+	                  {
+	                     mostAttractive = attraction;
+	                     target = stacks[n];
+	                  }
+	               }
+	            }
+            }
+         }
+      }
+      
+      return target;
+   }
 
+   private void sendShotNotification(ShipStack stack, int slot, DamageRecord damage, ShipStack target)
+   {
+      sendShotNotification( stack, slot, damage.shieldDamage, damage.armourDamage, damage.kills, target );
+   }
+   
    private void sendShotNotification(ShipStack stack, int slot, int shieldDamage, int armourDamage, int kills, ShipStack target)
    {
       BattleSimulationNotification notification = new BattleSimulationNotification();
@@ -873,9 +987,11 @@ public class BattleSimulation
     * Moves the specified stack
     * 
     * The stack will attempt to move to a new square that is as close as possible
-    * to it's preferred distance from it's target. 
+    * to it's preferred distance from it's target.
+    * 
+    * @deprecated 
     */
-   protected void moveStack(int index)
+   protected void moveStackOld(int index)
    {
       ShipStack mover = stacks[index];
       ShipStack target = mover.target;
@@ -957,28 +1073,24 @@ public class BattleSimulation
       // Count down from maximum initiative (max initiative fires first)
       for (int initLevel = MAX_INITIATIVE; initLevel > 0; initLevel--)
       {
-         // TODO: opinion on HomeWorldForum is that the manual is wrong and weapon range
-         // has no effect on firing order.   
+         // Originally we were checking weapon range here as specified in the 
+         // Stars! manual, but it turns out that the manual is wrong.
          
-         // Count up from range 0 to range 7 (shorter range first first)
-         for (int range = 0; range <= 7; range++)
+         // Loop through stacks
+         for (int n = 0; n < stackCount; n++)
          {
-            // Loop through stacks
-            for (int n = 0; n < stackCount; n++)
+            ShipStack stack = stacks[n];
+            ShipDesign design = stack.design;
+            
+            // Loop though weapons slots to find weapons with current initiative level & range
+            for (int slot = 0; slot < design.getWeaponSlots(); slot++)
             {
-               ShipStack stack = stacks[n];
-               ShipDesign design = stack.design;
+               int init = design.getInitiative() + design.getWeaponInit(slot);
+               int wpnRange = design.getWeaponRange(slot);
                
-               // Loop though weapons slots to find weapons with current initiative level & range
-               for (int slot = 0; slot < design.getWeaponSlots(); slot++)
+               if (init == initLevel)
                {
-                  int init = design.getInitiative() + design.getWeaponInit(slot);
-                  int wpnRange = design.getWeaponRange(slot);
-                  
-                  if ((init == initLevel) && (wpnRange == range))
-                  {
-                     fireWeapon( stack, slot );
-                  }
+                  fireWeapon( stack, slot );
                }
             }
          }
@@ -988,22 +1100,18 @@ public class BattleSimulation
    /**
     * Sorts the stacks before firing
     * <p>
-    * Randomly sort the stacks to give the stacks equal opportunity to fire first 
-    * if they have the same initiative.
+    * Stacks are given a random firing order at the start of the battle. We
+    * sort the stacks based on that value here.  This order only applies
+    * as a tie-breaker when ships have equal initiative values.
     */
    protected void sortStacksForFiring()
    {
-      for (int n = 0; n < stackCount; n++)
-      {
-         stacks[n].sortValue = Utils.getRandomInt();
-      }
-      
       Arrays.sort( stacks, 0, stackCount, new Comparator() {
          public int compare(Object arg0, Object arg1)
          {
             ShipStack stack0 = (ShipStack)arg0;
             ShipStack stack1 = (ShipStack)arg1;
-            return stack0.sortValue - stack1.sortValue;
+            return stack0.firingOrderValue - stack1.firingOrderValue;
          }
       });
    }
@@ -1170,5 +1278,257 @@ public class BattleSimulation
       {
          return (shields * 2 / accuracy) + (armour+shields) / (accuracy * typeModifier);
       }
+   }
+   
+   /**
+    * Moves the stack to a new location 
+    */
+   private void moveStack( ShipStack stack )
+   {
+      int bestRangeOffset = Integer.MAX_VALUE;
+      
+      // Store the original position
+      int oldX = stack.xpos;
+      int oldY = stack.ypos;
+      
+      ArrayList options = new ArrayList();	// List for storing possible movement options
+      options.add( new Point(0,0) );		// Initial best option is to stay where we are
+      
+      for (int x = -1; x <= 1; x++)
+      {
+         for (int y = -1; y <= 1; y++)
+         {
+            // Don't consider squares that are off the edge of the board
+            if ( validSquare(stack.xpos+x,stack.ypos+y) )
+            {            
+	            int range = distanceBetween( stack, stack.target, x, y );
+	            
+	            int rangeOffset = Math.abs( range - stack.preferredRange );
+	            
+	            if (rangeOffset < bestRangeOffset)
+	            {
+	               // This is a better option than any we have so far, so discard existing options
+	               options.clear();
+	               bestRangeOffset = rangeOffset;
+	            }
+	            
+	            if (rangeOffset == bestRangeOffset)
+	            {
+	               // This is equal to the best so far, so add to list of options
+	               options.add( new Point(x,y) );
+	            }
+            }
+         }
+      }
+      
+      // pick an option at random
+      int optionCount = options.size();
+      
+      int optionChosen = (int)(Utils.getRandomFloat() * optionCount);	      
+      Point offset = (Point)options.get(optionChosen);
+      
+      // and move the stack
+      stack.xpos += offset.x;
+      stack.ypos += offset.y;
+      
+      notifyStackMovement( stack, oldX, oldY );
+   }
+   
+   /**
+    * Tells all battle simulation listeners that a stack has moved  
+    */
+   private void notifyStackMovement( ShipStack mover, int oldX, int oldY )
+   {
+      BattleSimulationNotification event = new BattleSimulationNotification();
+      event.eventType = BattleSimulationNotification.TYPE_MOVE;
+      event.message = mover.toString() + " moves to " + mover.xpos + "," + mover.ypos + " (range " + distanceBetween(mover,mover.target) + ")";
+      event.round = round;
+      event.activeStack = mover;
+      event.movedFrom = new Point(oldX,oldY);
+      
+      statusUpdate( event );      
+   }
+   
+   /**
+    * Returns true if the specified location is a valid square on the battle board  
+    */
+   private boolean validSquare( int x, int y )
+   {
+      return ((x >= BBOARD_MIN_X) || (x <= BBOARD_MAX_X) || (y >= BBOARD_MIN_Y) || (y >= BBOARD_MAX_Y));
+   }
+   
+   /**
+    * Move a ship stack that is attempting to disengage 
+    */
+   private void moveDisengagingStack( ShipStack stack )
+   {
+      // Currently just move randomly
+      // TODO: figure out the correct implementation
+
+      int oldx = stack.xpos;
+      int oldy = stack.ypos;
+      
+      int x = (int)(Utils.getRandomFloat() * 3 - 1);
+      int y = (int)(Utils.getRandomFloat() * 3 - 1);
+      
+      // Don't allow movement off the battle board, or no movement at all
+      while ( ( validSquare(oldx+x,oldy+y) == false ) || ((x == oldx) && (y == oldy)))
+      {
+         x = (int)(Utils.getRandomFloat() * 3 - 1);
+         y = (int)(Utils.getRandomFloat() * 3 - 1);         
+      }
+      
+      stack.xpos += x;
+      stack.ypos += y;
+      
+      stack.movesMade++;
+      
+      notifyStackMovement( stack, oldx, oldy );
+   }
+   
+   /**
+    * Simulates firing beam weapons
+    */
+   private void fireBeamWeapon( ShipStack stack, int slot ) throws BattleSimulationError
+   {
+      ShipDesign design = stack.design;
+      
+      // Get the base damage done by the weapon
+      int baseDamage = design.getWeaponPower(slot) * design.getWeaponCount(slot) * stack.shipCount;
+
+      while (baseDamage > 0)	// while we have unallocated damage
+      {
+         // "Spend" the remaining base damage 
+         
+         ShipStack target = pickTargetInRange( stack, slot );
+
+         if (target == null)
+         {
+            return; // No more targets in range
+         }
+
+         DamageRecord damageRecord = new DamageRecord();
+         
+         int range = distanceBetween( stack, target );
+
+         // Calculate effects of range, energy capacitors and beam deflectors
+         double rangeMultiplier = getRangeMultiplier( range, stack.design.getWeaponRange(slot) );
+         double capacitorMultiplier = getCapacitorMultiplier( stack.design );        
+         double deflectorMultiplier = getDeflectorMultiplier( target.design );
+      
+         double damageMultiplier = rangeMultiplier * deflectorMultiplier * capacitorMultiplier;
+
+         if (target.shields > baseDamage * damageMultiplier)
+         {
+            // Shields can take all the damage
+            damageRecord.shieldDamage = (int)(baseDamage * damageMultiplier);               
+            target.shields -= baseDamage * damageMultiplier;
+            baseDamage = 0;            
+         }
+         else
+         {
+            // Shields are blown away, so armour will take damage
+            damageRecord.shieldDamage = target.shields;
+      		baseDamage = (int)(baseDamage - target.shields / damageMultiplier);
+      		target.shields = 0;
+
+      		if (design.getWeaponType(slot) != Weapon.TYPE_SAPPER)
+      		{
+      		   baseDamage = applyArmourDamage( target, baseDamage, damageMultiplier, damageRecord );      		   
+      		}
+         }
+         
+         sendShotNotification(stack, slot, damageRecord, target);
+      }
+   }
+
+   /**
+    * Returns the modification to damage due to any energy capacitors on the specified ship design
+    */
+   private double getCapacitorMultiplier(ShipDesign design)
+   {
+      if (design.getCapacitors() == 0) return 1.0;
+      
+      // Use integer arithmatic so we get the same rounding errors as the Stars! battle engine
+      int mod = 1000;
+      for (int n = 0; n < design.getCapacitors(); n++)
+      {
+         mod = mod * 110 / 100;
+      }
+      mod = (int)Math.floor( mod / 10 );      
+
+      return mod / 100;
+   }
+
+   /**
+    * Returns the modification to damage due to any beam deflectors on the specified ship design
+    */
+   private double getDeflectorMultiplier(ShipDesign design)
+   {
+      if (design.getDeflectors() == 0) return 1.0;
+      
+      // Use integer arithmatic so we get the same rounding errors as the Stars! battle engine
+      int mod = 1000;
+      for (int n = 0; n < design.getDeflectors(); n++)
+      {
+         mod = mod * 90 / 100;
+      }
+      mod = (int)Math.floor( mod / 10 );      
+
+      return mod / 100;
+   }
+   
+   /**
+    * Applies damage to the armour on a stack of ships
+    * <p>
+    * Some of the ships may be killed, and any excess damage is divided amongst the survivors
+    * 
+    * @return the amount of base damage not used if all ships in the target stack are killed
+    *  
+    * @throws BattleSimulationError
+    */
+   private int applyArmourDamage(ShipStack target, int baseDamage, double damageMultiplier, DamageRecord damageRecord) throws BattleSimulationError
+   {
+      // How much damage has each ship sustained so far ?
+      int damagePerShip = target.damage / target.shipCount;            
+      int remainingArmourPerShip = target.design.getArmour() - damagePerShip;
+      
+      int kills = (int)(baseDamage * damageMultiplier / remainingArmourPerShip);
+
+      if (kills > target.shipCount)
+      {
+         kills = target.shipCount;
+      }
+      
+      baseDamage -= kills * remainingArmourPerShip / damageMultiplier;
+      
+      damageRecord.armourDamage = kills * remainingArmourPerShip;
+  			
+      target.shipCount = target.shipCount - kills;
+
+      damageRecord.kills = kills;
+
+      if (target.shipCount > 0)
+      {
+         int damageUnits = Math.max( target.design.getArmour() / 512, 1 );
+
+         // Get the basic damage
+         int damage = (int)(baseDamage * damageMultiplier);
+         
+         // Round up to units of 1/512
+         int damage2 = (int)(Math.ceil(1.0 * damage / damageUnits) * damageUnits);
+      
+         int newDamagePerShip = damage2 / target.shipCount;
+         
+         // Apply damage to the target
+         target.damage = (damagePerShip+newDamagePerShip) * target.shipCount;
+
+         // There can't be any base damage left at this point as we have applied it all to armour
+         baseDamage = 0;
+
+         damageRecord.armourDamage += damage2;
+      }
+  		   
+      return baseDamage;
    }
 }

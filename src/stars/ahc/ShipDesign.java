@@ -80,8 +80,8 @@ public class ShipDesign
    private int bc = 0;
    private int bsc = 0;
    private int nexus = 0;
-   private int boraniumCost = 0;		// for attractiveness calculations
-   private int resourceCost = 0;		// for attractiveness calculations
+   private int boraniumCost = 1;		// for attractiveness calculations
+   private int resourceCost = 1;		// for attractiveness calculations
    
    public ShipDesign( int hullType, String name )
    {

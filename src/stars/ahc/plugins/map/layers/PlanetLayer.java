@@ -73,8 +73,7 @@ public class PlanetLayer extends AbstractMapLayer
       {
    	    planet = game.getPlanet(n,mapConfig.year); 
    	  	String defenceValue = planet.getDefence();
-   	    int arcSize = calculateArc(defenceValue);
-        int populationValue = planet.getPopulation();
+   	    int populationValue = planet.getPopulation();
         raceColor = game.getRaceColor( planet.getOwner() );
         if (planet.isUnoccupied())
         {
@@ -83,12 +82,12 @@ public class PlanetLayer extends AbstractMapLayer
         else if(defenceToggle && populationToggle)
         {
          	int size = calculateSize(populationValue);
-         	//int arcSize = calculateArc(defenceValue);
+         	int arcSize = calculateArc(defenceValue);
          	drawPlanets(g, size, arcSize);
         }
         else if(defenceToggle && (populationToggle == false) )
         {
-         	//int arcSize = calculateArc(defenceValue);
+         	int arcSize = calculateArc(defenceValue);
          	drawPlanets(g, DEFAULT_SIZE, arcSize);
         }
         else if(populationToggle && (defenceToggle == false))
@@ -144,7 +143,6 @@ public class PlanetLayer extends AbstractMapLayer
    private int calculateSize(int populationValue)
    {
 	double size;
-	// TODO Operations to determine the size based on population.
 	if (populationValue <= 20000)
 	{
 		return 3;

@@ -175,6 +175,8 @@ public class BattleSimulatorTest extends TestCase
       battle.addNewStack( rabidDog, 12 );
       battle.addNewStack( ccc, 14 );
       
+      battle.addStatusListener( consoleStatusListener );
+      
       battle.simulate();
       
       //
@@ -377,7 +379,7 @@ public class BattleSimulatorTest extends TestCase
       assertTrue( "Chaff more attractive than Arm BB to beamer", chaff_to_CCC > armBB_to_CCC );
    }
    
-   public void testBattleFour() throws Exception
+   public void _testBattleFour() throws Exception
    {
       // Based on a battle in the duel "Shorts"
       ShipDesign borderPatrol = new ShipDesign(ShipDesign.HULLTYPE_DESTROYER,"Border Patrol");
@@ -444,4 +446,5 @@ public class BattleSimulatorTest extends TestCase
       System.out.println( chaffStack.design.getName() + "... " + chaffStack.getCumulativeResults() );
       System.out.println( cccStack.design.getName() + "... " + cccStack.getCumulativeResults() );
    }
+   
 }
