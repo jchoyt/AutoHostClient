@@ -209,12 +209,16 @@ public class AutoHostGameController implements GameController
      */
     public boolean poll()
     {
+       Log.log( Log.NOTICE, this, "Polling autohost for " + game.getName() );
         /*
          *  get status file from AH
          */
         try
         {
-            Utils.getFileFromAutohost( game.getName(), game.getStatusFileName(), game.getDirectory() );
+           if (Utils.empty( game.getName() ) == false)
+           {
+              Utils.getFileFromAutohost( game.getName(), game.getStatusFileName(), game.getDirectory() );
+           }
         }
         catch ( AutoHostError e )
         {
@@ -224,7 +228,9 @@ public class AutoHostGameController implements GameController
         /*
          *  load new status into game  GUI should be updated by reloading game.getAhStatus()
          */
-        game.loadProperties();
+        // don't do this because loadProperties() may lead back to poll() - infinite recursion
+        // SL, 4 Nov 2004
+        //game.loadProperties();
         return true;
     }
 
@@ -280,9 +286,13 @@ public class AutoHostGameController implements GameController
              poll();
              //return;
           }
-          InputStream in = new FileInputStream( statusFile );
-          ahStatus.load( in );
-          pcs.firePropertyChange( "gameStatus", 0, 1 );
+          
+          if (statusFile.exists())
+          {
+             InputStream in = new FileInputStream( statusFile );
+             ahStatus.load( in );
+             pcs.firePropertyChange( "gameStatus", 0, 1 );
+          }
        }
        catch ( Exception e )
        {

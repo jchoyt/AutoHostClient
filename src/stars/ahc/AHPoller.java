@@ -22,7 +22,6 @@ import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -104,9 +103,12 @@ public class AHPoller extends TimerTask
                 cal = new GregorianCalendar();
                 nextPollTime.put( games[i], cal );
             }
-            if ( cal.getTimeInMillis() < now )
+            if ( cal.getTimeInMillis() <= now )
             {
                 success = success && games[i].poll();
+                
+                games[i].loadProperties();
+                
                 if ( success )
                 {
                     cal.add( Calendar.MILLISECOND, games[i].getPollInterval() );

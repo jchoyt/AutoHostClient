@@ -88,22 +88,28 @@ public class Game extends Object
         this.directory = directory;
         loadProperties();
         sahHosted = GamesProperties.getProperty( shortName + ".sahHosted", "true" );
-        if ( sahHosted.equals( "true" ) )
-        {
-            Log.log( Log.DEBUG, this, shortName + ": SahHosted game" );
-            controller = new AutoHostGameController( this );
-        }
-        else
-        {
-            Log.log( Log.DEBUG, this, shortName + ": local game" );
-            controller = new LocalGameController( this );
-        }
+        initController();
         loadProperties();
         loadUserDefinedProperties();
     }
 
 
-    /**
+    private void initController()
+   {
+      if ( sahHosted.equals( "true" ) )
+        {
+            Log.log( Log.DEBUG, this, name + ": SahHosted game" );
+            controller = new AutoHostGameController( this );
+        }
+        else
+        {
+            Log.log( Log.DEBUG, this, name + ": local game" );
+            controller = new LocalGameController( this );
+        }
+   }
+
+
+   /**
      *  Sets the directory attribute of the Game object
      *
      *@param  directory  The new directory value
@@ -762,6 +768,8 @@ public class Game extends Object
 
             race.getProperties( props );
         }
+        
+        setSahHosted( props.getProperty( name + ".sahHosted" ) );
     }
 
 
@@ -1042,6 +1050,13 @@ public class Game extends Object
     public void setSahHosted( String sahHosted )
     {
         this.sahHosted = sahHosted;
+                
+        boolean isSAHcontroller = (controller instanceof AutoHostGameController);
+        
+        if (isAutohosted() != isSAHcontroller)
+        {
+           initController();
+        }
     }
 
 
