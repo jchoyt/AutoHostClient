@@ -237,8 +237,7 @@ public class AhcFrame extends javax.swing.JFrame
          *  AutoHost.
          */
         GamesProperties.UPTODATE = true;
-        timer.schedule( new AHPoller(), 10 * 60 * 1000, 10 * 60 * 1000 );
-        //timer.schedule( new AHPoller(), 1 * 60 * 1000, 10 * 60 * 1000 );
+        timer.schedule( new AHPoller(), 10 * 60 * 1000, 10 * 60 * 1000 ); //10 minutes
     }
 
 
@@ -254,7 +253,6 @@ public class AhcFrame extends javax.swing.JFrame
         {
             ImageIcon icon = new ImageIcon( iconURL );
             JLabel ret = new JLabel( icon, SwingConstants.CENTER );
-            //doesn't work -> JLabel ret = new JLabel("<html><a href=\"http://autohost.com\"><img src=\"" + iconURL +"\"></a></html>");
             return ret;
         }
         else

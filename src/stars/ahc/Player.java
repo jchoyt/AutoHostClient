@@ -534,11 +534,9 @@ public class Player extends Object
         {
             Log.log( Log.MESSAGE, this, "Couldn't connect to AutoHost - returning nothing" );
             AhcGui.setStatus( "Couldn't get the file from AutoHost.  Are you connected to the internet?" );
-        }
-        finally
-        {
             return year;
         }
+        return year;
     }
 
 }

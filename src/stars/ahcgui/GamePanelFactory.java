@@ -15,26 +15,23 @@
  */
 package stars.ahcgui;
 import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-
-import java.net.*;
 import java.util.Properties;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.border.Border;
 import stars.ahc.*;
 
 /**
@@ -70,7 +67,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
     Game game;
     JLabel statusLabel;
 
-    JLabel titleYear;
+    TitledBorder nameBorder;
     private GridBagConstraints c;
     private GridBagLayout gridbag;
 
@@ -98,9 +95,9 @@ class GamePanel extends JPanel implements PropertyChangeListener
         /*
          *  add border
          */
-        Border nameBorder = BorderFactory.createTitledBorder( game.getLongName() + " ( year " + game.getGameYear()  + " )" );
+        nameBorder = BorderFactory.createTitledBorder( game.getLongName() + " ( year " + game.getGameYear() + " )" );
         Border spaceBorder = BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
-        this.setBorder(BorderFactory.createCompoundBorder(nameBorder, spaceBorder ));
+        this.setBorder( BorderFactory.createCompoundBorder( nameBorder, spaceBorder ) );
         /*
          *  set up the property change listener
          */
@@ -125,7 +122,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
             }
         }
         statusLabel.setText( "<html>" + game.getStatus() + "</html>" );
-        titleYear.setText( "<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i></html>" );
+        nameBorder.setTitle( game.getLongName() + " ( year " + game.getGameYear() + " )" );
     }
 
 
@@ -137,7 +134,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
     private void addAllStati( Game game )
     {
         int oldGridwidth = c.gridwidth;
-        c.gridwidth = 3;
+        c.gridwidth = 4;
         c.anchor = GridBagConstraints.CENTER;
         Properties playersByStatus = game.getPlayersByStatus();
         addStatusLabel( "In", playersByStatus.getProperty( "in" ), "green" );
@@ -154,10 +151,10 @@ class GamePanel extends JPanel implements PropertyChangeListener
     private void addBlankSpace()
     {
         Component blank = Box.createVerticalStrut( 20 );
-        c.gridwidth = 3;
-        c.gridx=0;
+        c.gridwidth = 4;
+        c.gridx = 0;
         c.gridy++;
-        gridbag.setConstraints(blank, c);
+        gridbag.setConstraints( blank, c );
         this.add( blank );
     }
 
@@ -194,6 +191,13 @@ class GamePanel extends JPanel implements PropertyChangeListener
         c.gridx++;
         gridbag.setConstraints( b1, c );
         this.add( b1 );
+        /*
+         *  Add Analyze button
+         */
+        b1 = new AnalyzeGameButton( game );
+        c.gridx++;
+        gridbag.setConstraints( b1, c );
+        this.add( b1 );
     }
 
 
@@ -204,10 +208,12 @@ class GamePanel extends JPanel implements PropertyChangeListener
      */
     private void addGameData( Game game )
     {
-        c.gridwidth = 3;
-        /* titleYear = new JLabel( "<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i></html>", JLabel.RIGHT );
-        gridbag.setConstraints( titleYear, c );
-        //this.add( titleYear ); */
+        c.gridwidth = 4;
+        /*
+         *  titleYear = new JLabel( "<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i></html>", JLabel.RIGHT );
+         *  gridbag.setConstraints( titleYear, c );
+         *  /this.add( titleYear );
+         */
         String label = "<html>" + game.getStatus() + "</html>";
         statusLabel = new JLabel( label );
         c.gridy++;
@@ -234,7 +240,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
          *  add launch turn button
          */
         JButton b = new LaunchGameButton( player );
-        c.gridwidth=1;
+        c.gridwidth = 1;
         c.gridx = 0;
         c.gridy++;
         gridbag.setConstraints( b, c );
@@ -242,7 +248,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
         /*
          *  add status JLabel
          */
-        c.gridwidth=2;
+        c.gridwidth = 3;
         PlayerJLabel playerLabel = new PlayerJLabel( player );
         c.gridx++;
         gridbag.setConstraints( playerLabel, c );
@@ -294,7 +300,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
          *  add status label
          */
         StringBuffer ret = new StringBuffer();
-        ret.append("<html>");
+        ret.append( "<html>" );
         ret.append( status );
         ret.append( ":  " );
         ret.append( "<font color=\"" );
@@ -302,7 +308,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
         ret.append( "\">" );
         ret.append( list );
         ret.append( "</font>" );
-        ret.append("</html>");
+        ret.append( "</html>" );
 
         JLabel b = new JLabel( String.valueOf( ret ) );
         c.gridx = 0;
@@ -441,6 +447,40 @@ class DownloadButton extends JButton implements ActionListener
  *  Description of the Class
  *
  *@author     jchoyt
+ *@created    December 25, 2002
+ */
+class AnalyzeGameButton extends JButton implements ActionListener
+{
+
+
+    Game game;
+
+
+    /**
+     *  Constructor for the DownloadButton object
+     *
+     *@param  game  Description of the Parameter
+     */
+    public AnalyzeGameButton( Game game )
+    {
+        this.game = game;
+        setText( "Analyze Game" );
+        addActionListener( this );
+    }
+
+
+    /**
+     *@param  e  Description of the Parameter
+     */
+    public void actionPerformed( ActionEvent e )
+    {
+        new Eval().evaluate( game );
+    }
+}
+/**
+ *  Description of the Class
+ *
+ *@author     jchoyt
  *@created    December 26, 2002
  */
 class UploadButton extends JButton implements ActionListener
@@ -453,7 +493,7 @@ class UploadButton extends JButton implements ActionListener
     /**
      *  Constructor for the DownloadButton object
      *
-     *@param  game  Descriptio of the Parameter
+     *@param  game  Description of the Parameter
      */
     public UploadButton( Game game )
     {

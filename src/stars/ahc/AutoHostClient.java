@@ -80,7 +80,7 @@ public class AutoHostClient extends java.lang.Object
             }
             if ( args[j].equals( "-testing" ) || args[j].equals( "-t" ) )
             {
-                GamesProperties.AUTOHOST = "file:///devel/autohostclient/ahclone/";
+                GamesProperties.AUTOHOST = "file:///devel/jchoyt/autohostclient/autohostclient/ahclone/";
                 logLevel = Log.DEBUG;
                 System.out.println( GamesProperties.AUTOHOST );
             }
@@ -107,15 +107,18 @@ public class AutoHostClient extends java.lang.Object
     {
         StringBuffer ret = new StringBuffer();
         ret.append( "Usage: " );
-        ret.append( "\njava[w] -jar ahclient.jar [-usage | -? | -d] [-pf propsfile] [-testing | -t]" );
+        ret.append( "\njava[w] -jar ahclient.jar [-usage | -? | -d] [-pf loc] [-testing | -t]" );
         ret.append( "\n    -usage   prints out this message" );
         ret.append( "\n    -?       prints out this message" );
         ret.append( "\n    -d       downloads all files in the properties configuration file" );
         ret.append( "\n    -pf loc  use the configuration file specified by \"loc\"" );
+        ret.append( "\n    -t       testing - uses the local directory instead of AutoHost" );
         ret.append( "\n\nexamples:" );
-        ret.append( "\n    ahclient.jar -pf buguni3.props" );
-        ret.append( "\n    ahclient.jar -d -pf dtroubl1.props" );
-        System.out.println( ret.toString() );
+        ret.append( "\n    java -jar ahclient.jar (uses ahclient.props)" );
+        ret.append( "\n    java -jar ahclient.jar -pf buguni3.properites (uses buguni3.properties instead of ahclient.props)" );
+        ret.append( "\n    java -jar ahclient.jar -d (just downloads files - no GUI)" );
+        ret.append( "\n    java -jar ahclient.jar -pf test.props -t (for development)" );
+         System.out.println( ret.toString() );
     }
 
 
