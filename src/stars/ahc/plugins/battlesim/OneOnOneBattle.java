@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import stars.ahc.ShipDesign;
+import stars.ahc.Utils;
 
 /**
  * Simulates a battle between 2 stacks of ships (only)
@@ -62,11 +63,34 @@ public class OneOnOneBattle extends BattleSimulation
    {
       round++;
       
+      regenShields();
+      
       pickTargets();
       
       moveStacks();
       
       fireWeapons();      
+   }
+   
+   private void regenShields()
+   {
+      for (int n = 0; n < stackCount; n++)
+      {
+         if (stacks[n].design.isRegenShields())
+         {
+            int beforeRegen = stacks[n].shields;
+            int originalShields = stacks[n].design.getShields() * stacks[n].shipCount;
+            int regen = originalShields / 10;
+            
+            stacks[n].shields += regen;
+            if (stacks[n].shields > originalShields)
+            {
+               stacks[n].shields = originalShields;
+            }
+            
+            debug( stacks[n].toString() + " shields regenerate from " + beforeRegen + " to " + stacks[n].shields + " dp" );            
+         }
+      }
    }
    
    private void pickTargets()
@@ -140,7 +164,7 @@ public class OneOnOneBattle extends BattleSimulation
          me.xpos++;
       }            
       
-      debug( stacks[index].toString() + " moves to " + me.xpos + "," + me.ypos + " range " + distanceBetween(me,you));      
+      debug( stacks[index].toString() + " moves to " + me.xpos + "," + me.ypos + " (range " + distanceBetween(me,you) + ")");      
    }
    
    private int distanceBetween( ShipStack stack1, ShipStack stack2 )
@@ -151,26 +175,45 @@ public class OneOnOneBattle extends BattleSimulation
    
    private void fireWeapons()
    {
+      // Randomly arrange the fleets so that init+range ties can go either way
+      randomSortFleets();
+      
       // Count down from maximum initiative
       for (int initLevel = MAX_INITIATIVE; initLevel > 0; initLevel--)
       {
-         // Loop through stacks
-         for (int n = 0; n < stackCount; n++)
+         // Count up from range 0 to range 3
+         for (int range = 0; range <= 3; range++)
          {
-            ShipStack stack = stacks[n];
-            ShipDesign design = stack.design;
-            
-            // Loop though weapons slots to find weapons with current initiative level
-            for (int slot = 0; slot < design.getWeaponSlots(); slot++)
-            {
-               int init = design.getInitiative() + design.getWeaponInit(slot);
-               
-               if (init == initLevel)
-               {
-                  fireWeapon( stack, slot );
-               }
-            }
+	         // Loop through stacks
+	         for (int n = 0; n < stackCount; n++)
+	         {
+	            ShipStack stack = stacks[n];
+	            ShipDesign design = stack.design;
+	            
+	            // Loop though weapons slots to find weapons with current initiative level
+	            for (int slot = 0; slot < design.getWeaponSlots(); slot++)
+	            {
+	               int init = design.getInitiative() + design.getWeaponInit(slot);
+	               int wpnRange = design.getWeaponRange(slot);
+	               
+	               if ((init == initLevel) && (wpnRange == range))
+	               {
+	                  fireWeapon( stack, slot );
+	               }
+	            }
+	         }
          }
+      }
+   }
+   
+   private void randomSortFleets()
+   {
+      if (Utils.getRandomFloat() > 0.5f)
+      {
+         // Half the time, swap the fleets
+         ShipStack temp = stacks[0];
+         stacks[0] = stacks[1];
+         stacks[1] = temp;
       }
    }
    
@@ -183,9 +226,18 @@ public class OneOnOneBattle extends BattleSimulation
       ShipDesign design = stack.design;
       ShipStack target = stack.target;
       
-      int power = design.getWeaponPower(slot) * design.getWeaponCount(slot) * stack.shipCount;
+      int range = distanceBetween( stack, target );
       
-      // TODO: adjust for range
+      if (range > stack.design.getWeaponRange(slot))
+      {
+         return;
+      }
+      
+      int power = design.getWeaponPower(slot) * design.getWeaponCount(slot) * stack.shipCount;
+
+      double rangeMultipliyer = getRangeMultiplier( range, stack.design.getWeaponRange(slot) );
+
+      power *= rangeMultipliyer;
       
       if (power < target.shields)
       {
@@ -206,21 +258,20 @@ public class OneOnOneBattle extends BattleSimulation
             armourDamage = 0;
          }
          
-         // TODO: get this working
+         int damagePerShip = target.damage / target.shipCount;
+         int remainingArmourPerShip = target.design.getArmour() - damagePerShip;
          
-         int targetShipArmour = target.design.getArmour() * target.shipCount - target.damage;
+         kills = (int)Math.floor( armourDamage / remainingArmourPerShip );
          
-         kills = (int)Math.floor( armourDamage / targetShipArmour );
+         int killDamage = kills * remainingArmourPerShip;
          
-         target.shipCount -= kills;
+         int damageRemainder = armourDamage - killDamage;
          
-         int killDamage = kills * targetShipArmour;
-         
-         target.damage += (armourDamage - killDamage);
-                  
+         target.shipCount -= kills;         
+         target.damage = damagePerShip * target.shipCount + damageRemainder;
       }
       
-      debug( stack.toString() + " fires " + stack.design.getWeaponName(slot) + " [" + slot + "] doing "
+      debug( stack.toString() + " fires " + stack.design.getWeaponName(slot) + " [" + (slot+1) + "] doing "
             + shieldDamage + " damage to shields and " + armourDamage + " to armour (" + kills + " kills)" );      
    }
 }

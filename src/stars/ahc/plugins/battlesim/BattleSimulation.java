@@ -95,4 +95,15 @@ public abstract class BattleSimulation
       return (round < 8) && (stacksFighting > 1);
    }
 
+   /**
+    */
+   public static double getRangeMultiplier(int distance, int weaponRange)
+   {
+      if (distance == 0) return 1.0;
+      
+      double n = 0.1 * distance / weaponRange;
+      
+      return 1.0 - n;
+   }
+
 }

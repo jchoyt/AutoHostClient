@@ -186,4 +186,8 @@ public class ShipDesign
    {
       return weaponCategory[slot];
    }
+   public int getWeaponRange(int slot)
+   {
+      return weaponRange[slot];
+   }
 }

@@ -28,6 +28,9 @@ public class ShipStack
 {
    public int shipCount = 0;
    public ShipDesign design = null;
+   /**
+    * total number of points of damage for the stack
+    */
    public int damage = 0;
    public int shields = 0;
    public int xpos = 0;
@@ -49,6 +52,8 @@ public class ShipStack
    
    public String toString()
    {
-      return design.getName() + " [" + shipCount + "@" + damage + "%,"+shields+"]";
+      int damagePerShip = damage / shipCount;
+      int damagePct = 100 * damagePerShip / design.getArmour();
+      return design.getName() + " [" + shipCount + "@" + damagePct + "%,"+shields+"]";
    }
 }
