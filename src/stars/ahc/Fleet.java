@@ -167,6 +167,10 @@ public class Fleet implements MapObject
         return Integer.parseInt( info[field] );
     }
 
+    public int getIntValue( int field, int defaultValue )
+    {
+       return Utils.safeParseInt( info[field], defaultValue );
+    }
 
     /**
      *  Gets the name attribute of the Fleet object
