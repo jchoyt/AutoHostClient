@@ -87,7 +87,7 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
       // Currently we ignore the request but schedule a full repaint instead.
       // Eventually we want to handle partial redraws properly.
       // Steve Leach (ashamed), 26 Oct 2004
-      if (g2D.getClipBounds().x + g2D.getClipBounds().y > 0)
+      if ((g2D.getClipBounds() != null) && (g2D.getClipBounds().x + g2D.getClipBounds().y > 0))
       {
          repaint();
          return;
@@ -117,26 +117,46 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
          }
       }
    }
+   
+   public static AffineTransform getMapTransform( MapConfig mapCfg, int screenHeight, int screenWidth )
+   {
+      AffineTransform xform = new AffineTransform();
+
+      int mapSize = mapCfg.gameMaxX - mapCfg.gameMinX;
+      
+      // centre in screen
+      xform.translate( screenWidth / 2, screenHeight / 2);
+
+      // apply scale
+      xform.scale( mapCfg.mapScale, mapCfg.mapScale );
+      
+      // translate
+      xform.translate( mapCfg.mapXpos - mapCfg.gameMinX - mapSize/2, mapCfg.mapYpos - mapCfg.gameMinY - mapSize / 2 );
+      
+      return xform;      
+   }
 
    /**
     * Returns an Affine Transform applying the current map configuration (pan and zoom) 
     */
    private AffineTransform getMapTransform()
    {
-      AffineTransform xform = new AffineTransform();
-
-      int mapSize = config.gameMaxX - config.gameMinX;
+      return getMapTransform( config, this.getHeight(), this.getWidth() );
       
-      // centre in screen
-      xform.translate( this.getWidth() / 2, this.getHeight() / 2);
-
-      // apply scale
-      xform.scale( config.mapScale, config.mapScale );
-      
-      // translate
-      xform.translate( config.mapXpos - config.gameMinX - mapSize/2, config.mapYpos - config.gameMinY - mapSize / 2 );
-      
-      return xform;
+//      AffineTransform xform = new AffineTransform();
+//
+//      int mapSize = config.gameMaxX - config.gameMinX;
+//      
+//      // centre in screen
+//      xform.translate( this.getWidth() / 2, this.getHeight() / 2);
+//
+//      // apply scale
+//      xform.scale( config.mapScale, config.mapScale );
+//      
+//      // translate
+//      xform.translate( config.mapXpos - config.gameMinX - mapSize/2, config.mapYpos - config.gameMinY - mapSize / 2 );
+//      
+//      return xform;
    }
    
    /**

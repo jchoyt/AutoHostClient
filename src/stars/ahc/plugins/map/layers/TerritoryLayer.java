@@ -70,13 +70,13 @@ public class TerritoryLayer extends AbstractCachedMapLayer implements GameUpdate
    /* (non-Javadoc)
     * @see stars.ahc.plugins.map.AbstractCachedMapLayer#createLayerImage()
     */
-   protected BufferedImage createLayerImage()
+   public BufferedImage createLayerImage()
    {
       BufferedImage img = null;
 
       int size = mapConfig.getUniverseSize();
       
-      if (size < 100) return null;			// safety check
+      if (size < 10) return null;			// safety check
          
       long start = System.currentTimeMillis();
 
@@ -104,7 +104,7 @@ public class TerritoryLayer extends AbstractCachedMapLayer implements GameUpdate
             
             if (planet.isUnoccupied() == false)
             {
-               if (step == 1)
+               if (screenPos[n] == null)
                {
                   // first time round, cache values
                   screenPos[n] = mapConfig.mapToScreen( planet.getPosition() );
@@ -116,12 +116,16 @@ public class TerritoryLayer extends AbstractCachedMapLayer implements GameUpdate
                 
                float r = (float)( (stepCount - step) * (200 + rootPop[n]) * sizeFactor );
                
-               if (screenPos[n] == null) System.out.println( "Null screen position: " + n ); 
-                  
-               Ellipse2D ellipse = new Ellipse2D.Float( screenPos[n].x-r, screenPos[n].y-r, r*2+1, r*2+1 );
-                  
-               g.setColor( Utils.adjustBrightness( baseColor[n], step*3 ) );
-               g.fill( ellipse );               
+               if (screenPos[n] == null)
+               {
+                  System.out.println( "Null screen position: " + n ); 
+               }
+               else
+               {
+                  Ellipse2D ellipse = new Ellipse2D.Float( screenPos[n].x-r, screenPos[n].y-r, r*2+1, r*2+1 );
+                  g.setColor( Utils.adjustBrightness( baseColor[n], step*3 ) );
+                  g.fill( ellipse );               
+               }                  
             }
          }
       }      
