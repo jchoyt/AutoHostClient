@@ -27,6 +27,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
@@ -38,16 +39,20 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTable;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
@@ -114,7 +119,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       
       config.addChangeListener( this );
       addWindowListener( this );
-      
+     
       setupMapFrame();
       setupLayers();
       setupMapControls();
@@ -279,27 +284,35 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       
       yearPanel.add( Box.createHorizontalGlue() );
       
-      prevYearButton = new JButton( "<" );
-      prevYearButton.setMaximumSize( new Dimension(20,20) );
-      prevYearButton.addActionListener( new ActionListener() {
-         public void actionPerformed(ActionEvent event)
+      Action prevYearAction = new AbstractAction("<") 
+      {
+         public void actionPerformed(ActionEvent e)
          {
             moveYear(-1);
-         }
-      } );
+         }         
+      };
+
+      prevYearButton = new JButton( prevYearAction );
+      prevYearButton.setMaximumSize( new Dimension(20,20) );
+      prevYearButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put( KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP,0), "Previous year" );
+      prevYearButton.getActionMap().put( "Previous year", prevYearAction );
       yearPanel.add( prevYearButton );
       
       yearLabel = new JLabel( " "+config.year+" " );
       yearPanel.add( yearLabel );
-      
-      nextYearButton = new JButton( ">" );
-      nextYearButton.setMaximumSize( new Dimension(20,20) );
-      nextYearButton.addActionListener( new ActionListener() {
-         public void actionPerformed(ActionEvent event)
+
+      Action nextYearAction = new AbstractAction(">") 
+      {
+         public void actionPerformed(ActionEvent e)
          {
             moveYear(1);
-         }
-      } );
+         }         
+      };
+      
+      nextYearButton = new JButton( nextYearAction );
+      nextYearButton.setMaximumSize( new Dimension(20,20) );
+      prevYearButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put( KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN,0), "Next year" );
+      prevYearButton.getActionMap().put( "Next year", nextYearAction );
       yearPanel.add( nextYearButton );
 
       yearPanel.add( Box.createHorizontalGlue() );

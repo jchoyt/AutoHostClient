@@ -113,6 +113,8 @@ public class TerritoryLayer extends AbstractCachedMapLayer
                 
                float r = (float)( (stepCount - step) * (200 + rootPop[n]) * sizeFactor );
                
+               if (screenPos[n] == null) System.out.println( "Null screen position: " + n ); 
+                  
                Ellipse2D ellipse = new Ellipse2D.Float( screenPos[n].x-r, screenPos[n].y-r, r*2+1, r*2+1 );
                   
                g.setColor( Utils.adjustBrightness( baseColor[n], step*3 ) );
