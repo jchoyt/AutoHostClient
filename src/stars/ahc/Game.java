@@ -1115,15 +1115,18 @@ public class Game extends Object
     */
    public void generateNextTurn() throws TurnGenerationError
    {
-      GameTurnGenerator gen = (GameTurnGenerator)controller;
-      
-      if (gen.readyToGenerate())
+      if (controller instanceof GameTurnGenerator)
       {
-         gen.generateTurns(1);
-      }
-      else
-      {
-         throw new TurnGenerationError( "Not ready to generate" );
+	      GameTurnGenerator gen = (GameTurnGenerator)controller;
+	      
+	      if (gen.readyToGenerate())
+	      {
+	         gen.generateTurns(1);
+	      }
+	      else
+	      {
+	         throw new TurnGenerationError( "Not ready to generate" );
+	      }
       }
    }
 }
