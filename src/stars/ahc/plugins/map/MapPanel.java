@@ -18,6 +18,7 @@
  */
 package stars.ahc.plugins.map;
 
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -30,16 +31,19 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 
-import javax.swing.JPanel;
+import javax.swing.JComponent;
 
 import stars.ahc.Game;
 import stars.ahcgui.pluginmanager.MapLayer;
 
 /**
+ * Panel on which the map is drawn.
+ * <p>
+ * FIXME: current implementation cannot handle partial repaint requests (ie. where there is a clip region)
+ * <p>
  * @author Steve Leach
- *
  */
-public class MapPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, MapConfigChangeListener
+public class MapPanel extends JComponent implements MouseListener, MouseMotionListener, MouseWheelListener, MapConfigChangeListener
 {
    private Game game = null;
    private MapConfig config = null;
@@ -47,6 +51,13 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
    private Point prevMousePos = null;
    private ArrayList layers = new ArrayList();
    
+   /**
+    * Default constructor for MapPanel.
+    * 
+    * @param game - the game for which a map is to be displayed
+    * @param config - map configuration information
+    * @throws MapDisplayError
+    */
    public MapPanel( Game game, MapConfig config ) throws MapDisplayError
    {
       this.game = game;
@@ -57,6 +68,8 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
       addMouseWheelListener( this );
       
       config.addChangeListener( this );
+      
+      setBackground( Color.BLACK );
    }
    
    public void paint(Graphics g)
@@ -84,8 +97,8 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
    /**
     * Sets the transformation (movement and scaling) for the graphics device
     * 
-    * @param layer
-    * @param g2d
+    * @param layer - the MapLayer to which the tranform is to be applied
+    * @param g2d - the Graphics device to create the transform for
     */
    private void setupTransform(MapLayer layer, Graphics2D g2d)
    {
@@ -108,8 +121,7 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
     */
    public void mouseClicked(MouseEvent arg0)
    {
-      // TODO Auto-generated method stub
-      
+      // empty
    }
 
    /* (non-Javadoc)
@@ -117,8 +129,7 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
     */
    public void mouseEntered(MouseEvent arg0)
    {
-      // TODO Auto-generated method stub
-      
+      // empty
    }
 
    /* (non-Javadoc)
@@ -126,8 +137,7 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
     */
    public void mouseExited(MouseEvent arg0)
    {
-      // TODO Auto-generated method stub
-      
+      // empty
    }
 
    /* (non-Javadoc)
@@ -200,6 +210,7 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
    }
 
    /**
+    * Adds a set of map layers to the map
     */
    public void addMapLayers(ArrayList layers)
    {

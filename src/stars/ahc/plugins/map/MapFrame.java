@@ -184,6 +184,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       
       JButton btn = new JButton( "Save Image" );
       btn.setSelected( true );
+      btn.setToolTipText( "Save map image to disk" );
       btn.addActionListener( new ActionListener() {
          public void actionPerformed(ActionEvent event)
          {
@@ -191,6 +192,17 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
          }
       });
       toolbar.add( btn );
+
+      JButton refreshBtn = new JButton( "Refresh" );
+      refreshBtn.setSelected( true );
+      refreshBtn.setToolTipText( "Redraw the map" );
+      refreshBtn.addActionListener( new ActionListener() {
+         public void actionPerformed(ActionEvent event)
+         {
+            redrawMap();
+         }
+      });
+      toolbar.add( refreshBtn );      
       
       mapPanel = new MapPanel( game, config );
       
