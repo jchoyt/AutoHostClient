@@ -200,6 +200,7 @@ public class LocalGameController implements GameController, GameTurnGenerator
      */
     public boolean poll() 
     {
+       Log.log( Log.NOTICE, this, "Polling local game" );
        return true;
     }
 
