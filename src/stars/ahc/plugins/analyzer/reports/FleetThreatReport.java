@@ -87,7 +87,6 @@ public class FleetThreatReport extends AbstractAnalyzerReport
       defineColumn( "Scout", 8, PAD_LEFT );
       defineColumn( "Utility", 8, PAD_LEFT );
       defineColumn( "Unarmed", 8, PAD_LEFT );
-      defineColumn( "Task", 8, PAD_LEFT );
       
       // Add the header text
       reportText += getHeaderText();
