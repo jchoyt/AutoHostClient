@@ -2,7 +2,7 @@
  * Created on Oct 15, 2004
  *
  * Copyright (c) 2004, Steve Leach
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
  *  as published by the Free Software Foundation; either version 2
@@ -80,7 +80,7 @@ public class GamePanel extends JPanel implements PropertyChangeListener
        c.gridy = 0;
 
        gridCols = 4 + countPluginButtons();
-       
+
        addGameData( game );
        addBlankSpace();
        addPlayerList( game );
@@ -225,7 +225,7 @@ public class GamePanel extends JPanel implements PropertyChangeListener
         this.add( b1 );
 
         addPluginButtons(game);
-                
+
     }
 
     /**
@@ -238,35 +238,35 @@ public class GamePanel extends JPanel implements PropertyChangeListener
 
         for (int n = 0; n < pluginButtons.size(); n++)
         {
-           
-	         try
-	         {
-	            Class pluginClass = (Class)pluginButtons.get(n); 
-	            GamePanelButtonPlugin plug;
-	            plug = (GamePanelButtonPlugin)pluginClass.newInstance();
-	            plug.init( game );
 
-	            if (plug instanceof ConfigurablePlugIn)
-	            {
-	               GamesProperties.registerConfigurablePlugin( (ConfigurablePlugIn)plug );
-	            }
-	            
-	            b1 = new PluginButton( plug );
-	            c.gridx++;
-	            gridbag.setConstraints( b1, c );
+             try
+             {
+                Class pluginClass = (Class)pluginButtons.get(n);
+                GamePanelButtonPlugin plug;
+                plug = (GamePanelButtonPlugin)pluginClass.newInstance();
+                plug.init( game );
 
-	            this.add( b1 );
-	         }
-	         catch (InstantiationException e)
-	         {
-	            // TODO Auto-generated catch block
-	            e.printStackTrace();
-	         }
-	         catch (IllegalAccessException e)
-	         {
-	            // TODO Auto-generated catch block
-	            e.printStackTrace();
-	         }
+                if (plug instanceof ConfigurablePlugIn)
+                {
+                   GamesProperties.registerConfigurablePlugin( (ConfigurablePlugIn)plug );
+                }
+
+                b1 = new PluginButton( plug );
+                c.gridx++;
+                gridbag.setConstraints( b1, c );
+
+                this.add( b1 );
+             }
+             catch (InstantiationException e)
+             {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+             }
+             catch (IllegalAccessException e)
+             {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+             }
         }
    }
 
@@ -377,7 +377,7 @@ class DeleteGameButton extends JButton implements ActionListener
 
 
     /**
-     * 
+     *
      */
     public void actionPerformed( ActionEvent e )
     {
@@ -389,7 +389,7 @@ class DeleteGameButton extends JButton implements ActionListener
                 "Are you sure you want to remove this game ?",
                 "Remove game",
                 JOptionPane.YES_NO_OPTION);
-          
+
           if (rc == JOptionPane.YES_OPTION)
           {
              GamesProperties.removeGame( game );
@@ -451,8 +451,7 @@ class DownloadButton extends JButton implements ActionListener
                 File playFile = new File( game.getDirectory(), players[i].getTurnFileName() );
                 Utils.fileCopy( stagedSrc, backupDest );
                 Utils.fileCopy( stagedSrc, playFile );
-                players[i].setLastDownload( System.currentTimeMillis() );
-                players[i].setNeedsDownload( false );
+                players[i].setLastUpload( System.currentTimeMillis() );
                 Utils.genPxxFiles( game, players[i].getId(), players[i].getStarsPassword(), new File( game.getDirectory() ) );
                 Log.log( Log.MESSAGE, this, "Player " + players[i].getId() + " m-file downloaded from AutoHost" );
                 AhcGui.setStatus( "Player " + players[i].getId() + " m-file downloaded from AutoHost" );
@@ -578,7 +577,6 @@ class UploadButton extends JButton implements ActionListener
                         playerXFile,
                         players[i].getUploadPassword() );
                 players[i].setLastUpload( playerXFile.lastModified() );
-                players[i].setNeedsUpload( false );
                 ret.append( " " );
                 ret.append( players[i] );
                 game.setPlayerTurnStatus(i, UPLOADED);

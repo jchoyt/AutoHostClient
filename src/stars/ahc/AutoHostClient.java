@@ -103,27 +103,31 @@ public class AutoHostClient extends java.lang.Object
         }
 
         setupClassLoader();
-        
+
         GamesProperties.init( propsFile );
         Log.log( Log.MESSAGE, AutoHostClient.class, "Properties file loaded and parsed" );
-        
+
         showGui();
-        
+
         startPoller();
     }
 
 
     /**
-    * 
+    *
     */
    private static void setupClassLoader()
    {
       File pluginDir = new File("plugins");
-      
+      if(!pluginDir.exists())
+      {
+          return;
+      }
+
       File[] plugins = pluginDir.listFiles();
-      
+
       ArrayList urlList = new ArrayList();
-      
+
       for (int n = 0; n < plugins.length; n++)
       {
          if (plugins[n].getName().toLowerCase().endsWith(".jar"))
@@ -140,33 +144,33 @@ public class AutoHostClient extends java.lang.Object
             }
          }
       }
-      
+
       URL[] urls = (URL[])urlList.toArray( new URL[0] );
-      
+
       URLClassLoader loader = new URLClassLoader( urls );
-      
+
       Thread.currentThread().setContextClassLoader( loader );
    }
 
 
    /**
-    * 
+    *
     */
    private static void startPoller()
    {
       poller = new AHPoller();
-      
+
       poller.addNotificationListener( mainFrame );
-      
+
       BasePlugIn p = PlugInManager.getPluginManager().getBasePlugin("System tray icon manager");
-      
+
       if (p != null)
       {
          poller.addNotificationListener( (NotificationListener)p );
       }
-      
+
       poller.run();
-      
+
    }
 
 
@@ -201,9 +205,9 @@ public class AutoHostClient extends java.lang.Object
         mainFrame.pack();
 
         PlugInManager manager = PlugInManager.getPluginManager();
-        
+
         manager.installBasePlugins( mainFrame );
-        
+
         if (manager.getBasePlugin("System tray icon manager") != null)
         {
            mainFrame.addHideButton();
@@ -301,8 +305,7 @@ public class AutoHostClient extends java.lang.Object
                 File stagedSrc = new File( stage, players[i].getTurnFileName() );
                 File playFile = new File( game.getDirectory(), players[i].getTurnFileName() );
                 Utils.fileCopy( stagedSrc, playFile );
-                players[i].setLastDownload( System.currentTimeMillis() );
-                players[i].setNeedsDownload( false );
+                players[i].setLastUpload( System.currentTimeMillis() );
                 Utils.genPxxFiles( game, players[i].getId(), players[i].getStarsPassword(), new File( game.getDirectory() ) );
                 System.out.println( "Player " + players[i].getId() + " m-file downloaded from AutoHost" );
             }
@@ -317,6 +320,6 @@ public class AutoHostClient extends java.lang.Object
         }
         return;
     }
-    
+
 }
 

@@ -127,6 +127,7 @@ public class Utils
                 dest.mkdirs();
             }
             //go get the files
+            Log.log(Log.DEBUG, Utils.class, GamesProperties.AUTOHOST );
             URL url = new URL( GamesProperties.AUTOHOST + gameName + "/" + fileName );
             Log.log( Log.DEBUG, Utils.class, "Going to get " + url.getFile() );
             URLConnection connection = url.openConnection();
@@ -148,17 +149,6 @@ public class Utils
         }
         catch ( IOException e )
         {
-           // This utility code shouldn't really be displaying errors; that should be left
-           // to the GUI code.
-           // Steve Leach, 12 Oct 2004
-           
-//            JOptionPane.showInternalMessageDialog(
-//                    AhcGui.mainFrame.getContentPane(),
-//                    fileName + " couldn't be retrieved from AutoHost",
-//                    "Retrieval problem",
-//                    JOptionPane.INFORMATION_MESSAGE );
-//            return;
-           
            throw new AutoHostError( fileName + " couldn't be retrieved from AutoHost", e );
         }
     }
@@ -353,10 +343,10 @@ public class Utils
             throw newex;
         }
     }
-    
+
     /**
      * Returns true if the string is null, zero length or contains only whitespace
-     * 
+     *
      * @author Steve Leach
      */
     public static boolean empty( String str )
@@ -370,7 +360,7 @@ public class Utils
    /**
     * Converts a string to an integer.  If the string does not contain a valid
     * integer then the default value is returned.
-    * 
+    *
     * @author Steve Leach
     */
    public static int safeParseInt(String value, int defaultValue)
@@ -384,10 +374,10 @@ public class Utils
          return defaultValue;
       }
    }
-    
+
    /**
     * Returns a pseudo-random floating point value between 0 and 1.
-    * 
+    *
     * @author Steve Leach
     */
    public static float getRandomFloat()
@@ -401,33 +391,33 @@ public class Utils
     * <p>
     * The colour string us in the format rr:bb:gg where rr, bb and gg are
     * red, blue and green values in the range 0 to 255.
-    * 
+    *
     * @see getColorFromString()
-    * @author Steve Leach  
+    * @author Steve Leach
     */
    public static String getColorStr(Color color)
    {
       return "" + color.getRed() + "," + color.getGreen() + "," + color.getBlue();
    }
-   
+
    /**
     * Creates a Color object from a color string
     * <p>
     * See getColorStr() for details of the format.
-    * 
+    *
     * @see getColorStr()
-    * @author Steve Leach 
+    * @author Steve Leach
     */
    public static Color getColorFromString( String str ) throws ParseException
    {
       try
       {
          String[] tokens = str.split(",");
-         
+
          int r = Integer.parseInt(tokens[0]);
          int g = Integer.parseInt(tokens[1]);
          int b = Integer.parseInt(tokens[2]);
-         
+
          return new Color( r, g, b );
       }
       catch (Throwable t)
@@ -435,28 +425,28 @@ public class Utils
          throw new ParseException( "String cannot be parsed as a color: '" + str + "'", 0 );
       }
    }
-   
+
    /**
     * Adjusts the specified colour to the given brightness value
     * <p>
     * The brightness value should be between 0 (darkest) and 255 (lightest).
     * <p>
-    * Works in HSV color space by adjusting V to the specified value.   
+    * Works in HSV color space by adjusting V to the specified value.
     */
    public static Color adjustBrightness( Color baseColor, int value )
    {
       int r = baseColor.getRed();
       int b = baseColor.getBlue();
       int g = baseColor.getGreen();
-      
+
       float[] vals = Color.RGBtoHSB( r, g, b, null );
-      
+
       vals[2] = 1.0f * value / 255;
-      
+
       Color result = Color.getHSBColor( vals[0], vals[1], vals[2] );
-      
+
       return result;
-      
+
    }
 }
 

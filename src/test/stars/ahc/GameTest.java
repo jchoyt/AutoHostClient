@@ -117,7 +117,7 @@ public class GameTest extends TestCase
         Player[] players = new Player[2];
         Player player = new Player();
         player.setId( "1" );
-        player.setLastDownload( 1039721561160L );
+        //player.setLastDownload( 1039721561160L );
         player.setStarsPassword( "" );
         player.setUploadPassword( "v0e4" );
         player.setGame( game );
@@ -125,7 +125,7 @@ public class GameTest extends TestCase
         players[0] = player;
         player = new Player();
         player.setId( "2" );
-        player.setLastDownload( 1039721561160L );
+        //player.setLastDownload( 1039721561160L );
         player.setStarsPassword( "" );
         player.setGame( game );
         player.setToUpload( false );

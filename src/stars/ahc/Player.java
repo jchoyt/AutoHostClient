@@ -26,23 +26,19 @@ import java.util.Properties;
 import stars.ahcgui.AhcGui;
 
 /**
- * A player using Autohost in a Stars! game.
- * <p>
- * Each Player will control a Race.
+ *  A player using Autohost in a Stars! game. <p>
  *
- *@see stars.ahc.Race
+ *  Each Player will control a Race.
  *
  *@author     jchoyt
  *@created    November 27, 2002
+ *@see        stars.ahc.Race
  */
 public class Player extends Object
 {
     Game game;
     String id;
-    long lastDownload;
     long lastUpload;
-    boolean needsDownload;
-    boolean needsUpload;
     PropertyChangeSupport pcs;
     String starsPassword;
     boolean toUpload;
@@ -59,10 +55,7 @@ public class Player extends Object
         id = "";
         starsPassword = "";
         uploadPassword = "";
-        needsDownload = false;
-        needsUpload = false;
         toUpload = false;
-        lastDownload = 0;
         lastUpload = 0;
     }
 
@@ -87,20 +80,6 @@ public class Player extends Object
     {
         String oldValue = this.id;
         this.id = id;
-        //pcs.firePropertyChange( "id", oldValue, id );
-    }
-
-
-    /**
-     *  Sets the lastDownload attribute of the Player object
-     *
-     *@param  lastDownload  The new lastDownload value
-     */
-    public void setLastDownload( long lastDownload )
-    {
-        long oldValue = this.lastDownload;
-        this.lastDownload = lastDownload;
-        pcs.firePropertyChange( "lastDownload", new Long( oldValue ), new Long( lastDownload ) );
     }
 
 
@@ -114,32 +93,6 @@ public class Player extends Object
         long oldValue = this.lastUpload;
         this.lastUpload = lastUpload;
         pcs.firePropertyChange( "lastUpload", new Long( oldValue ), new Long( lastUpload ) );
-    }
-
-
-    /**
-     *  Sets the needsDownload attribute of the Player object
-     *
-     *@param  needsDownload  The new needsDownload value
-     */
-    public void setNeedsDownload( boolean needsDownload )
-    {
-        boolean oldValue = this.getNeedsDownload();
-        this.needsDownload = needsDownload;
-        pcs.firePropertyChange( "needsDownload", oldValue, needsDownload );
-    }
-
-
-    /**
-     *  Sets the needsUpload attribute of the Player object
-     *
-     *@param  needsUpload  The new needsUpload value
-     */
-    public void setNeedsUpload( boolean needsUpload )
-    {
-        boolean oldValue = this.getNeedsUpload();
-        this.needsUpload = needsUpload;
-        pcs.firePropertyChange( "needsUpload", oldValue, needsUpload );
     }
 
 
@@ -224,7 +177,7 @@ public class Player extends Object
             {
                 ret += "; not uploading this player";
             }
-            else if ( AHPoller.xFileIsNewer( this ) )
+            else if ( needsUpload() )
             {
                 ret += ", <i>latest x-file NOT uploaded</i>";
             }
@@ -261,17 +214,6 @@ public class Player extends Object
     public String getId()
     {
         return id;
-    }
-
-
-    /**
-     *  Gets the lastDownload attribute of the Player object
-     *
-     *@return    The lastDownload value
-     */
-    public long getLastDownload()
-    {
-        return lastDownload;
     }
 
 
@@ -333,28 +275,6 @@ public class Player extends Object
     {
         File playerMFile = new File( game.getDirectory(), getTurnFileName() );
         return getFileYear( playerMFile );
-    }
-
-
-    /**
-     *  Gets the needsDownload attribute of the Player object
-     *
-     *@return    The needsDownload value
-     */
-    public boolean getNeedsDownload()
-    {
-        return needsDownload;
-    }
-
-
-    /**
-     *  Gets the needsUpload attribute of the Player object
-     *
-     *@return    The needsUpload value
-     */
-    public boolean getNeedsUpload()
-    {
-        return needsUpload;
     }
 
 
@@ -504,11 +424,10 @@ public class Player extends Object
 
     /**
      *  Description of the Method
-     * 
-     * @deprecated setProperties() is used instead
      *
      *@param  out              Description of the Parameter
      *@exception  IOException  Description of the Exception
+     *@deprecated              setProperties() is used instead
      */
     public void writeProperties( Writer out )
         throws IOException
@@ -549,34 +468,66 @@ public class Player extends Object
         return year;
     }
 
+
     /**
-     * @deprecated getColor() is now part of stars.ahc.Race instead 
+     *@return        The color value
+     *@deprecated    getColor() is now part of stars.ahc.Race instead
      */
     public Color getColor()
     {
-       if (this.color == null)
-       {
-          this.color = Color.GREEN;
-       }
-       
-       return color;
+        if ( this.color == null )
+        {
+            this.color = Color.GREEN;
+        }
+
+        return color;
     }
 
 
-   /**
-    * @param props
-    */
-   public void setProperties(Properties props)
-   {
-      props.setProperty( game.getName() + ".player" + id + ".lastUpload", ""+lastUpload );
-      props.setProperty( game.getName() + ".player" + id + ".StarsPassword", starsPassword );
-      props.setProperty( game.getName() + ".player" + id + ".UploadPassword", uploadPassword );
-      props.setProperty( game.getName() + ".player" + id + ".upload", ""+toUpload );
-   }
-   
-   public boolean actionRequired()
-   {
-      return needsUpload || needsDownload;
-   }
+    /**
+     *  Checks the local xfile game year vs the last time you uploaded via ACH.
+     *  Note if you upload directly, this will give a false positive. I can live
+     *  with that ;o)
+     *
+     *@return    Description of the Return Value
+     */
+    public boolean needsUpload()
+    {
+        return getXFileDate() > getLastUpload();
+    }
+
+
+    /**
+     *  Checks the local mfile game year vs the status file game year.
+     *
+     *@return    Description of the Return Value
+     */
+    public boolean needsDownload()
+    {
+        return getMFileYear().compareTo( game.getCurrentYear() ) < 0;
+    }
+
+
+    /**
+     *@param  props
+     */
+    public void setProperties( Properties props )
+    {
+        props.setProperty( game.getName() + ".player" + id + ".lastUpload", "" + lastUpload );
+        props.setProperty( game.getName() + ".player" + id + ".StarsPassword", starsPassword );
+        props.setProperty( game.getName() + ".player" + id + ".UploadPassword", uploadPassword );
+        props.setProperty( game.getName() + ".player" + id + ".upload", "" + toUpload );
+    }
+
+
+    /**
+     *  Description of the Method
+     *
+     *@return    Description of the Return Value
+     */
+    public boolean actionRequired()
+    {
+        return needsDownload() || needsUpload();
+    }
 }
 

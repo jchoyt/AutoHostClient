@@ -34,62 +34,20 @@ public class AHPoller extends TimerTask
    //
    // Updated 12 Oct 2004, Steve Leach
    // Removed references to the GUI from this non-GUI code.  All references
-   // were for status updating and error reporting, so I implemented a 
+   // were for status updating and error reporting, so I implemented a
    // listener system instead.  The GUI now registers itself as a listener
    // for notifications from the AHPoller.
    //
    // Also changed the static methods to non-static.
    //
-   
+
    private ArrayList notificationListeners = new ArrayList();
    public static final int BALLOON_NOTIFICATION = 99;
-   
+
     /**
      *  Constructor for the AHPoller object
      */
     public AHPoller() { }
-
-
-    /**
-     *  Checks the year on the m-file on AH vs. the reported current year. Note
-     *  if the user has downloaded a turn separately, this may incorrectly
-     *  report that they need to download a new turn when, in fact, they already
-     *  have it.
-     *
-     *@param  player           Description of the Parameter
-     *@return                  Description of the Return Value
-     *@exception  IOException  Description of the Exception
-     */
-    public  boolean mFileIsNewer( Player player ) throws IOException
-    {
-        String dateOnAh = "";
-        File localMfile = player.getLocalMfile();
-        String localTurn = getYearOfFile( localMfile );
-        return ( localTurn.compareTo( player.getGame().getCurrentYear() ) < 0 );
-    }
-
-
-    /**
-     *  Checks the date on the x-file on the user's hard drive vs. the file date
-     *  reported as the last uploaded file. Note if the user has uploaded a turn
-     *  separately, this may incorrectly report that they need to upload when,
-     *  in fact, they already have.
-     *
-     *@param  player  Description of the Parameter
-     *@return         Description of the Return Value
-     */
-    public static boolean xFileIsNewer( Player player )
-    {
-        long xFileDate = player.getXFileDate();
-        if ( xFileDate == 0 )
-        {
-            return false;
-        }
-        else
-        {
-            return ( xFileDate > player.getLastUpload() );
-        }
-    }
 
 
     /**
@@ -130,7 +88,7 @@ public class AHPoller extends TimerTask
         boolean success = true;
         //AhcGui.setStatus( "Polling AutoHost - wait for the update." );
         sendNotification( this, NotificationListener.SEV_STATUS, "Polling AutoHost - wait for the update." );
-        
+
         for ( int i = 0; i < games.length; i++ )
         {
             success = success && games[i].poll();
@@ -153,7 +111,7 @@ public class AHPoller extends TimerTask
         else
         {
            sendNotification( this, NotificationListener.SEV_ERROR, "There was a problem checking the stati.  Please check the log and and report any errors to jchoyt@users.sourceforge.net." );
-           
+
             //AhcGui.setStatus( "There was a problem checking the stati.  Please check the log and and report any errors to jchoyt@users.sourceforge.net." );
         }
     }
@@ -161,17 +119,17 @@ public class AHPoller extends TimerTask
 
    /**
     * Register a class that wishes to be notified of events
-    * 
+    *
     * @author Steve Leach
     */
    public void addNotificationListener(NotificationListener listener)
    {
-      notificationListeners.add( listener );      
+      notificationListeners.add( listener );
    }
-   
+
    /**
     * Send a notification to all registered listeners
-    *   
+    *
     * @author Steve Leach
     */
    private void sendNotification( Object source, int severity, String message )
@@ -182,6 +140,6 @@ public class AHPoller extends TimerTask
          listener.receiveNotification( source, severity, message );
       }
    }
-   
+
 }
 

@@ -44,51 +44,6 @@ public class AHPollerTest extends TestCase
 
 
     /**
-     *  A unit test for JUnit
-     */
-    public void testMFileIsNewer()
-    {
-        /*
-        try
-        {
-            player.getGame().setCurrentYear( "1400" );
-            assertTrue( "set an obscenely low lastDownload",
-                    AHPoller.mFileIsNewer( player ) );
-            player.getGame().setCurrentYear( "3400" );
-            assertFalse( "set an obscenely high lastDownload",
-                    AHPoller.mFileIsNewer( player ) );
-            player.getGame().setCurrentYear( "2400" );
-            assertFalse( "Should be the same as on the server",
-                    AHPoller.mFileIsNewer( player ) );
-        }
-        catch ( NullPointerException e )
-        {
-            System.out.println( "Can't test if the m file is newer - can't connect to URL ");
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace();
-        }
-        */
-    }
-
-
-
-    /**
-     *  A unit test for JUnit
-     */
-/*     public void testXFileIsNewer()
-    {
-        player.setLastUpload( 10000L );
-        assertTrue( "set an obscenely low lastDownload",
-                AHPoller.xFileIsNewer( player ) );
-        player.setLastUpload( 1139721561160L );
-        assertFalse( "set an obscenely high lastDownload",
-                AHPoller.xFileIsNewer( player ) );
-    }
-
- */
-    /**
      *  The JUnit setup method
      */
     protected void setUp()
@@ -99,7 +54,6 @@ public class AHPollerTest extends TestCase
         player = new Player();
         player.setId( "1" );
         player.setLastUpload( 1039721561160L );
-        player.setLastDownload( 1039721561160L );
         player.setStarsPassword( "" );
         player.setUploadPassword( "v0e4" );
         player.setGame( game );

@@ -7,6 +7,12 @@
   <property name="jarfile" value="ahclient.jar" />
   <property name="build.compiler" value="modern" />
 
+  <path id="jarspath">
+    <fileset dir="plugins">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
   <target name="init">
     <tstamp />
     <mkdir dir="${build}" />
@@ -16,6 +22,9 @@
 
   <target name="compile" depends="init">
     <javac srcdir="${src}" target="1.1" destdir="${build}" deprecation="on" debug="on" description="Compile the java code from ${src} into ${build}">
+      <classpath>
+        <path refid="jarspath" />
+      </classpath>
       <include name="**/*.java" />
     </javac>
     <copy todir="${build}/images">
