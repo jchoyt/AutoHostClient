@@ -162,10 +162,10 @@ public class Eval
     public JPanel createCommentPane()
     {
         JPanel ret = new JPanel();
-        ret.setLayout( new BoxLayout( ret, BoxLayout.Y_AXIS ) );
+        ret.setLayout( new BorderLayout() );
         ret.add( new JLabel( "<html><body>It is important to realize that since these analyses are based on the f-files, that the totals shown are only for those fleets you can actually see.  Also note that these are pages experimental and have not gone through vigorous testing.<br><br>" +
                 "I would appreciate and feedback, positive or negative, at jchoyt@users.sourceforge.net.<br><br>" +
-                "Evaluating " + filesEvaluated.toString() + "</body></html>" ) );
+                "Evaluating " + filesEvaluated.toString() + "</body></html>" ), BorderLayout.CENTER );
         return ret;
     }
 
