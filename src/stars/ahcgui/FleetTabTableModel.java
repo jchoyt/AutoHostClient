@@ -12,7 +12,7 @@ import javax.swing.table.AbstractTableModel;
  */
 public abstract class FleetTabTableModel extends AbstractTableModel
 {
-
+    protected List allFleets = new ArrayList();
     protected List fleets = new ArrayList();
     protected int numberToShow = 20;
 
@@ -51,6 +51,11 @@ public abstract class FleetTabTableModel extends AbstractTableModel
     }
 
 
+    protected void ignoreMyFleets()
+    {
+    }
+
+
     /**
      *  Gets the columnClass attribute of the ShipCountTableModel object
      *
@@ -59,7 +64,7 @@ public abstract class FleetTabTableModel extends AbstractTableModel
      */
     public Class getColumnClass( int col )
     {
-        if ( col == 0 )
+        if ( col < 2 )
         {
             return String.class;
         }
