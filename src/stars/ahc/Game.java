@@ -627,7 +627,11 @@ public class Game extends Object
      */
     public Planet getPlanet( int index, int year )
     {
-        return planets.getPlanet( index, year );
+       if (year == 0)
+       {
+          year = getYear();
+       }
+       return planets.getPlanet( index, year );
     }
 
 
@@ -670,10 +674,13 @@ public class Game extends Object
     {
        loadMapFile();
        
-       for (int n = 1; n <= MAX_RACES; n++)
+       for (int y = 2400; y <= getYear(); y ++)
        {
-          loadReportFile( REPORTTYPE_PLANET, n, getYear() );
-          loadReportFile( REPORTTYPE_FLEET, n, getYear() );
+	       for (int n = 1; n <= MAX_RACES; n++)
+	       {
+	          loadReportFile( REPORTTYPE_PLANET, n, y );
+	          loadReportFile( REPORTTYPE_FLEET, n, y );
+	       }
        }
     }
 

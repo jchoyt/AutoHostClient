@@ -34,7 +34,7 @@ public class GateRouteLayer extends AbstractMapLayer
    {
       for (int n = 1; n <= game.getPlanetCount(); n++)
       {
-         Planet planet1 = game.getPlanet(n);
+         Planet planet1 = game.getPlanet(n,mapConfig.year);
 
          if (planet1.getGateRange() > 0)
          {           
@@ -45,7 +45,7 @@ public class GateRouteLayer extends AbstractMapLayer
             
             for (int m = 1; m <= game.getPlanetCount(); m++)
             {
-               Planet planet2 = game.getPlanet(m);
+               Planet planet2 = game.getPlanet(m,mapConfig.year);
                
                if (planet2.getGateRange() > 0)
                {

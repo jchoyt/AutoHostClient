@@ -30,7 +30,7 @@ import stars.ahc.plugins.map.MapConfig;
 import stars.ahc.plugins.map.MapDisplayError;
 
 /**
- * @author Steve
+ * @author Steve Leach
  *
  */
 public class PlanetLayer extends AbstractMapLayer
@@ -50,7 +50,7 @@ public class PlanetLayer extends AbstractMapLayer
    {
       for (int n = 1; n <= game.getPlanetCount(); n++)
       {
-         Planet planet = game.getPlanet(n);
+         Planet planet = game.getPlanet(n,mapConfig.year);
          
          Point screenPos = mapConfig.mapToScreen( planet.getPosition() );
          

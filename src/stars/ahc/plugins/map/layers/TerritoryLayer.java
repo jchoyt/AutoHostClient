@@ -81,8 +81,8 @@ public class TerritoryLayer extends AbstractCachedMapLayer
          int saturation = 140 - (stepCount-step)*(100/stepCount);
          
          for (int n = 1; n <= planetCount; n++)
-         {
-            Planet planet = game.getPlanet(n);
+         {            
+            Planet planet = game.getPlanet(n,mapConfig.year);
             
             if (planet.isUnoccupied() == false)
             {

@@ -47,7 +47,7 @@ public abstract class AbstractCachedMapLayer extends AbstractMapLayer
     */
    protected MapLayerConfig getLayerConfig()
    {
-      return new MapLayerConfig( game.getYear() );
+      return new MapLayerConfig( mapConfig.year );
    }
    
    /* (non-Javadoc)

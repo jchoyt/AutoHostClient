@@ -34,6 +34,7 @@ import stars.ahc.Planet;
  */
 public class MapConfig
 {
+   public int year = 0;
    public int mapXpos = 0;
    public int mapYpos = 0;
    public int gameMinX = 0;

@@ -77,6 +77,9 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    private JLabel scaleLabel; 
    private ArrayList layers = new ArrayList();
    private Properties savedProperties;
+   private JButton prevYearButton;
+   private JButton nextYearButton;
+   private JLabel yearLabel;
    
    /**
     * Other classes should use viewGameMap() instead of the constructor.
@@ -87,6 +90,11 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       this.game = game;
       
       this.config = config;
+      
+      if (config.year < 2400)
+      {
+         config.year = game.getYear();
+      }
       
       config.addChangeListener( this );
       addWindowListener( this );
@@ -244,6 +252,33 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       });
 
       //===============
+
+      JPanel yearPanel = new JPanel();
+      
+      prevYearButton = new JButton( "<" );
+      prevYearButton.addActionListener( new ActionListener() {
+         public void actionPerformed(ActionEvent event)
+         {
+            moveYear(-1);
+         }
+      } );
+      yearPanel.add( prevYearButton );
+      
+      yearLabel = new JLabel( ""+config.year );
+      yearPanel.add( yearLabel );
+      
+      nextYearButton = new JButton( ">" );
+      nextYearButton.addActionListener( new ActionListener() {
+         public void actionPerformed(ActionEvent event)
+         {
+            moveYear(1);
+         }
+      } );
+      yearPanel.add( nextYearButton );
+      
+      controlPanel.add( yearPanel );
+      
+      //===============
       
       Box playersPanel = Box.createVerticalBox();
       playersPanel.setBorder( BorderFactory.createEmptyBorder(4,4,4,4) );
@@ -280,6 +315,12 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       controlPanel.add( Box.createGlue() );
       
       getContentPane().add( controlPanel, BorderLayout.EAST );
+   }
+   
+   private void moveYear( int movement )
+   {
+      config.year += movement;
+      config.notifyChangeListeners();
    }
    
    private void doSave()
@@ -324,6 +365,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    public void mapConfigChanged(MapConfig config)
    {
       scaleSlider.setValue( (int)Math.round(config.mapScale * 100) );
+      yearLabel.setText( "" + config.year );
       mapPanel.repaint();
    }
    
@@ -453,6 +495,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
          }
       }      
    }
+
 }
 
 

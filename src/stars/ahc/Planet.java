@@ -223,4 +223,15 @@ public class Planet implements MapObject
    {
       return game.getUserDefinedProperty( getUserDefinedPropertyFullName( propertyName ) );
    }
+   
+   public String getDebugString()
+   {
+      String str =  "Planet '" + getName() + "' ";
+      if (getOwner() != null)
+      {
+         str += "(" + getOwner() + ") ";
+      }
+      str += year;
+      return str;
+   }
 }

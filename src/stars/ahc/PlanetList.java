@@ -39,6 +39,8 @@ public class PlanetList
    
    private int planetCount = 0;
    
+   private Map reportsLoaded = new HashMap();
+   
    // List of planet names, fast sequential scan
    private String[] planetNames = new String[1000];
    
@@ -63,6 +65,24 @@ public class PlanetList
    }
    
    /**
+    * Returns the latest planet data up to the specified year 
+    */
+   private PlanetData getLatestData( String planetName, int year )
+   {
+      for (int n = year; n >= 2400; n--)
+      {
+         String hashValue = planetDataHashValue( planetName, n );
+         PlanetData data = (PlanetData)planetData.get( hashValue );
+
+         if (data != null)
+         {
+            return data;
+         }
+      }
+      return null;
+   }
+   
+   /**
     * 
     * @param index (starts at 1)
     * @param year
@@ -71,8 +91,9 @@ public class PlanetList
    public Planet getPlanet( int index, int year )
    {
       String planetName = planetNames[index];
-      String hashValue = planetDataHashValue( planetName, year );
-      PlanetData data = (PlanetData)planetData.get( hashValue );
+//      String hashValue = planetDataHashValue( planetName, year );
+//      PlanetData data = (PlanetData)planetData.get( hashValue );
+      PlanetData data = getLatestData( planetName, year );
       Point position = (Point)planetPositions.get( planetName );
       
       return new Planet(planetName,year,position,data,game);       
@@ -101,9 +122,10 @@ public class PlanetList
       
       String hashString = planetDataHashValue( name, year );
       
-      // TODO: find any existing data for this planet/year and merge
-      
-      planetData.put( hashString, data );
+      if (planetData.get( hashString ) == null)
+      {
+         planetData.put( hashString, data );
+      }
    }
 
    /**
@@ -156,6 +178,12 @@ public class PlanetList
     */
    public void loadPlanetReport(File reportFile, int year) throws ReportLoaderException
    {
+      if (reportsLoaded.get( reportFile.getName()) != null)
+      {
+         // Have already loaded this report so don't do so again
+         return;
+      }
+      
       try
       {
          BufferedReader reader = new BufferedReader(new FileReader(reportFile));
@@ -174,6 +202,8 @@ public class PlanetList
          }
          
          reader.close();
+         
+         reportsLoaded.put( reportFile.getName(), reportFile.getName() );
       }
       catch (FileNotFoundException e)
       {

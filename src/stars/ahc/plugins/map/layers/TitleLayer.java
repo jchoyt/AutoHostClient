@@ -59,7 +59,7 @@ public class TitleLayer implements MapLayer
    public void draw(Graphics2D g)
    {
       int offset = 20;
-      String title = ""+game.getGameYear();
+      String title = ""+config.year;
       
       if (game.getName() != null)
       {
