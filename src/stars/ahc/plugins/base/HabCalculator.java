@@ -22,6 +22,7 @@ import javax.swing.JFrame;
 
 import stars.ahc.Planet;
 import stars.ahc.Race;
+import stars.ahc.StarsRuleSet;
 import stars.ahcgui.pluginmanager.BasePlugIn;
 
 /**
@@ -42,25 +43,6 @@ public class HabCalculator implements BasePlugIn
    public static final int TEMP = 2;
    public static final int RAD = 3;
 
-   /**
-    * Table for converting grav values to/from tick counts
-    */
-   private static final int[] grav_clicks = 
-   {
-       12,  
-       12,  13,  13,  14,  14,  15,  15,  16,  17,  17,  
-       18,  19,  20,  21,  22,  24,  25,  27,  29,  31,  
-       33,  36,  40,  44,  50,  51,  52,  53,  54,  55,  
-       56,  58,  59,  60,  62,  64,  65,  67,  69,  71,  
-       73,  75,  78,  80,  83,  86,  89,  92,  96, 100, 
-      104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 
-      144, 148, 152, 156, 160, 164, 168, 172, 176, 180, 
-      184, 188, 192, 196, 200, 224, 248, 272, 296, 320, 
-      344, 368, 392, 416, 440, 464, 488, 512, 536, 560, 
-      584, 608, 632, 656, 680, 704, 728, 752, 776, 800
-   };	// all multiplied by 100
-   
-   
    /**
     * Calculates the maximum hab value for the specified race on the specified planet after terraforming.
     * <p>
@@ -178,46 +160,6 @@ public class HabCalculator implements BasePlugIn
       return (int)habValue;
    }
 
-   public static int gravToClicks(double grav)
-   {
-      int target = (int)Math.round(grav * 100);
-      
-      for (int n = 0; n < grav_clicks.length; n++)
-      {
-         if (grav_clicks[n] == target)
-         {
-            return n;
-         }
-      }      
-      return -1;
-   }
-
-   public static float gravFromClicks( int clicks )
-   {
-      return grav_clicks[clicks] / 100f;
-   }
-   
-   public static int tempToClicks(int temp)
-   {
-      int clicks = (temp + 200) / 4;
-      return clicks;
-   }
-
-   public static int tempFromClicks(int clicks)
-   {
-      return clicks * 4 - 200;
-   }
-   
-   public static int radToClicks(int baseRad)
-   {
-      return baseRad;
-   }
-   
-   public static int radFromClicks(int clicks)
-   {
-      return clicks;
-   }
-   
    private static int randIntUpTo( int max )
    {
       return (int)Math.round( Math.floor( (Math.random() * max) ) );
@@ -250,19 +192,19 @@ public class HabCalculator implements BasePlugIn
    public static float getRandomGrav()
    {
       int clicks = getRandomHabVal(GRAV);
-      return gravFromClicks(clicks);
+      return StarsRuleSet.gravFromClicks(clicks);
    }
    
    public static int getRandomTemp()
    {
       int clicks = getRandomHabVal(TEMP);
-      return tempFromClicks(clicks);
+      return StarsRuleSet.tempFromClicks(clicks);
    }
 
    public static int getRandomRad()
    {
       int clicks = getRandomHabVal(RAD);
-      return radFromClicks(clicks);
+      return StarsRuleSet.radFromClicks(clicks);
    }
 
    /* (non-Javadoc)

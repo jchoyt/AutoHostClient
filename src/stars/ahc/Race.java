@@ -23,8 +23,6 @@ import java.text.ParseException;
 import java.util.Properties;
 import java.util.Random;
 
-import stars.ahc.plugins.base.HabCalculator;
-
 /**
  * Represents a race in a Stars! game, controlled by a Player 
  * 
@@ -186,8 +184,8 @@ public class Race
    
    public void setGravRange( double min, double max )
    {
-      setUserProperty( "gravMinClicks", HabCalculator.gravToClicks( min ) );
-      setUserProperty( "gravMaxClicks", HabCalculator.gravToClicks( max ) );
+      setUserProperty( "gravMinClicks", StarsRuleSet.gravToClicks( min ) );
+      setUserProperty( "gravMaxClicks", StarsRuleSet.gravToClicks( max ) );
    }
    
    public int getUserIntProperty( String name, int defaultValue )
@@ -208,8 +206,8 @@ public class Race
    
    public void setTempRange( int min, int max )
    {
-      setUserProperty( "tempMinClicks", HabCalculator.tempToClicks(min) );
-      setUserProperty( "tempMaxClicks", HabCalculator.tempToClicks(max) );
+      setUserProperty( "tempMinClicks", StarsRuleSet.tempToClicks(min) );
+      setUserProperty( "tempMaxClicks", StarsRuleSet.tempToClicks(max) );
    }
 
    public int getMinTempClicks()
@@ -224,8 +222,8 @@ public class Race
 
    public void setRadRange( int min, int max )
    {
-      setUserProperty( "radMinClicks", HabCalculator.radToClicks(min) );
-      setUserProperty( "radMaxClicks", HabCalculator.radToClicks(max) );
+      setUserProperty( "radMinClicks", StarsRuleSet.radToClicks(min) );
+      setUserProperty( "radMaxClicks", StarsRuleSet.radToClicks(max) );
    }
    
    public int getMinRadClicks()
@@ -240,32 +238,32 @@ public class Race
    
    public float getGravMin()
    {
-      return HabCalculator.gravFromClicks( getMinGravClicks() );
+      return StarsRuleSet.gravFromClicks( getMinGravClicks() );
    }
    
    public float getGravMax()
    {
-      return HabCalculator.gravFromClicks( getMaxGravClicks() );
+      return StarsRuleSet.gravFromClicks( getMaxGravClicks() );
    }
 
    public int getTempMin()
    {
-      return HabCalculator.tempFromClicks( getMinTempClicks() );
+      return StarsRuleSet.tempFromClicks( getMinTempClicks() );
    }
 
    public int getTempMax()
    {
-      return HabCalculator.tempFromClicks( getMaxTempClicks() );
+      return StarsRuleSet.tempFromClicks( getMaxTempClicks() );
    }
 
    public int getRadMin()
    {
-      return HabCalculator.radFromClicks( getMinRadClicks() );
+      return StarsRuleSet.radFromClicks( getMinRadClicks() );
    }
 
    public int getRadMax()
    {
-      return HabCalculator.radFromClicks( getMaxRadClicks() );
+      return StarsRuleSet.radFromClicks( getMaxRadClicks() );
    }
    
    public boolean gravImmune()

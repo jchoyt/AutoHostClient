@@ -20,8 +20,6 @@ package stars.ahc;
 
 import java.awt.Point;
 
-import stars.ahc.plugins.base.HabCalculator;
-
 /**
  * Encapulates information about a planet in a Stars! game
  * 
@@ -270,7 +268,7 @@ public class Planet implements MapObject
       }
 
       double baseGrav = Utils.getLeadingFloat(baseGravStr,0);
-      return HabCalculator.gravToClicks( baseGrav );
+      return StarsRuleSet.gravToClicks( baseGrav );
    }
 
    public int getBaseTempClicks()
@@ -283,7 +281,7 @@ public class Planet implements MapObject
       }
 
       int baseTemp = Utils.getLeadingInt(baseTempStr,0);
-      return HabCalculator.tempToClicks( baseTemp );
+      return StarsRuleSet.tempToClicks( baseTemp );
    }
 
    public int getBaseRadClicks()
@@ -296,7 +294,7 @@ public class Planet implements MapObject
       }
 
       int baseRad = Utils.getLeadingInt(baseRadStr,0);
-      return HabCalculator.radToClicks( baseRad );
+      return StarsRuleSet.radToClicks( baseRad );
    }
 
    /**
