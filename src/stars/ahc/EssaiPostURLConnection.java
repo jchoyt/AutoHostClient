@@ -15,6 +15,7 @@
  */
 package stars.ahc;
 
+import javax.swing.JOptionPane;
 import java.io.StringWriter;
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
@@ -51,7 +52,7 @@ public class EssaiPostURLConnection
     /**
      *@param  args  the command line arguments
      */
-    public static void upload( File fileToUpload, String uploadPassword )
+    public static boolean upload( File fileToUpload, String uploadPassword )
     {
         try
         {
@@ -102,11 +103,18 @@ public class EssaiPostURLConnection
             {
                 Log.log(Log.WARNING,EssaiPostURLConnection.class, "Something went horribly wrong!  Report from AutoHost:\n" + returnMsg );
                 AhcGui.setStatus("Something went horribly wrong with the upload!  Report from AutoHost:\n" + returnMsg);
+                JOptionPane.showInternalMessageDialog(
+                    AhcGui.mainFrame.getContentPane(),
+                    "<html><body>Something went horribly wrong with the upload!  Report from AutoHost:\n" + returnMsg +"</html>",
+                    "Upload Results",
+                    JOptionPane.INFORMATION_MESSAGE );
             }
+            return true;
         }
         catch ( Exception e )
         {
             Log.log(Log.WARNING,EssaiPostURLConnection.class, e.toString() );
+            return false;
         }
     }
 
