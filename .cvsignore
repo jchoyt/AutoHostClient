@@ -1,0 +1,6 @@
+build
+images
+*.bat
+build.props
+ahclient.jar
+*.doc
