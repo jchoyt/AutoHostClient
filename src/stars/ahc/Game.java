@@ -93,10 +93,7 @@ public class Game extends Object
     private void init( String shortName, String directory )
     {
         name = shortName.toString();
-        players = new ArrayList();
-        planets = new PlanetList( this );
-        fleets = new FleetList( this );
-        shipDesigns = new ShipDesignList( this );
+        initLists();
         this.directory = directory;
         loadProperties();
         sahHosted = GamesProperties.getProperty( shortName + ".sahHosted", "true" );
@@ -105,6 +102,14 @@ public class Game extends Object
         loadUserDefinedProperties();
     }
 
+    public void initLists()
+    {
+       players = new ArrayList();
+       planets = new PlanetList( this );
+       fleets = new FleetList( this );
+       shipDesigns = new ShipDesignList( this );       
+    }
+    
 
     private void initController()
    {
@@ -1251,6 +1256,16 @@ public class Game extends Object
    public Properties getUserDefinedProperties()
    {
       return userDefinedProperties;
+   }
+   
+   public void loadPlanetReport( String reportFileName, int year ) throws ReportLoaderException
+   {
+      planets.loadPlanetReport( new File(reportFileName), year );
+   }
+   
+   public void loadMapFile( String mapFileName ) throws ReportLoaderException
+   {
+      planets.loadMapFile( new File(mapFileName) );      
    }
 }
 

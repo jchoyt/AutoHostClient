@@ -467,19 +467,28 @@ public class BattleSimulation
     */
    public boolean stillFighting()
    {
-      int stacksFighting = 0;
-   
-      // TODO: there have to be at least 2 _sides_ still fighting, not 2 stacks
-      
+      int otherSide = -1;
+
       for (int n = 0; n < stackCount; n++)
       {
          if (stacks[n].stillFighting())
          {
-            stacksFighting++;
+            if (stacks[n].side != otherSide)
+            {
+               if (otherSide == -1)
+               {
+                  otherSide = stacks[n].side;
+               }
+               else
+               {
+                  // We have at least 2 sides still fighting
+                  return (round < MAX_ROUNDS);
+               }
+            }
          }
       }
       
-      return (round < MAX_ROUNDS) && (stacksFighting > 1);
+      return false;
    }
 
    /**

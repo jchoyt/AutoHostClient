@@ -23,14 +23,18 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -55,6 +59,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -76,7 +81,7 @@ import stars.ahc.plugins.objedit.ShipDesignEditor;
  */
 public class StandAloneBattleSimulator extends JFrame
 {
-   private static double version = 0.17;
+   private static double version = 0.18;
    private Action exitAction;
    private AbstractAction openAction;
    private AbstractAction runSimAction;
@@ -100,6 +105,9 @@ public class StandAloneBattleSimulator extends JFrame
    private AbstractAction newFileAction;
    private JFrame helpFrame = null;
    private AbstractAction helpAction;
+   private AbstractAction importDesignAction;
+   private JScrollPane resultsScroller;
+   private AbstractAction saveAsAction;
 
    public static void main( String[] args ) throws Exception
    {      
@@ -109,10 +117,19 @@ public class StandAloneBattleSimulator extends JFrame
       {
          simWin.openSimulation( args[0] );
       }
+      else
+      {
+         simWin.newFile();
+      }
       
       simWin.setVisible( true );
    }
    
+   /**
+    * Default constructor
+    * <p>
+    * Creates and initialises the application window 
+    */
    public StandAloneBattleSimulator()
    {
       setupWindow();
@@ -127,6 +144,9 @@ public class StandAloneBattleSimulator extends JFrame
       refreshControls();
    }
    
+   /**
+    * Sets up the main application window
+    */
    private void setupWindow()
    {
       setTitle( "Stars! Battle Simulator" );
@@ -138,7 +158,10 @@ public class StandAloneBattleSimulator extends JFrame
       
       getContentPane().setLayout( new BorderLayout() );
    }
-   
+
+   /**
+    * Creates actions that can be used for menus, buttons and toolbars
+    */
    private void setupActions()
    {
       exitAction = new AbstractAction("Exit") {
@@ -183,6 +206,24 @@ public class StandAloneBattleSimulator extends JFrame
       saveAction.setEnabled(false);
       saveAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK) );
       saveAction.putValue( Action.SHORT_DESCRIPTION, "Save simulation configuration" );
+
+      saveAsAction = new AbstractAction("Save As") {
+         public void actionPerformed(ActionEvent event)
+         {
+            saveSimulationGui();
+         }
+      };
+      saveAsAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.CTRL_MASK) );
+      saveAsAction.putValue( Action.SHORT_DESCRIPTION, "Save simulation using a different name" );
+      
+      importDesignAction = new AbstractAction("Import Design") {
+         public void actionPerformed(ActionEvent event)
+         {
+            importDesign();
+         }
+      };
+      importDesignAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionEvent.CTRL_MASK) );
+      importDesignAction.putValue( Action.SHORT_DESCRIPTION, "Import ship design from another file" );
       
       copyAction = new AbstractAction("Copy") {
          public void actionPerformed(ActionEvent event)
@@ -245,7 +286,10 @@ public class StandAloneBattleSimulator extends JFrame
       removeStackAction.setEnabled(false);
       
    }
-   
+
+   /**
+    * Creates the application main menu 
+    */
    private void setupMenu()
    {
       JMenuBar mainMenu = new JMenuBar();
@@ -256,6 +300,9 @@ public class StandAloneBattleSimulator extends JFrame
       fileMenu.add( new JMenuItem(newFileAction) );
       fileMenu.add( new JMenuItem(openAction) );
       fileMenu.add( new JMenuItem(saveAction) );
+      fileMenu.add( new JMenuItem(saveAsAction) );
+      fileMenu.addSeparator();
+      fileMenu.add( new JMenuItem(importDesignAction) );
       fileMenu.addSeparator();
       fileMenu.add( new JMenuItem(exitAction) );
 
@@ -279,6 +326,9 @@ public class StandAloneBattleSimulator extends JFrame
       setJMenuBar( mainMenu );
    }
 
+   /**
+    * Creates the application toolbar
+    */
    private void setupToolbar()
    {
       JToolBar toolbar = new JToolBar();
@@ -298,12 +348,6 @@ public class StandAloneBattleSimulator extends JFrame
    {
       controlPanel = Box.createVerticalBox();
       controlPanel.setBorder( new CompoundBorder( new EtchedBorder(), new EmptyBorder(4,4,4,4) ) );
-      
-//      Box startBox = Box.createHorizontalBox();
-//      startBox.setBorder( new EmptyBorder(6,6,6,6) );
-//      startBox.add( new JButton(runSimAction) );
-//      startBox.add( Box.createHorizontalGlue() );
-//      controlPanel.add( startBox );
       
       Box seedBox = Box.createHorizontalBox();
       seedBox.setBorder( new EmptyBorder(6,6,6,6) );
@@ -332,18 +376,7 @@ public class StandAloneBattleSimulator extends JFrame
       stacksTitleBox.setBorder( new EmptyBorder(3,3,3,3) );
       stacksTitleBox.add( new JLabel("Ship Stacks (Tokens)") );
       stacksPanel.add( stacksTitleBox );
-      stackTableModel = new StackTableModel();
-      stacksTable = new JTable(stackTableModel);
-      stacksTable.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
-         public void valueChanged(ListSelectionEvent event)
-         {
-            if (event.getValueIsAdjusting() == false)
-            {
-               stackSelected();
-            }
-         }
-      } );
-      stacksPanel.add( new JScrollPane(stacksTable) );
+      setupStacksTable(stacksPanel);
       controlPanel.add( stacksPanel );
             
       Box stackButtonBox = Box.createHorizontalBox();
@@ -357,6 +390,45 @@ public class StandAloneBattleSimulator extends JFrame
       controlPanel.add( Box.createVerticalGlue() );
    }
    
+   private void setupStacksTable(Box stacksPanel)
+   {
+      stackTableModel = new StackTableModel();
+      
+      stacksTable = new JTable(stackTableModel);
+      
+      stacksTable.getColumnModel().getColumn(0).setPreferredWidth( 100 );
+      stacksTable.getColumnModel().getColumn(1).setPreferredWidth( 150 );
+      stacksTable.getColumnModel().getColumn(2).setPreferredWidth( 50 );
+      stacksTable.getColumnModel().getColumn(3).setPreferredWidth( 50 );
+      
+      stacksTable.addMouseListener( new MouseAdapter() {
+         public void mouseClicked(MouseEvent e)
+         {            
+            if (e.getClickCount() == 2)	// double click
+            {
+               designDoubleClicked();
+            }
+         }
+      });
+      
+      stacksTable.getSelectionModel().setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
+      
+      stacksTable.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
+         public void valueChanged(ListSelectionEvent event)
+         {
+            if (event.getValueIsAdjusting() == false)
+            {
+               stackSelected();
+            }
+         }
+      } );
+      
+      stacksPanel.add( new JScrollPane(stacksTable) );
+   }
+
+   /**
+    * Refreshes on screen controls to use the latest values from the simulation 
+    */
    private void refreshControls()
    {
       BattleSimulation s = (sim == null) ? new BattleSimulation() : sim;
@@ -375,15 +447,22 @@ public class StandAloneBattleSimulator extends JFrame
       stackSelected();
    }
    
+   private void designDoubleClicked()
+   {
+      editStack();
+   }
+   
    private void setupResultsPanel()
    {
       resultsArea = new JTextArea();
+      resultsScroller = new JScrollPane(resultsArea);
    }
    
    private void setupMainArea()
    {
-      JSplitPane splitter = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, controlPanel, resultsArea );
+      JSplitPane splitter = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, controlPanel, resultsScroller );
       splitter.setOneTouchExpandable(true);
+      splitter.setDividerLocation( 320 );
       
       getContentPane().add( splitter, BorderLayout.CENTER );
    }
@@ -426,6 +505,7 @@ public class StandAloneBattleSimulator extends JFrame
       JFileChooser chooser = new JFileChooser();
 
       chooser.setDialogTitle( "Open simulation" );
+      chooser.addChoosableFileFilter( new BkpFileFilter() );
       chooser.addChoosableFileFilter( new SimFileFilter() );
       chooser.setCurrentDirectory( new File(System.getProperty("user.home")) ); 
       
@@ -467,13 +547,21 @@ public class StandAloneBattleSimulator extends JFrame
 
       chooser.setDialogTitle( "Save simulation" );
       chooser.addChoosableFileFilter( new SimFileFilter() );
-      chooser.setCurrentDirectory( new File(System.getProperty("user.home")) ); 
+      chooser.setCurrentDirectory( new File(System.getProperty("user.home")) );
       
       int rc = chooser.showSaveDialog( this );
       
       if (rc == JFileChooser.APPROVE_OPTION)
       {
-         saveSimulationAs( chooser.getSelectedFile() );
+         File file = chooser.getSelectedFile();
+         
+         // Add the ".sim" extension if not specified
+         if (file.getName().lastIndexOf(".") == -1)
+         {
+            file = new File( file.getAbsolutePath()+".sim" );
+         }
+         
+         saveSimulationAs( file );
       }
    }
    
@@ -489,6 +577,7 @@ public class StandAloneBattleSimulator extends JFrame
       {
          backupSimFile();
          getFieldValues();
+         
          sim.saveTo( currentSimFile.getAbsolutePath() );
          setStatus( "Simulation saved: " + currentSimFile.getName() );
       }
@@ -564,47 +653,62 @@ public class StandAloneBattleSimulator extends JFrame
    {
       String text = "";
       
-      for (int n = 0; n < sim.stackCount; n++)
+      for (int side = 1; side < 16; side++)
       {
-         ShipDesign design = sim.stacks[n].design;
+         boolean isFirst = true;
          
-         text += sim.stacks[n].owner + " ";
-         text += design.getName() + " x ";
-         text += sim.stacks[n].getShipCount();
-         text += "\n";
-         
-         text += "   " + design.getHullName();
-         text += ", Armour=" + design.getArmour();
-         text += ", Shields=" + design.getShields();
-         if (design.isRegenShields())
-         {
-            text += "(R)";
-         }
-         text += ", Speed=" + (design.getSpeed4() / 4.0);
-         text += ", Initiative=" + design.getInitiative();
-         text += ", Jamming=" + design.getJamming();
-         text += ", Capacitors=" + design.getCapacitors();
-         text += ", Deflectors=" + design.getDeflectors();
-         text += ", Computers=";
-         text += design.getComputers(ShipDesign.BATTLE_COMPUTER) + "/";
-         text += design.getComputers(ShipDesign.SUPER_COMPUTER) + "/";
-         text += design.getComputers(ShipDesign.BATTLE_NEXUS);
-         
-         text += "\n   ";
-         if (design.getWeaponSlots() == 0)
-         {
-            text += "unarmed";
-         }
-         else
-         {
-            for (int s = 0; s < design.getWeaponSlots(); s++)
-            {
-               text += (s == 0) ? "" : ", ";
-               text += design.getWeaponCount(s) + " x " + design.getWeaponName(s);
-            }
-         }
-         
-         text += "\n";
+	      for (int n = 0; n < sim.stackCount; n++)
+	      {
+	         if (sim.stacks[n].side == side)
+	         {
+	            if (isFirst)
+	            {
+	               text += "Side " + side + "\n";
+	               
+	               isFirst = false;
+	            }
+	            
+		         ShipDesign design = sim.stacks[n].design;
+		         
+		         text += "  " + sim.stacks[n].owner + " ";
+		         text += design.getName() + " x ";
+		         text += sim.stacks[n].getShipCount();
+		         text += "\n";
+		         
+		         text += "     " + design.getHullName();
+		         text += ", Armour=" + design.getArmour();
+		         text += ", Shields=" + design.getShields();
+		         if (design.isRegenShields())
+		         {
+		            text += "(R)";
+		         }
+		         text += ", Speed=" + (design.getSpeed4() / 4.0);
+		         text += ", Initiative=" + design.getInitiative();
+		         text += ", Jamming=" + design.getJamming();
+		         text += ", Capacitors=" + design.getCapacitors();
+		         text += ", Deflectors=" + design.getDeflectors();
+		         text += ", Computers=";
+		         text += design.getComputers(ShipDesign.BATTLE_COMPUTER) + "/";
+		         text += design.getComputers(ShipDesign.SUPER_COMPUTER) + "/";
+		         text += design.getComputers(ShipDesign.BATTLE_NEXUS);
+		         
+		         text += "\n     ";
+		         if (design.getWeaponSlots() == 0)
+		         {
+		            text += "unarmed";
+		         }
+		         else
+		         {
+		            for (int s = 0; s < design.getWeaponSlots(); s++)
+		            {
+		               text += (s == 0) ? "" : ", ";
+		               text += design.getWeaponCount(s) + " x " + design.getWeaponName(s);
+		            }
+		         }
+		         
+		         text += "\n";
+	         }
+	      }
       }
       
       text += "\n";
@@ -727,11 +831,16 @@ public class StandAloneBattleSimulator extends JFrame
       ShipStack stack = sim.addNewStack( new ShipDesign(), 0 );
       stack.side = 1;
     
+      fireStackAdded();
+      
+      editStack();
+   }
+
+   private void fireStackAdded()
+   {
       int newRow = sim.stackCount - 1;
       stackTableModel.fireTableRowsInserted( newRow, newRow );
       stacksTable.getSelectionModel().setSelectionInterval( newRow, newRow );
-      
-      editStack();
    }
 
    private void logError( Throwable t)
@@ -793,7 +902,7 @@ public class StandAloneBattleSimulator extends JFrame
 	         stackEditor.getContentPane().setLayout( new BorderLayout() );
 	         stackEditor.setTitle( "Stack Editor" );
 	         stackEditor.setLocation( 80, 80 );
-	         stackEditor.setSize( 600, 400 );
+	         stackEditor.setSize( 640, 480 );
 	         
 	         stackEditor.addWindowListener( new WindowAdapter() {
 	            public void windowClosing(WindowEvent e)
@@ -802,7 +911,7 @@ public class StandAloneBattleSimulator extends JFrame
 	            }
 	         });
 
-	         AbstractAction closeAction = new AbstractAction("Close") {
+	         AbstractAction closeAction = new AbstractAction("Done") {
                public void actionPerformed(ActionEvent event)
                {
                   getDesignChanges();
@@ -823,6 +932,7 @@ public class StandAloneBattleSimulator extends JFrame
 	      designEditor.setDesign( getSelectedStack(false).design );
 	      
 	      stackEditor.show();
+	      designEditor.moveToFirstField();
       }
       catch (Throwable t)
       {
@@ -839,6 +949,94 @@ public class StandAloneBattleSimulator extends JFrame
          stackTableModel.fireTableDataChanged();
          stacksTable.repaint();
       }
+   }
+   
+   private void importDesign()
+   {
+      JFileChooser chooser = new JFileChooser();
+
+      chooser.setDialogTitle( "Import design from simulation" );
+      chooser.addChoosableFileFilter( new SimFileFilter() );
+      chooser.setCurrentDirectory( new File(System.getProperty("user.home")) ); 
+      
+      int rc = chooser.showOpenDialog( this );
+      
+      if (rc == JFileChooser.APPROVE_OPTION)      
+      {
+         try
+         {
+            importDesignFromFile( chooser.getSelectedFile() );
+         }
+         catch (Exception e)
+         {
+            logError( e );
+            showError( e );
+         }
+      }
+   }
+
+   /**
+    * @param selectedFile
+    */
+   private void importDesignFromFile(File selectedFile) throws IOException
+   {
+      Properties props = new Properties();
+      props.load( new FileInputStream(selectedFile) );
+      
+      int stackCount = Utils.safeParseInt( props.getProperty("StackCount") );
+      
+      ArrayList designs = new ArrayList();
+      
+      for (int n = 0; n < stackCount; n++)
+      {
+         String owner = props.getProperty( "ShipDesigns." + n + ".owner" );
+         String name = props.getProperty( "ShipDesigns." + n + ".name" );
+         
+         designs.add( owner + " " + name );
+      }
+      
+      String selected = selectDesign( designs );
+      
+      if (Utils.empty(selected) == false)
+      {
+         for (int n = 0; n < stackCount; n++)
+         {
+            String owner = props.getProperty( "ShipDesigns." + n + ".owner" );
+            String name = props.getProperty( "ShipDesigns." + n + ".name" );
+            
+            if (selected.equals(owner + " " + name))
+            {
+               ShipDesign design = new ShipDesign();
+               design.loadProperties( props, n );
+               
+               ShipStack stack = sim.addNewStack( design, 1, 1 );
+
+               fireStackAdded();
+               
+               break;
+            }
+         }
+      }
+   }
+
+   /**
+    * @param designs
+    * @return
+    */
+   private String selectDesign(ArrayList designList)
+   {
+      String[] designs = (String[])designList.toArray( new String[0] );
+      
+      String s = (String)JOptionPane.showInputDialog(
+            this,
+            "Select design to import:",
+            "Import Design",
+            JOptionPane.PLAIN_MESSAGE,
+            null,
+            designs,
+            designs[0]);
+      
+      return s;
    }
 }
 
@@ -892,6 +1090,25 @@ class SimFileFilter extends FileFilter
    public String getDescription()
    {
       return "Sim files";
+   }   
+}
+
+class BkpFileFilter extends FileFilter
+{
+   /* (non-Javadoc)
+    * @see javax.swing.filechooser.FileFilter#accept(java.io.File)
+    */
+   public boolean accept(File file)
+   {
+      return file.isDirectory() || file.getName().toLowerCase().endsWith(".bkp");
+   }
+
+   /* (non-Javadoc)
+    * @see javax.swing.filechooser.FileFilter#getDescription()
+    */
+   public String getDescription()
+   {
+      return "Backup files";
    }   
 }
 

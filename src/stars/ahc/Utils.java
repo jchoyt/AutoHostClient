@@ -577,5 +577,19 @@ public class Utils
       return safeParseFloat( text, defaultValue );
    }
    
+   private static final String MANY_SPACES = "                                                                       ";
+   
+   public static String padRight( String text, int width )
+   {
+      if (text == null) text = "";
+      return (text + MANY_SPACES).substring( 0, width );
+   }
+   
+   public static String padLeft( String text, int width)
+   {
+      if (text == null) text = "";
+      text = (MANY_SPACES + text);
+      return text.substring( text.length() - width );
+   }
 }
 

@@ -297,8 +297,8 @@ public class ShipDesignEditor extends JPanel
       weaponsTable.setRowHeight( 22 );
 
       weaponsTable.setAutoResizeMode( JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS );
-      weaponsTable.getColumnModel().getColumn(0).setWidth( 30 );
-      weaponsTable.getColumnModel().getColumn(1).setWidth( 200 );
+      weaponsTable.getColumnModel().getColumn(0).setPreferredWidth( 30 );
+      weaponsTable.getColumnModel().getColumn(1).setPreferredWidth( 200 );
       
       JComboBox weaponTypeSelector = new JComboBox();
       for (int n = 0; n < Weapon.getAllWeapons().length; n++)
@@ -480,6 +480,15 @@ public class ShipDesignEditor extends JPanel
             default:			return null;
          }
       }
+   }
+
+   /**
+    * 
+    */
+   public void moveToFirstField()
+   {
+      // set the focus to the owner field
+      ownerField.requestFocus();
    }   
 }
 

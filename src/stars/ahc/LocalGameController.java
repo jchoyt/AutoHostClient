@@ -46,7 +46,7 @@ public class LocalGameController implements GameController, GameTurnGenerator
     }
 
     /**
-     *
+     * @param id - player number
      * @param fileType - either "m" or "x"
      */
     private String getFileYear( String id, String fileType )
