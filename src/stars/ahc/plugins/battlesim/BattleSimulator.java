@@ -55,6 +55,7 @@ public class BattleSimulator extends JFrame implements PlugIn, BattleSimulationL
    private JComboBox design2chooser;
    private JTextField design1count;
    private JTextField design2count;
+   private BattleBoard battleBoard;
 
    public BattleSimulator()
    {
@@ -160,6 +161,10 @@ public class BattleSimulator extends JFrame implements PlugIn, BattleSimulationL
       JScrollPane scroller = new JScrollPane(results);
       
       getContentPane().add( scroller, BorderLayout.CENTER );
+      
+      battleBoard = new BattleBoard();
+      
+      getContentPane().add( battleBoard, BorderLayout.EAST );
    }
    
    private void refreshDesignList()
@@ -205,14 +210,11 @@ public class BattleSimulator extends JFrame implements PlugIn, BattleSimulationL
       
       sim.addStatusListener( this );
       
-      try
-      {
-         sim.simulate();
-      }
-      catch (BattleSimulationError e)
-      {
-         results.setText( results.getText() + "Error: " + e.getMessage() + "\n");
-      }
+      battleBoard.setSimulation( sim );
+      
+      BattleSimThread thread = new BattleSimThread( sim, this );
+            
+      thread.start();
    }
 
    /* (non-Javadoc)
@@ -229,6 +231,36 @@ public class BattleSimulator extends JFrame implements PlugIn, BattleSimulationL
    public void handleNotification(BattleSimulationNotification notification)
    {
       results.setText( results.getText() + "Round " + notification.round + " : " + notification.message + "\n"); 
+   }
+   
+   public void addResult( String s )
+   {
+      results.setText( results.getText() + s );
+      //results.setCaretPosition( results.getText().length() );
+   }
+}
+
+class BattleSimThread extends Thread
+{
+   private BattleSimulation simulation;
+   private BattleSimulator simulator;
+
+   public BattleSimThread( BattleSimulation sim, BattleSimulator simulator )
+   {
+      this.simulation = sim;
+      this.simulator = simulator;
+   }
+   
+   public void run()
+   {
+      try
+      {
+         simulation.simulate();
+      }
+      catch (BattleSimulationError e)
+      {
+         simulator.addResult( "Error: " + e.getMessage() + "\n" );         
+      }
    }
    
 }

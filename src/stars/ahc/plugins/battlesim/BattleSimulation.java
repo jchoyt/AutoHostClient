@@ -18,6 +18,7 @@
  */
 package stars.ahc.plugins.battlesim;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -332,20 +333,25 @@ public class BattleSimulation
     */
    public void statusUpdate( String msg )
    {
+      BattleSimulationNotification notification = new BattleSimulationNotification();
+      notification.round = round;
+      notification.message = msg;      
+      
+      statusUpdate( notification );
+   }
+   
+   public void statusUpdate( BattleSimulationNotification notification )
+   {
       for (int n = 0; n < statusListers.size(); n++)
       {
          try
          {
             BattleSimulationListener listener = (BattleSimulationListener)statusListers.get(n);
-            
-            BattleSimulationNotification notification = new BattleSimulationNotification();
-            notification.round = round;
-            notification.message = msg;
-            
             listener.handleNotification( notification );
          }
          catch (Throwable t)
          {
+            // Catch any errors to prevent a buggy listener crashing the simulation
             t.printStackTrace();
          }
       }
@@ -737,11 +743,20 @@ public class BattleSimulation
          pickTarget( stack );  // If we have killed all ships in the target stack, pick another
       }
 
-      String status = stack.toString() + " fires " + stack.design.getWeaponName(slot) 
+      sendShotNotification(stack, slot, shieldDamage, armourDamage, kills, target);
+   }
+
+   private void sendShotNotification(ShipStack stack, int slot, int shieldDamage, int armourDamage, int kills, ShipStack target)
+   {
+      BattleSimulationNotification notification = new BattleSimulationNotification();
+      notification.round = round;
+      notification.eventType = BattleSimulationNotification.TYPE_FIRE;
+      notification.activeStack = stack;
+      notification.targetStack = target;
+      notification.message = stack.toString() + " fires " + stack.design.getWeaponName(slot) 
       				+ " [" + (slot+1) + "] doing " + shieldDamage + " damage to shields and " 
       				+ armourDamage + " to armour (" + kills + " kills)";
-      
-      statusUpdate( status );
+      statusUpdate( notification );
    }
 
    /**
@@ -808,11 +823,7 @@ public class BattleSimulation
          pickTarget( stack );  // If we have killed all ships in the target stack, pick another
       }
       
-      String status = stack.toString() + " fires " + stack.design.getWeaponName(slot) 
-				   	+ " [" + (slot+1) + "] doing " + shieldDamage + " damage to shields and " 
-				   	+ armourDamage + " to armour (" + kills + " kills)";
-      
-      statusUpdate( status );
+      sendShotNotification( stack, slot, shieldDamage, armourDamage, kills, target );
    }
 
    /**
@@ -826,6 +837,8 @@ public class BattleSimulation
       ShipStack mover = stacks[index];
       ShipStack target = mover.target;
    
+      Point originalPosition = new Point( mover.xpos, mover.ypos );
+      
       int originalDistance = distanceBetween(mover,target); 
    
       // These two arrays specify where to move relative to current location
@@ -878,7 +891,13 @@ public class BattleSimulation
          directionStr = " forward ";
       }
    
-      statusUpdate( stacks[index].toString() + " moves" + directionStr + "to " + mover.xpos + "," + mover.ypos + " (range " + distanceBetween(mover,target) + ")");
+      BattleSimulationNotification event = new BattleSimulationNotification();
+      event.eventType = BattleSimulationNotification.TYPE_MOVE;
+      event.message = stacks[index].toString() + " moves" + directionStr + "to " + mover.xpos + "," + mover.ypos + " (range " + distanceBetween(mover,target) + ")";
+      event.round = round;
+      event.activeStack = stacks[index];
+      event.movedFrom = originalPosition;
+      statusUpdate( event );
    }
    
    /**
