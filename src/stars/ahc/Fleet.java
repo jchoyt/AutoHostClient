@@ -6,7 +6,7 @@ package stars.ahc;
  *@author     jchoyt
  *@created    February 16, 2004
  */
-public class Fleet
+public class Fleet implements MapObject
 {
     protected String[] info;
     private int hashCache = 0;
@@ -214,5 +214,24 @@ public class Fleet
     public static int WARSHIP = 26;
     public static int UTILITY = 27;
     public static int BOMBER = 28;
+
+
+   /* (non-Javadoc)
+    * @see stars.ahc.MapObject#getName()
+    */
+   public String getName()
+   {
+      return info[FLEET_NAME];
+   }
+
+
+   public int getX()
+   {
+      return getIntValue(X);
+   }
+   public int getY()
+   {
+      return getIntValue(Y);
+   }
 }
 

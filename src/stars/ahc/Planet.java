@@ -24,13 +24,58 @@ import java.awt.Point;
  * @author Steve Leach
  *
  */
-public class Planet
+public class Planet implements MapObject
 {
-   public int x, y;
-   public String name;
+   private PlanetData data;
+   private String name;
+   private int year;
+   private Point position;
    
+   /**
+    * @param data
+    */
+   public Planet(String name,int year,Point position,PlanetData data)
+   {
+      this.name = name;
+      this.year = year;
+      this.position = position;
+      this.data = data;
+   }
+
    public Point getPosition()
    {
-      return new Point( x, y );
+      return position;
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.MapObject#getName()
+    */
+   public String getName()
+   {
+      return name;
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.MapObject#getOwner()
+    */
+   public String getOwner()
+   {
+      return null;
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.MapObject#getX()
+    */
+   public int getX()
+   {
+      return position.x;
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.MapObject#getY()
+    */
+   public int getY()
+   {
+      return position.y;
    }
 }

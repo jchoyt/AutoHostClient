@@ -14,8 +14,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahc;
-import java.awt.*;
-import java.awt.event.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -26,9 +24,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Properties;
-
-import javax.swing.*;
-import stars.ahc.Player;
 
 /**
  *  Description of the Class
@@ -43,8 +38,9 @@ public class Game extends Object
     String name;
     PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
     ArrayList players;
-
-
+    private PlanetList planets = new PlanetList();
+    
+    
     /**
      *  Constructor for the Game object
      */
@@ -452,6 +448,66 @@ public class Game extends Object
     {
         ahStatus.setProperty( "player" + playerNum + "-turn", value );
     }
-}
+    
+    public int getYear()
+    {
+       return Integer.parseInt( getCurrentYear() );
+    }
 
+    // Pass-through functions for planet list
+    
+    public Planet getPlanet( String planetName )
+    {
+       return planets.getPlanet( planetName, getYear() );
+    }    
+    
+    public Planet getPlanet( String planetName, int year )
+    {
+       return planets.getPlanet( planetName, year );
+    }
+    
+    public int getPlanetCount()
+    {
+       return planets.getPlanetCount();
+    }
+    
+    /**
+     * @param index (starts at 1)
+     * @return
+     */
+    public Planet getPlanet( int index )
+    {       
+       return planets.getPlanet( index, getYear() );
+    }
+    
+    public Planet getPlanet( int index, int year )
+    {
+       return planets.getPlanet( index, year );
+    }
+
+    /**
+     * Returns the planets list
+     */
+    public PlanetList getPlanets()
+    {
+       return planets;
+    }
+    
+    public void loadMapFile() throws ReportLoaderException
+    {
+       String mapName = getDirectory() + "/" + getName() + ".map";
+       
+       File mapFile = new File( mapName );
+       
+       if (mapFile.exists())
+       {
+          planets.loadMapFile( mapFile );
+       }
+       else
+       {
+          throw new ReportLoaderException( "Map file not found: " + mapName, null  );
+       }
+       
+    }
+}
 

@@ -188,8 +188,7 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
     * @see java.awt.event.MouseWheelListener#mouseWheelMoved(java.awt.event.MouseWheelEvent)
     */
    public void mouseWheelMoved(MouseWheelEvent event)
-   {
-      System.out.println( "wheel" );
+   {      
       int amount = event.getWheelRotation();
       if (amount > 0)
       {

@@ -19,11 +19,11 @@
 package stars.ahc.plugins.map;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -33,7 +33,6 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.border.BevelBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
@@ -118,7 +117,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener
       JPanel toolbar = new JPanel( new FlowLayout(FlowLayout.LEFT) );
       getContentPane().add( toolbar, BorderLayout.NORTH );
       
-      JButton btn = new JButton( "Move" );
+      JButton btn = new JButton( "Test" );
       btn.setSelected( true );
       toolbar.add( btn );
       
@@ -129,14 +128,14 @@ public class MapFrame extends JFrame implements MapConfigChangeListener
       JPanel controlPanel = new JPanel();
       controlPanel.setLayout( new BoxLayout(controlPanel, BoxLayout.Y_AXIS) );
       controlPanel.setBorder( new BevelBorder(BevelBorder.LOWERED) );
-      controlPanel.setBackground( Color.RED );
 
       //===============
-      JPanel scalePanel = new JPanel( new FlowLayout(FlowLayout.LEFT) );
+      JPanel scalePanel = new JPanel();
+      scalePanel.setLayout( new BoxLayout(scalePanel,BoxLayout.X_AXIS) );
+      scalePanel.setBorder( BorderFactory.createEmptyBorder(4,4,4,4) );
       
       JLabel label = new JLabel( "Scale: " );
       scalePanel.add( label );
-      scalePanel.setBackground( Color.GREEN );
       
       scaleSlider = new JSlider();
       scaleSlider.setMinimum( 10 );
@@ -162,12 +161,13 @@ public class MapFrame extends JFrame implements MapConfigChangeListener
       //===============
       
       JPanel layersPanel = new JPanel();
-      layersPanel.setBackground( Color.YELLOW );
       layersPanel.setLayout( new BoxLayout(layersPanel,BoxLayout.Y_AXIS) );
+      layersPanel.setBorder( BorderFactory.createEmptyBorder(4,4,4,4) );
+      
       layersPanel.add( new JLabel("Layers") );
       LayerTableModel layerModel = new LayerTableModel( this );
-      JTable layerTable = new JTable( layerModel );
-      layerTable.setBorder( new EtchedBorder() );      
+      JTable layerTable = new JTable( layerModel );      
+      layerTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );      
       
       layersPanel.add( layerTable );
       controlPanel.add( layersPanel );

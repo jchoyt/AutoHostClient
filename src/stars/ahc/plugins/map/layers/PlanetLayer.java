@@ -21,10 +21,10 @@ package stars.ahc.plugins.map.layers;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.util.ArrayList;
 
 import stars.ahc.Game;
 import stars.ahc.Planet;
+import stars.ahc.ReportLoaderException;
 import stars.ahc.plugins.map.MapConfig;
 import stars.ahc.plugins.map.MapDisplayError;
 import stars.ahcgui.pluginmanager.MapLayer;
@@ -36,8 +36,8 @@ import stars.ahcgui.pluginmanager.MapLayer;
 public class PlanetLayer implements MapLayer
 { 
    private boolean enabled = true;
-   private ArrayList planets = new ArrayList();
    private MapConfig mapConfig = null;
+   private Game game = null;
       
    /* (non-Javadoc)
     * @see stars.ahcgui.map.MapLayer#isEnabled()
@@ -62,9 +62,9 @@ public class PlanetLayer implements MapLayer
    {
       g.setColor( Color.WHITE );
       
-      for (int n = 0; n < planets.size(); n++)
+      for (int n = 1; n <= game.getPlanetCount(); n++)
       {
-         Planet planet = (Planet)planets.get( n );
+         Planet planet = game.getPlanet(n);
          
          Point screenPos = mapConfig.mapToScreen( planet.getPosition() );
          
@@ -78,10 +78,21 @@ public class PlanetLayer implements MapLayer
    public void initialize(Game game, MapConfig config) throws MapDisplayError
    {
       this.mapConfig = config;
+      this.game = game;
       
-      planets = PlanetLoader.loadPlanets( game );
+      if (game.getPlanetCount() == 0)
+      {
+         try
+         {
+            game.loadMapFile();
+         }
+         catch (ReportLoaderException e)
+         {
+            throw new MapDisplayError( "Error loading map file", e );
+         }
       
-      mapConfig.calcUniverseSize( planets );
+         mapConfig.calcUniverseSize( game );
+      }
    }
 
    /* (non-Javadoc)

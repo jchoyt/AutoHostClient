@@ -6,9 +6,9 @@
 package stars.ahc.plugins.map;
 
 import java.awt.Point;
-import java.util.ArrayList;
 import java.util.Vector;
 
+import stars.ahc.Game;
 import stars.ahc.Planet;
 
 /**
@@ -43,22 +43,22 @@ public class MapConfig
    /**
     * Calculates the boundaries of the universe 
     */
-   public void calcUniverseSize( ArrayList planets )
+   public void calcUniverseSize( Game game )
    {
       gameMinX = Integer.MAX_VALUE;
       gameMinY = Integer.MAX_VALUE;
       gameMaxX = 0;
       gameMaxY = 0;
 
-      for (int n = 0; n < planets.size(); n++)
+      for (int n = 1; n <= game.getPlanetCount(); n++)
       {
-         Planet planet = (Planet)planets.get( n );
+         Planet planet = game.getPlanet(n);
          
-         if (planet.x < gameMinX) gameMinX = planet.x;
-         if (planet.y < gameMinY) gameMinY = planet.y;
+         if (planet.getX() < gameMinX) gameMinX = planet.getX();
+         if (planet.getY() < gameMinY) gameMinY = planet.getY();
          
-         if (planet.x > gameMaxX) gameMaxX = planet.x;
-         if (planet.y > gameMaxY) gameMaxY = planet.y;
+         if (planet.getX() > gameMaxX) gameMaxX = planet.getX();
+         if (planet.getY() > gameMaxY) gameMaxY = planet.getY();
       }
       
       int border = 20;

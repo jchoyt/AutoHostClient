@@ -8,10 +8,10 @@ package stars.ahc.plugins.map.layers;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.util.ArrayList;
 
 import stars.ahc.Game;
 import stars.ahc.Planet;
+import stars.ahc.ReportLoaderException;
 import stars.ahc.plugins.map.MapConfig;
 import stars.ahc.plugins.map.MapDisplayError;
 import stars.ahcgui.pluginmanager.MapLayer;
@@ -25,7 +25,6 @@ public class PlanetNamesLayer implements MapLayer
    private boolean enabled = true;
    private Game game;
    private MapConfig config;
-   private ArrayList planets;
 
    /* (non-Javadoc)
     * @see stars.ahcgui.pluginmanager.PlugIn#isEnabled()
@@ -51,9 +50,19 @@ public class PlanetNamesLayer implements MapLayer
       this.game = game;
       this.config = config;
       
-      planets = PlanetLoader.loadPlanets( game );
+      if (game.getPlanetCount() == 0)
+      {
+         try
+         {
+            game.loadMapFile();
+         }
+         catch (ReportLoaderException e)
+         {
+            throw new MapDisplayError( "Error loading map file", e );
+         }
       
-      config.calcUniverseSize( planets );
+         config.calcUniverseSize( game );
+      }
       
    }
 
@@ -72,13 +81,13 @@ public class PlanetNamesLayer implements MapLayer
    {
       g.setColor( Color.YELLOW );
       
-      for (int n = 0; n < planets.size(); n++)
+      for (int n = 1; n <= game.getPlanetCount(); n++)
       {
-         Planet planet = (Planet)planets.get( n );
+         Planet planet = game.getPlanet(n);
          
          Point screenPos = config.mapToScreen( planet.getPosition() );
          
-         g.drawString( planet.name, screenPos.x-20, screenPos.y+16 );
+         g.drawString( planet.getName(), screenPos.x-20, screenPos.y+16 );
       }
    }
 
