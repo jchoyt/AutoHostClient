@@ -51,6 +51,14 @@
       <fileset dir="." includes="base.ahcplugin"/>
       <fileset dir="${build}" includes="**/plugins/base/**" />
     </jar>
+    <jar jarfile="plugins/battlesim.jar" description="rebuild the base plugin jarfile">
+      <fileset dir="." includes="battlesim.ahcplugin"/>
+      <fileset dir="${build}" includes="**/plugins/battlesim/**" />
+    </jar>
+    <jar jarfile="plugins/objedit.jar" description="rebuild the objedit plugin jarfile">
+      <fileset dir="." includes="objedit.ahcplugin"/>
+      <fileset dir="${build}" includes="**/plugins/objedit/**" />
+    </jar>
   </target>
 
   <target name="test" depends="compile">
