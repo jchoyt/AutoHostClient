@@ -58,6 +58,7 @@ import stars.ahc.NotificationListener;
 import stars.ahcgui.pluginmanager.PlugIn;
 import stars.ahcgui.pluginmanager.PlugInManager;
 import stars.ahcgui.pluginmanager.PluginLoadError;
+import stars.ahcgui.trayicon.TrayIconManager;
 
 /**
  *  Description of the Class
@@ -76,6 +77,7 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
 
     HashMap optionPanes = new HashMap();
     Timer timer = new Timer( true );
+   private JPanel toolbar;
 
 
     /**
@@ -142,7 +144,7 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
      */
    private void setupGamesToolbar( JPanel parent )
    {
-      JPanel toolbar = new JPanel();
+      toolbar = new JPanel();
       toolbar.setBorder( BorderFactory.createEmptyBorder(2,2,2,2) );
       toolbar.setLayout( new BoxLayout(toolbar,BoxLayout.X_AXIS) );
       parent.add( toolbar );
@@ -166,7 +168,8 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
             }
       );
       toolbar.add( newButton );
-      toolbar.add( Box.createGlue() );
+      
+      toolbar.add( Box.createGlue() );      
    }
 
 
@@ -260,6 +263,8 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
     {
        setApplicationIcon();
        
+       setExitHandler();
+       
         //AhcGui.setMainFrame( this );
         contentPane = getContentPane();
         
@@ -307,6 +312,21 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
     }
 
     /**
+    * 
+    */
+    private void setExitHandler()
+    {
+       addWindowListener( new WindowAdapter()
+       {
+          public void windowClosing(WindowEvent e)
+          {
+             TrayIconManager.getTrayIconManager().cleanup();
+          }
+       } );
+    }
+
+
+   /**
      * Sets the icon that the application displays in the taskbar.
      *  
      * @author Steve Leach
@@ -466,6 +486,32 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
 		            "Error",
 		            JOptionPane.ERROR_MESSAGE );
          	break;
+      }
+   }
+
+
+   /**
+    * Adds the "Hide" button to the main toolbar.
+    * <p>
+    * The hide button is only added if the TrayIconManager is available to create a
+    * system tray icon from which the application can be restored. 
+    */
+   public void addHideButton()
+   {
+      // Only include the hide button if system tray functionality is supported 
+      if (TrayIconManager.getTrayIconManager().trayIconSupported())
+      {
+         JButton hideButton = new JButton("Hide");
+         
+         hideButton.addActionListener( new ActionListener() {
+            public void actionPerformed(ActionEvent e)
+            {
+               AhcFrame.this.setVisible(false);
+            }
+         });
+         
+         int index = toolbar.getComponentCount(); 
+         toolbar.add( hideButton, index-1 );
       }
    }
 }

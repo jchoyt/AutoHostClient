@@ -3,5 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.jboss.ide.eclipse.jdt.core.classpath.junit-3.8.1"/>
+	<classpathentry kind="lib" path="plugins/trayicon.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -20,6 +20,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import stars.ahcgui.AhcFrame;
+import stars.ahcgui.trayicon.TrayIconManager;
 
 /**
  *  Description of the Class
@@ -109,9 +110,12 @@ public class AutoHostClient extends java.lang.Object
    private static void startPoller()
    {
       poller = new AHPoller();
+      
       poller.addNotificationListener( mainFrame );
+      poller.addNotificationListener( TrayIconManager.getTrayIconManager() );
       
       poller.run();
+      
    }
 
 
@@ -144,6 +148,15 @@ public class AutoHostClient extends java.lang.Object
     {
         mainFrame = new AhcFrame();
         mainFrame.pack();
+        
+        TrayIconManager trayIconManager = TrayIconManager.getTrayIconManager();
+        trayIconManager.init( mainFrame, "AHClient" );
+        
+        if (trayIconManager.trayIconSupported())
+        {
+           mainFrame.addHideButton();
+        }
+
         mainFrame.setVisible( true );
     }
 

@@ -192,7 +192,7 @@ public class PlugInManager
    /**
     * Registers a new plugin class loader
     */
-   private URLClassLoader registerClassLoader(File file) throws PluginLoadError
+   public URLClassLoader registerClassLoader(File file) throws PluginLoadError
    {
       URL[] urls = new URL[1];
 
