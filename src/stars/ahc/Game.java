@@ -16,9 +16,16 @@
 package stars.ahc;
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.*;
-import java.io.*;
-import java.util.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Properties;
 
 import javax.swing.*;
 import stars.ahc.Player;
@@ -196,6 +203,70 @@ public class Game extends Object
             ar[i] = ( Player ) playersArray[i];
         }
         return ar;
+    }
+
+
+    /**
+     *  Gets the playersByStatus attribute of the Game object
+     *
+     *@return    A Properties object with three properties containing a list of
+     *      the races with a given status (in a StringBuffer). The three keys
+     *      are in, out, and dead.
+     */
+    public Properties getPlayersByStatus()
+    {
+        StringBuffer in = new StringBuffer();
+        StringBuffer out = new StringBuffer();
+        StringBuffer dead = new StringBuffer();
+        String ret;
+        for ( int i = 1; i <= 16; i++ )
+        {
+            ret = ahStatus.getProperty( "player" + i + "-turn" );
+            if ( ret == null )
+            {
+                continue;
+            }
+            if ( ret.equals( "waiting" ) )
+            {
+                if ( out.length() != 0 )
+                {
+                    out.append( ", " );
+                }
+                out.append( ahStatus.getProperty( "player" + i + "-race" ) );
+            }
+            else if(ret.startsWith( "skipped" ) )
+            {
+                if ( out.length() != 0 )
+                {
+                    out.append( ", " );
+                }
+                out.append( ahStatus.getProperty( "player" + i + "-race" ) );
+                out.append( " ( ");
+                out.append( ret.substring(8) );
+                out.append( " )" );
+            }
+            else if ( ret.equals( "inactive" ) || ret.startsWith( "dead" ) )
+            {
+                if ( dead.length() != 0 )
+                {
+                    dead.append( ", " );
+                }
+                dead.append( ahStatus.getProperty( "player" + i + "-race" ) );
+            }
+            else if ( ret.startsWith( "in" ) )
+            {
+                if ( in.length() != 0 )
+                {
+                    in.append( ", " );
+                }
+                in.append( ahStatus.getProperty( "player" + i + "-race" ) );
+            }
+        }
+        Properties stati = new Properties();
+        stati.setProperty( "in", String.valueOf( in ) );
+        stati.setProperty( "out", String.valueOf( out ) );
+        stati.setProperty( "dead", String.valueOf( dead ) );
+        return stati;
     }
 
 
