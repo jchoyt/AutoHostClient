@@ -50,7 +50,7 @@ public class Game extends Object
     private Properties userDefinedProperties = new Properties();
     protected String sahHosted = "true";
     private GameController controller;
-    
+
     /**
      * A list of objects (all implementing GameUpdateListener) that wish to be notified
      * when the game details change
@@ -396,7 +396,7 @@ public class Game extends Object
     }
 
     /**
-     * Used to notify other objects that something has changed in the game 
+     * Used to notify other objects that something has changed in the game
      */
     public void firePropertyChange( String propertyName, Object oldValue, Object newValue )
     {
@@ -446,24 +446,6 @@ public class Game extends Object
        }
 
        pcs.firePropertyChange( "gameStatus", 0, 1 );
-
-//        ahStatus = new Properties();
-//        try
-//        {
-//            File statusFile = new File( getDirectory(), getStatusFileName() );
-//            if ( !statusFile.exists() )
-//            {
-//                poll();
-//                //return;
-//            }
-//            InputStream in = new FileInputStream( statusFile );
-//            ahStatus.load( in );
-//            pcs.firePropertyChange( "gameStatus", 0, 1 );
-//        }
-//        catch ( Exception e )
-//        {
-//            Log.log( Log.ERROR, this, e );
-//        }
     }
 
 
@@ -472,9 +454,9 @@ public class Game extends Object
      *
      *@return    Description of the Return Value
      */
-    public boolean poll()
+    public int poll()
     {
-        return (controller == null) ? false : controller.poll();
+        return (controller == null) ? AHPoller.POLL_NO_CONTROLLER : controller.poll();
     }
 
 
@@ -685,15 +667,15 @@ public class Game extends Object
      */
     public Color getRaceColor( String raceName )
     {
-    	if( Utils.empty(raceName))
-    	{
-    		return Color.WHITE;
-    	}
-    	else
-    	{
-    	Race race = getRace( raceName, true );
-    	return race.getColor();
-    	}
+        if( Utils.empty(raceName))
+        {
+            return Color.WHITE;
+        }
+        else
+        {
+        Race race = getRace( raceName, true );
+        return race.getColor();
+        }
     }
 
 
@@ -797,7 +779,7 @@ public class Game extends Object
 
             race.getProperties( props );
         }
-        
+
         setSahHosted( props.getProperty( name + ".sahHosted" ) );
     }
 
@@ -933,17 +915,17 @@ public class Game extends Object
     public void saveUserDefinedProperties()
     {
         getShipDesignProperties( userDefinedProperties );
-        
+
         /* Not sure yet
          * Theory-- Causes the ShipDesigns to be saved into the userdefs...
-         * 
+         *
          */
 
         File userPropertiesFile = getUserDefinedPropertiesFile();
-        
+
         /* the var userPropertiesFile to the File type
          * This will contain the file name the data will be put in
-         * 
+         *
          *getUserDefinedPropertiesFile() function determines the file
          *name that the game settings will be saved in.
          *
@@ -957,18 +939,18 @@ public class Game extends Object
         try
         {
             FileOutputStream s = new FileOutputStream( userPropertiesFile );
-            
+
             /* Opens a stream to the file
-             * 
+             *
              */
 
             userDefinedProperties.store( s, "User defined properties for " + name );
-            
+
             /* Stores all Settings into the file from the <var> userDefinedProperties
-             * The First line will be User defined properties for " + name 
+             * The First line will be User defined properties for " + name
              * 's' is the Stream to Use
              * store must be a FSO causing the data in the userDef... <var> to be saved in 's'
-             * 
+             *
              */
         }
         catch ( FileNotFoundException e )
@@ -1108,9 +1090,9 @@ public class Game extends Object
     public void setSahHosted( String sahHosted )
     {
         this.sahHosted = sahHosted;
-                
+
         boolean isSAHcontroller = (controller instanceof AutoHostGameController);
-        
+
         if (isAutohosted() != isSAHcontroller)
         {
            initController();
@@ -1211,24 +1193,24 @@ public class Game extends Object
           }
       }
    }
-   
+
    /**
-    * Registers an object to receive notifications when details of the game change 
+    * Registers an object to receive notifications when details of the game change
     */
    public void addUpdateListener( GameUpdateListener listener )
    {
       updateListeners.add( listener );
    }
-   
+
    /**
     * Notifies all registered listeners that an update to the game data has occurred
     * <p>
-    * Designed to be called from User Interface code 
+    * Designed to be called from User Interface code
     */
    public void notifyUpdateListeners( Object updatedObject, String propertyName, Object oldValue, Object newValue )
    {
       GameUpdateNotification notification = new GameUpdateNotification( this, updatedObject, propertyName, newValue, oldValue );
-      
+
       for (int n = 0; n < updateListeners.size(); n++)
       {
          // Do the notification inside a try block because we cannot trust the listener code
@@ -1243,14 +1225,14 @@ public class Game extends Object
          }
       }
    }
-   
+
    /**
     * Notifies registered update listeners that the specified object has been updated
     * <p>
     * The listeners are not informed what property of the object has changed, or what the
     * new and old values are.
-    * <p> 
-    * Designed to be called from User Interface code 
+    * <p>
+    * Designed to be called from User Interface code
     */
    public void notifyUpdateListeners( Object updatedObject )
    {
@@ -1261,11 +1243,11 @@ public class Game extends Object
 /**
  * @param currentDesign
  */
-   public void removeShipDesign(ShipDesign Design) 
+   public void removeShipDesign(ShipDesign Design)
    {
-   	shipDesigns.removeShipDesign(Design);
+    shipDesigns.removeShipDesign(Design);
    }
-   
+
    public Properties getUserDefinedProperties()
    {
       return userDefinedProperties;

@@ -88,7 +88,7 @@ public interface GameController
      *
      *@return    Description of the Return Value
      */
-    public boolean poll();
+    public int poll();
 
 
     /**

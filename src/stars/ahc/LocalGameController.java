@@ -31,6 +31,7 @@ public class LocalGameController implements GameController, GameTurnGenerator
 {
     private PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
     protected Game game;
+    protected long nextGen = 0;
 
 
     /**
@@ -41,6 +42,7 @@ public class LocalGameController implements GameController, GameTurnGenerator
     public LocalGameController( Game game )
     {
         this.game = game;
+        nextGen = System.currentTimeMillis();
     }
 
     /**
@@ -198,10 +200,20 @@ public class LocalGameController implements GameController, GameTurnGenerator
      *
      *@return    Description of the Return Value
      */
-    public boolean poll()
+    public int poll()
     {
-       Log.log( Log.NOTICE, this, "Polling local game" );
-       return true;
+        if( System.currentTimeMillis() > nextGen )
+        {
+            Log.log( Log.NOTICE, this, "Polling local game " + game.getName() );
+            /* TODO : do polling here */
+            Log.log(Log.NOTICE,this,"OK, not really - it hasn't been implemented yet.");
+            nextGen = System.currentTimeMillis() + getPollInterval();
+            return AHPoller.POLL_SUCCESSFUL;
+        }
+        else
+        {
+            return AHPoller.POLL_NOT_DONE;
+        }
     }
 
 
@@ -300,7 +312,7 @@ public class LocalGameController implements GameController, GameTurnGenerator
       Player[] players = game.getPlayers();
 
       for (int n = 0; n < players.length; n++)
-      {         
+      {
          try
          {
             Utils.genPxxFiles( game, players[n].id, players[n].getStarsPassword(), gameDirectory );

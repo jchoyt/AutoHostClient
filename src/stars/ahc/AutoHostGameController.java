@@ -32,6 +32,8 @@ public class AutoHostGameController implements GameController
 {
     private PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
     protected Game game;
+    protected long nextGen = 0;
+
 
 
     /**
@@ -42,6 +44,7 @@ public class AutoHostGameController implements GameController
     public AutoHostGameController( Game game )
     {
         this.game = game;
+        nextGen = System.currentTimeMillis();
     }
 
 
@@ -207,31 +210,36 @@ public class AutoHostGameController implements GameController
      *
      *@return    Description of the Return Value
      */
-    public boolean poll()
+    public int poll()
     {
-       Log.log( Log.NOTICE, this, "Polling autohost for " + game.getName() );
-        /*
-         *  get status file from AH
-         */
-        try
+        if ( System.currentTimeMillis() > nextGen )
         {
-           if (Utils.empty( game.getName() ) == false)
-           {
-              Utils.getFileFromAutohost( game.getName(), game.getStatusFileName(), game.getDirectory() );
-           }
+            Log.log( Log.NOTICE, this, "Polling autohost for " + game.getName() );
+            /*
+             *  get status file from AH
+             */
+            try
+            {
+                if ( Utils.empty( game.getName() ) == false )
+                {
+                    Utils.getFileFromAutohost( game.getName(), game.getStatusFileName(), game.getDirectory() );
+                }
+            }
+            catch ( AutoHostError e )
+            {
+                Log.log( Log.ERROR, this, e );
+                return AHPoller.POLL_FAILED;
+            }
+            finally
+            {
+                nextGen = System.currentTimeMillis() + getPollInterval();
+            }
+            return AHPoller.POLL_SUCCESSFUL;
         }
-        catch ( AutoHostError e )
+        else
         {
-            Log.log( Log.ERROR, this, e );
-            return false;
+            return AHPoller.POLL_NOT_DONE;
         }
-        /*
-         *  load new status into game  GUI should be updated by reloading game.getAhStatus()
-         */
-        // don't do this because loadProperties() may lead back to poll() - infinite recursion
-        // SL, 4 Nov 2004
-        //game.loadProperties();
-        return true;
     }
 
 
@@ -260,6 +268,13 @@ public class AutoHostGameController implements GameController
     }
 
 
+    /**
+     *  Gets the pollInterval attribute of the AutoHostGameController object.
+     *  The pollInterval is the number of milliseconds between doing actual
+     *  polling.
+     *
+     *@return    The pollInterval value, in milliseconds
+     */
     public int getPollInterval()
     {
         /*
@@ -269,35 +284,41 @@ public class AutoHostGameController implements GameController
          *  shut down access by this application.  I will NOT be responsible for messing up
          *  AutoHost.
          */
-         return 10*60*1000;  //10 minutes
+        return 10 * 60 * 1000;//10 minutes
     }
 
 
-   /* (non-Javadoc)
-    * @see stars.ahc.GameController#getStatusProperties()
-    */
+    /*
+     *  (non-Javadoc)
+     *  @see stars.ahc.GameController#getStatusProperties()
+     */
+    /**
+     *  Description of the Method
+     *
+     *@param  ahStatus  Description of the Parameter
+     */
     public void loadStatusProperties( Properties ahStatus )
     {
-       try
-       {
-          File statusFile = new File( game.getDirectory(), game.getStatusFileName() );
-          if ( !statusFile.exists() )
-          {
-             poll();
-             //return;
-          }
-          
-          if (statusFile.exists())
-          {
-             InputStream in = new FileInputStream( statusFile );
-             ahStatus.load( in );
-             pcs.firePropertyChange( "gameStatus", 0, 1 );
-          }
-       }
-       catch ( Exception e )
-       {
-          Log.log( Log.ERROR, this, e );
-       }
+        try
+        {
+            File statusFile = new File( game.getDirectory(), game.getStatusFileName() );
+            if ( !statusFile.exists() )
+            {
+                poll();
+                //return;
+            }
+
+            if ( statusFile.exists() )
+            {
+                InputStream in = new FileInputStream( statusFile );
+                ahStatus.load( in );
+                pcs.firePropertyChange( "gameStatus", 0, 1 );
+            }
+        }
+        catch ( Exception e )
+        {
+            Log.log( Log.ERROR, this, e );
+        }
     }
 }
 

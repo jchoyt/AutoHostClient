@@ -46,6 +46,10 @@ public class AHPoller extends TimerTask
 
     private ArrayList notificationListeners = new ArrayList();
     public final static int BALLOON_NOTIFICATION = 99;
+    public final static int POLL_SUCCESSFUL = 1;
+    public final static int POLL_FAILED = 2;
+    public final static int POLL_NOT_DONE = 4;
+    public final static int POLL_NO_CONTROLLER = 8;
 
 
     /**
@@ -94,41 +98,35 @@ public class AHPoller extends TimerTask
         Game[] games = GamesProperties.getGames();
         boolean success = true;
         sendNotification( this, NotificationListener.SEV_STATUS, "Polling AutoHost - wait for the update." );
-        long now = System.currentTimeMillis();
+        int pollResult;
         for ( int i = 0; i < games.length; i++ )
         {
-            Calendar cal = ( Calendar ) nextPollTime.get( games[i] );
-            if ( cal == null )
+            pollResult = games[i].poll();
+            switch ( pollResult )
             {
-                cal = new GregorianCalendar();
-                nextPollTime.put( games[i], cal );
-            }
-            if ( cal.getTimeInMillis() <= now )
-            {
-                success = success && games[i].poll();
-                
-                games[i].loadProperties();
-                
-                if ( success )
-                {
-                    cal.add( Calendar.MILLISECOND, games[i].getPollInterval() );
+                case AHPoller.POLL_FAILED:
+                    Log.log( Log.WARNING, this, "Game " + games[i].getName() + " had a problem during the status poll. Please check the log and and report any errors to jchoyt@users.sourceforge.net." );
+                    sendNotification( this, NotificationListener.SEV_ERROR, "There was a problem checking the stati.  Please check the log and and report any errors to jchoyt@users.sourceforge.net." );
+                    break;
+                case AHPoller.POLL_SUCCESSFUL:
+                    games[i].loadProperties();
+                    /*
+                     *  TODO: check this to see if this created infinite loop
+                     */
                     Player[] players = games[i].getPlayers();
                     for ( int j = 0; j < players.length; j++ )
                     {
                         players[j].pcs.firePropertyChange( "status updated", "checked", "not checked" );
                     }
-                }
+                    break;
+                case AHPoller.POLL_NOT_DONE:
+                    break;
+                case AHPoller.POLL_NO_CONTROLLER:
+                    Log.log( Log.WARNING, this, "Game " + games[i].getName() + " had no Controller!!" );
+                    sendNotification( this, NotificationListener.SEV_ERROR, "There was a problem checking the stati.  Please check the log and and report any errors to jchoyt@users.sourceforge.net." );
+                default:
+                    success = false;
             }
-        }
-        if ( success )
-        {
-            sendNotification( this, NotificationListener.SEV_STATUS, "All player stati updated." );
-            GamesProperties.UPTODATE = true;
-            GamesProperties.writeProperties();
-        }
-        else
-        {
-            sendNotification( this, NotificationListener.SEV_ERROR, "There was a problem checking the stati.  Please check the log and and report any errors to jchoyt@users.sourceforge.net." );
         }
     }
 
