@@ -38,44 +38,57 @@ import java.util.Properties;
  */
 public class Game extends Object
 {
-    private static final int MAX_RACES = 16;
+    private final static int MAX_RACES = 16;
     Properties ahStatus;
     String directory;
     String name;
     PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
-    ArrayList players;    
+    ArrayList players;
     private PlanetList planets;
     private FleetList fleets;
     private ArrayList races = new ArrayList();
     private Properties userDefinedProperties = new Properties();
+    protected String sahHosted = "true";
+
 
     /**
      *  Constructor for the Game object
      */
     public Game()
     {
-       init( "", "" );
+        init( "", "" );
     }
 
 
     /**
      *  Constructor for the Game object
+     *
+     *@param  shortName  Description of the Parameter
+     *@param  directory  Description of the Parameter
      */
     public Game( String shortName, String directory )
     {
-       init( shortName, directory );
+        init( shortName, directory );
     }
 
+
+    /**
+     *  Description of the Method
+     *
+     *@param  shortName  Description of the Parameter
+     *@param  directory  Description of the Parameter
+     */
     private void init( String shortName, String directory )
     {
-       name = shortName.toString();
-       players = new ArrayList();
-       planets = new PlanetList( this );
-       fleets = new FleetList( this );
-       this.directory = directory;
-       loadProperties();      
-       loadUserDefinedProperties();
+        name = shortName.toString();
+        players = new ArrayList();
+        planets = new PlanetList( this );
+        fleets = new FleetList( this );
+        this.directory = directory;
+        loadProperties();
+        loadUserDefinedProperties();
     }
+
 
     /**
      *  Sets the directory attribute of the Game object
@@ -272,6 +285,10 @@ public class Game extends Object
         StringBuffer in = new StringBuffer();
         StringBuffer out = new StringBuffer();
         StringBuffer dead = new StringBuffer();
+        int in_lines = 1;
+        int out_lines = 1;
+        int dead_lines = 1;
+        final int COLS = 65;
         String ret;
         for ( int i = 1; i <= 16; i++ )
         {
@@ -285,6 +302,11 @@ public class Game extends Object
                 if ( out.length() != 0 )
                 {
                     out.append( ", " );
+                    if ( out.length() > COLS * out_lines )
+                    {
+                        out.append( "<br>" );
+                        out_lines++;
+                    }
                 }
                 out.append( ahStatus.getProperty( "player" + i + "-race" ) );
             }
@@ -293,6 +315,11 @@ public class Game extends Object
                 if ( out.length() != 0 )
                 {
                     out.append( ", " );
+                    if ( out.length() > COLS * out_lines )
+                    {
+                        out.append( "<br>" );
+                        out_lines++;
+                    }
                 }
                 out.append( ahStatus.getProperty( "player" + i + "-race" ) );
                 out.append( " ( skipped " );
@@ -304,6 +331,11 @@ public class Game extends Object
                 if ( dead.length() != 0 )
                 {
                     dead.append( ", " );
+                    if ( dead.length() > COLS * dead_lines )
+                    {
+                        dead.append( "<br>" );
+                        dead_lines++;
+                    }
                 }
                 dead.append( ahStatus.getProperty( "player" + i + "-race" ) );
             }
@@ -312,6 +344,11 @@ public class Game extends Object
                 if ( in.length() != 0 )
                 {
                     in.append( ", " );
+                    if ( in.length() > COLS * in_lines )
+                    {
+                        in.append( "<br>" );
+                        in_lines++;
+                    }
                 }
                 in.append( ahStatus.getProperty( "player" + i + "-race" ) );
             }
@@ -465,6 +502,14 @@ public class Game extends Object
      */
     public boolean poll()
     {
+        if ( sahHosted.equals( "false" ) )
+        {
+            /*
+             *  TODO: need code in here to check the status of hte local files and essentially recreate the .status file
+             *  Or do I want to just subclass Game to create an OfflineGame class????
+             */
+            return true;
+        }
         /*
          *  get status file from AH
          */
@@ -475,7 +520,6 @@ public class Game extends Object
         catch ( AutoHostError e )
         {
             Log.log( Log.ERROR, this, e );
-            
             return false;
         }
         /*
@@ -524,11 +568,10 @@ public class Game extends Object
 
     /**
      *  Description of the Method
-     * 
-     * @deprecated setProperties() is used instead
      *
      *@param  out              Description of the Parameter
      *@exception  IOException  Description of the Exception
+     *@deprecated              setProperties() is used instead
      */
     public void writeProperties( Writer out )
         throws IOException
@@ -628,17 +671,18 @@ public class Game extends Object
      */
     public Planet getPlanet( int index, int year )
     {
-       if (year == 0)
-       {
-          year = getYear();
-       }
-       return planets.getPlanet( index, year );
+        if ( year == 0 )
+        {
+            year = getYear();
+        }
+        return planets.getPlanet( index, year );
     }
 
 
     /**
      *  Returns the planets list
      *
+     *@return    The planets value
      */
     public PlanetList getPlanets()
     {
@@ -647,336 +691,434 @@ public class Game extends Object
 
 
     /**
-     * Loads the contents of the Stars! map file into the planets list
+     *  Loads the contents of the Stars! map file into the planets list
      *
-     * @author Steve Leach
+     *@exception  ReportLoaderException  Description of the Exception
+     *@author                            Steve Leach
      */
-    public void loadMapFile() throws ReportLoaderException
+    public void loadMapFile()
+        throws ReportLoaderException
     {
-       File mapFile = getReportFile( REPORTTYPE_MAP, 0, 0 );       
-       
-       if (mapFile.exists())
-       {
-          planets.loadMapFile( mapFile );
-       }
-       else
-       {
-          throw new ReportLoaderException( "Map file not found", mapFile.getName()  );
-       }       
+        File mapFile = getReportFile( REPORTTYPE_MAP, 0, 0 );
+
+        if ( mapFile.exists() )
+        {
+            planets.loadMapFile( mapFile );
+        }
+        else
+        {
+            throw new ReportLoaderException( "Map file not found", mapFile.getName() );
+        }
     }
-    
+
+
     /**
-     * Loads all Stars! reports for the game
-     * 
-     * @author Steve Leach
-     * @throws ReportLoaderException
+     *  Loads all Stars! reports for the game
+     *
+     *@author                         Steve Leach
+     *@throws  ReportLoaderException
      */
-    public void loadReports() throws ReportLoaderException
+    public void loadReports()
+        throws ReportLoaderException
     {
-       loadMapFile();
-       
-       for (int y = 2400; y <= getYear(); y ++)
-       {
-	       for (int n = 1; n <= MAX_RACES; n++)
-	       {
-	          loadReportFile( REPORTTYPE_PLANET, n, y );
-	          loadReportFile( REPORTTYPE_FLEET, n, y );
-	       }
-       }
+        loadMapFile();
+
+        for ( int y = 2400; y <= getYear(); y++ )
+        {
+            for ( int n = 1; n <= MAX_RACES; n++ )
+            {
+                loadReportFile( REPORTTYPE_PLANET, n, y );
+                loadReportFile( REPORTTYPE_FLEET, n, y );
+            }
+        }
     }
 
 
-   /**
-    */
-   private void loadReportFile(int reportType, int player, int year) throws ReportLoaderException
-   {
-      File reportFile = getReportFile( reportType, player, year );
-            
-      if ((reportFile != null) && reportFile.exists())
-      {
-         switch (reportType)
-         {
-            case REPORTTYPE_PLANET:
-               planets.loadPlanetReport( reportFile, year );
-               break;
-            case REPORTTYPE_FLEET:
-               fleets.loadFleetReport( reportFile, year );
-               break;
-         }
-         
-      }
-   }
-   
-   /**
-    * Returns the color associated with the race for display on the map, etc.
-    * 
-    * @author Steve Leach
-    */
-   public Color getRaceColor( String raceName )
-   {
-      Race race = getRace( raceName, true );
-      
-      return race.getColor();
-   }
-   
-   /**
-    * Returns a race object matching the specified race (not player) name.
-    * <p>
-    * If no matching race is found and create == true then a new race is created and added to the list.
-    * 
-    * @author Steve Leach  
-    */
-   public Race getRace( String raceName, boolean create )
-   {
-      // First, try and find the race in the list
-      for (int n = 0; n < races.size(); n++)
-      {
-         Race race = (Race)races.get(n);
-         
-         if (race.equals(raceName))
-         {
-            return race;
-         }
-      }
-      
-      // Next, if it has not been found then create it (if this is what is requested)
-      if (create)
-      {         
-         Race newRace = new Race( this );
-         newRace.setRaceName( raceName );
-         races.add( newRace );
-         return newRace;
-      }
-      
-      // Otherwise, return null
-      return null;
-   }
+    /**
+     *@param  reportType                 Description of the Parameter
+     *@param  player                     Description of the Parameter
+     *@param  year                       Description of the Parameter
+     *@exception  ReportLoaderException  Description of the Exception
+     */
+    private void loadReportFile( int reportType, int player, int year )
+        throws ReportLoaderException
+    {
+        File reportFile = getReportFile( reportType, player, year );
+
+        if ( ( reportFile != null ) && reportFile.exists() )
+        {
+            switch ( reportType )
+            {
+                case REPORTTYPE_PLANET:
+                    planets.loadPlanetReport( reportFile, year );
+                    break;
+                case REPORTTYPE_FLEET:
+                    fleets.loadFleetReport( reportFile, year );
+                    break;
+            }
+
+        }
+    }
 
 
-   /**
-    * Updates all the properties for this game
-    */
-   public void setProperties(Properties props)
-   {
-      String playerNumbers = "";
-      
-      for ( int i = 0; i < players.size(); i++ )
-      {
-         Player player = (Player)players.get(i);
-         
-          playerNumbers += player.getId();
-          
-          if ( i < players.size() - 1 )
-          {
-              playerNumbers += ",";
-          }
-          
-          player.setProperties( props );
-      }
-      
-      props.setProperty( name + ".RaceCount", ""+races.size() );
-      
-      String raceNames = "";
-      
-      for (int n = 0; n < races.size(); n++)
-      {
-         Race race = (Race)races.get(n);
+    /**
+     *  Returns the color associated with the race for display on the map, etc.
+     *
+     *@param  raceName  Description of the Parameter
+     *@return           The raceColor value
+     *@author           Steve Leach
+     */
+    public Color getRaceColor( String raceName )
+    {
+        Race race = getRace( raceName, true );
 
-         if (n > 0) raceNames += ",";
-         raceNames += race.getRaceName().replaceAll( " ", "_" );
-
-         race.setProperties( props );
-      }
-      
-      props.setProperty( name + ".RaceNames", raceNames );
-      
-      props.setProperty( name + ".GameDir", directory );
-      props.setProperty( name + ".PlayerNumbers", playerNumbers );
-   }
+        return race.getColor();
+    }
 
 
-   /**
-    * Load game properties
-    */
-   public void loadGameProperties(Properties props)
-   {
-      String[] races = props.getProperty( name + ".RaceNames" ).split(",");
-      
-      for (int n = 0; n < races.length; n++)
-      {
-         races[n] = races[n].replaceAll( "_", " " );
-         
-         Race race = getRace( races[n], true );
-         
-         race.getProperties( props );
-      }
-   }
+    /**
+     *  Returns a race object matching the specified race (not player) name. <p>
+     *
+     *  If no matching race is found and create == true then a new race is
+     *  created and added to the list.
+     *
+     *@param  raceName  Description of the Parameter
+     *@param  create    Description of the Parameter
+     *@return           The race value
+     *@author           Steve Leach
+     */
+    public Race getRace( String raceName, boolean create )
+    {
+        // First, try and find the race in the list
+        for ( int n = 0; n < races.size(); n++ )
+        {
+            Race race = ( Race ) races.get( n );
+
+            if ( race.equals( raceName ) )
+            {
+                return race;
+            }
+        }
+
+        // Next, if it has not been found then create it (if this is what is requested)
+        if ( create )
+        {
+            Race newRace = new Race( this );
+            newRace.setRaceName( raceName );
+            races.add( newRace );
+            return newRace;
+        }
+
+        // Otherwise, return null
+        return null;
+    }
 
 
-   /**
-    * Returns an iterator to iterate over all the known races in the game
-    * @author Steve Leach
-    */
-   public Iterator getRaces()
-   {
-      return races.iterator();
-   }
+    /**
+     *  Updates all the properties for this game
+     *
+     *@param  props  The new properties value
+     */
+    public void setProperties( Properties props )
+    {
+        String playerNumbers = "";
+
+        for ( int i = 0; i < players.size(); i++ )
+        {
+            Player player = ( Player ) players.get( i );
+
+            playerNumbers += player.getId();
+
+            if ( i < players.size() - 1 )
+            {
+                playerNumbers += ",";
+            }
+
+            player.setProperties( props );
+        }
+
+        props.setProperty( name + ".RaceCount", "" + races.size() );
+
+        String raceNames = "";
+
+        for ( int n = 0; n < races.size(); n++ )
+        {
+            Race race = ( Race ) races.get( n );
+
+            if ( n > 0 )
+            {
+                raceNames += ",";
+            }
+            raceNames += race.getRaceName().replaceAll( " ", "_" );
+
+            race.setProperties( props );
+        }
+
+        props.setProperty( name + ".RaceNames", raceNames );
+
+        props.setProperty( name + ".GameDir", directory );
+        props.setProperty( name + ".PlayerNumbers", playerNumbers );
+    }
 
 
-   /**
-    * Returns true if player action is required for this game
-    * @author Steve Leach
-    */
-   public boolean actionRequired()
-   {
-      boolean actionRequired = false;
-      
-      Player[] players = getPlayers();
-      
-      for (int m = 0; m < players.length; m++)
-      {
-         if (players[m].actionRequired())
-         {
-            actionRequired = true;
-         }
-      }
-      return actionRequired;
-   }
-   
-   private File getUserDefinedPropertiesFile()
-   {
-      return new File(directory + File.separator + name + ".userprops");
-   }
-   
-   /**
-    * Loads user defined properties from the game's user properties file
-    * @author Steve Leach 
-    */
-   public void loadUserDefinedProperties()
-   {
-      File userPropertiesFile = getUserDefinedPropertiesFile();
+    /**
+     *  Load game properties
+     *
+     *@param  props  Description of the Parameter
+     */
+    public void loadGameProperties( Properties props )
+    {
+        String[] races = props.getProperty( name + ".RaceNames" ).split( "," );
 
-      if (userPropertiesFile.exists())
-      {
-         try
-         {
-            FileInputStream s = new FileInputStream(userPropertiesFile);
-            userDefinedProperties.load(s);
-         }
-         catch (FileNotFoundException e)
-         {
-            // This should never happen as we have already checked that the file exists
+        for ( int n = 0; n < races.length; n++ )
+        {
+            races[n] = races[n].replaceAll( "_", " " );
+
+            Race race = getRace( races[n], true );
+
+            race.getProperties( props );
+        }
+    }
+
+
+    /**
+     *  Returns an iterator to iterate over all the known races in the game
+     *
+     *@return    The races value
+     *@author    Steve Leach
+     */
+    public Iterator getRaces()
+    {
+        return races.iterator();
+    }
+
+
+    /**
+     *  Returns true if player action is required for this game
+     *
+     *@return    Description of the Return Value
+     *@author    Steve Leach
+     */
+    public boolean actionRequired()
+    {
+        boolean actionRequired = false;
+
+        Player[] players = getPlayers();
+
+        for ( int m = 0; m < players.length; m++ )
+        {
+            if ( players[m].actionRequired() )
+            {
+                actionRequired = true;
+            }
+        }
+        return actionRequired;
+    }
+
+
+    /**
+     *  Gets the userDefinedPropertiesFile attribute of the Game object
+     *
+     *@return    The userDefinedPropertiesFile value
+     */
+    private File getUserDefinedPropertiesFile()
+    {
+        return new File( directory + File.separator + name + ".userprops" );
+    }
+
+
+    /**
+     *  Loads user defined properties from the game's user properties file
+     *
+     *@author    Steve Leach
+     */
+    public void loadUserDefinedProperties()
+    {
+        File userPropertiesFile = getUserDefinedPropertiesFile();
+
+        if ( userPropertiesFile.exists() )
+        {
+            try
+            {
+                FileInputStream s = new FileInputStream( userPropertiesFile );
+                userDefinedProperties.load( s );
+            }
+            catch ( FileNotFoundException e )
+            {
+                // This should never happen as we have already checked that the file exists
+                e.printStackTrace();
+            }
+            catch ( IOException e )
+            {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+
+    /**
+     *  Support function for use by Planet, Fleet and Race classes
+     *
+     *@param  propertyName  Description of the Parameter
+     *@return               The userDefinedProperty value
+     */
+    String getUserDefinedProperty( String propertyName )
+    {
+        return userDefinedProperties.getProperty( propertyName );
+    }
+
+
+    /**
+     *  Support function for use by Planet, Fleet and Race classes
+     *
+     *@param  propertyName  The new userDefinedProperty value
+     *@param  value         The new userDefinedProperty value
+     */
+    void setUserDefinedProperty( String propertyName, String value )
+    {
+        userDefinedProperties.setProperty( propertyName, value );
+    }
+
+
+    /**
+     *  Saves all user defined properties to the game's user properties file
+     *
+     *@author    Steve Leach
+     */
+    public void saveUserDefinedProperties()
+    {
+        File userPropertiesFile = getUserDefinedPropertiesFile();
+
+        try
+        {
+            FileOutputStream s = new FileOutputStream( userPropertiesFile );
+
+            userDefinedProperties.store( s, "User defined properties for " + name );
+        }
+        catch ( FileNotFoundException e )
+        {
             e.printStackTrace();
-         }
-         catch (IOException e)
-         {
+        }
+        catch ( IOException e )
+        {
             e.printStackTrace();
-         }
-         
-      }
-      
-   }
+        }
+    }
 
 
-   /**
-    * Support function for use by Planet, Fleet and Race classes
-    */
-   String getUserDefinedProperty(String propertyName)
-   {
-      return userDefinedProperties.getProperty( propertyName );
-   }
-
-   /**
-    * Support function for use by Planet, Fleet and Race classes
-    */
-   void setUserDefinedProperty( String propertyName, String value )
-   {
-      userDefinedProperties.setProperty( propertyName, value );
-   }
-
-   /**
-    * Saves all user defined properties to the game's user properties file
-    * @author Steve Leach
-    */
-   public void saveUserDefinedProperties()
-   {
-      File userPropertiesFile = getUserDefinedPropertiesFile();
-      
-      try
-      {
-         FileOutputStream s = new FileOutputStream(userPropertiesFile);
-         
-         userDefinedProperties.store( s, "User defined properties for " + name );
-      }
-      catch (FileNotFoundException e)
-      {
-         e.printStackTrace();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-   }
-   
-   /**
-    * Returns details of the specified fleet in the specified year
-    * @author Steve Leach
-    */
-   public Fleet getFleet( int year, int index )
-   {
-      return fleets.getFleet( year, index );
-   }
-   
-   /**
-    * Returns details of the specified fleet in the current year
-    * @author Steve Leach
-    */
-   public Fleet getFleet( int index )
-   {
-      return fleets.getFleet( index );
-   }
-   
-   public Fleet getFleetByID( int year, String owner, int id )
-   {
-      return fleets.getFleetByID( year, owner, id );
-   }
-   
-   /**
-    * Returns the number of fleets known in the specified year
-    * @author Steve Leach
-    */
-   public int getFleetCount( int year )
-   {
-      return fleets.getFleetCount( year );
-   }
-   
-   /**
-    * Returns the number of fleets known in the current year
-    * @author Steve Leach
-    */
-   public int getFleetCount()
-   {
-      return fleets.getFleetCount( getYear() );
-   }
+    /**
+     *  Returns details of the specified fleet in the specified year
+     *
+     *@param  year   Description of the Parameter
+     *@param  index  Description of the Parameter
+     *@return        The fleet value
+     *@author        Steve Leach
+     */
+    public Fleet getFleet( int year, int index )
+    {
+        return fleets.getFleet( year, index );
+    }
 
 
-   /**
-    * Returns the number of races in the game
-    */
-   public int getRaceCount()
-   {
-      return races.size();
-   }
+    /**
+     *  Returns details of the specified fleet in the current year
+     *
+     *@param  index  Description of the Parameter
+     *@return        The fleet value
+     *@author        Steve Leach
+     */
+    public Fleet getFleet( int index )
+    {
+        return fleets.getFleet( index );
+    }
 
 
-   /**
-    * Finds the closes planet to the given position.
-    * <p>
-    * No planet over the specified threshold distance will be considered. 
-    */
-   public Planet findClosestPlanet(Point mapPos, int threshold)
-   {
-      return planets.findClosestPlanet( mapPos, threshold );
-   }
+    /**
+     *  Gets the fleetByID attribute of the Game object
+     *
+     *@param  year   Description of the Parameter
+     *@param  owner  Description of the Parameter
+     *@param  id     Description of the Parameter
+     *@return        The fleetByID value
+     */
+    public Fleet getFleetByID( int year, String owner, int id )
+    {
+        return fleets.getFleetByID( year, owner, id );
+    }
+
+
+    /**
+     *  Returns the number of fleets known in the specified year
+     *
+     *@param  year  Description of the Parameter
+     *@return       The fleetCount value
+     *@author       Steve Leach
+     */
+    public int getFleetCount( int year )
+    {
+        return fleets.getFleetCount( year );
+    }
+
+
+    /**
+     *  Returns the number of fleets known in the current year
+     *
+     *@return    The fleetCount value
+     *@author    Steve Leach
+     */
+    public int getFleetCount()
+    {
+        return fleets.getFleetCount( getYear() );
+    }
+
+
+    /**
+     *  Returns the number of races in the game
+     *
+     *@return    The raceCount value
+     */
+    public int getRaceCount()
+    {
+        return races.size();
+    }
+
+
+    /**
+     *  Finds the closes planet to the given position. <p>
+     *
+     *  No planet over the specified threshold distance will be considered.
+     *
+     *@param  mapPos     Description of the Parameter
+     *@param  threshold  Description of the Parameter
+     *@return            Description of the Return Value
+     */
+    public Planet findClosestPlanet( Point mapPos, int threshold )
+    {
+        return planets.findClosestPlanet( mapPos, threshold );
+    }
+
+
+    /**
+     *  Gets the sahHosted attribute of the Game object
+     *
+     *@return    The sahHosted value
+     */
+    public String getSahHosted()
+    {
+        return sahHosted;
+    }
+
+
+    /**
+     *  Sets the sahHosted attribute of the Game object
+     *
+     *@param  sahHosted  The new sahHosted value
+     */
+    public void setSahHosted( String sahHosted )
+    {
+        this.sahHosted = sahHosted;
+    }
 }
 
