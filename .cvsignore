@@ -1,6 +1,13 @@
-build
-images
 *.bat
-build.props
-ahclient.jar
 *.doc
+*.zip
+stars.exe
+ahclient.jar
+ahclone
+buguni3
+build
+build.props
+dtroubl1
+images
+junk
+sahFlatfile.props

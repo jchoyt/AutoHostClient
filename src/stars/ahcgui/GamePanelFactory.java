@@ -34,11 +34,6 @@ import stars.ahc.*;
  */
 public class GamePanelFactory extends java.lang.Object
 {
-    private static GridBagConstraints c;
-    private static GridBagLayout gridbag;
-    private static JPanel panel;
-
-
     /**
      *  Description of the Method
      *
@@ -47,141 +42,8 @@ public class GamePanelFactory extends java.lang.Object
      */
     public static JPanel createPanel( Game game )
     {
-        panel = new GamePanel( game );
-        gridbag = new GridBagLayout();
-        c = new GridBagConstraints();
-        panel.setLayout( gridbag );
-        c.gridx = 0;
-        c.gridy = 0;
-        addGameData( game );
-        addBlankSpace();
-        addPlayerList( game );
-        addBlankSpace();
-        c.anchor = GridBagConstraints.CENTER;
-        c.gridwidth = 1;
-        addButtons( game );
-        /*
-         *  add border
-         */
-        Border etched = BorderFactory.createEtchedBorder();
-        panel.setBorder( etched );
-        /*
-         *  set up the property change listener
-         */
-        game.addPropertyChangeListener( new GamesPanelChangeListener( panel ) );
-
-        return panel;
+        return new GamePanel( game );
     }
-
-
-    /**
-     *  Adds a feature to the BlankSpace attribute of the GamePanelFactory
-     *  object
-     */
-    private static void addBlankSpace()
-    {
-        Component blank = Box.createVerticalStrut( 20 );
-        c.gridy++;
-        gridbag.setConstraints( blank, c );
-        panel.add( blank );
-    }
-
-
-    /**
-     *  Adds a feature to the Buttons attribute of the GamePanelFactory class
-     *
-     *@param  game  The feature to be added to the Buttons attribute
-     */
-    private static void addButtons( Game game )
-    {
-        /*
-         *  Add download button
-         */
-        JButton b1 = new DownloadButton( game );
-        c.gridy++;
-        gridbag.setConstraints( b1, c );
-        panel.add( b1 );
-        /*
-         *  Add upload button
-         */
-        b1 = new UploadButton( game );
-        c.gridx++;
-        gridbag.setConstraints( b1, c );
-        panel.add( b1 );
-        /*
-         *  Add remove game button
-         */
-        b1 = new DeleteGameButton( game );
-        c.gridx++;
-        gridbag.setConstraints( b1, c );
-        panel.add( b1 );
-    }
-
-
-    /**
-     *  Adds the game information to the top of the game panel
-     *
-     *@param  game  The feature to be added to the GameData attribute
-     */
-    private static void addGameData( Game game )
-    {
-        JLabel gameDiamond = new JLabel( "<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i?</html>", JLabel.RIGHT );
-        c.gridwidth = 2;
-        gridbag.setConstraints( gameDiamond, c );
-        panel.add( gameDiamond );
-        String label = game.getStatus();//GamesProperties.UPTODATE ? game.getStatus() : "Polling AutoHost - hold on a minute";
-        JLabel stat = new JLabel( label );
-        c.gridy++;
-        gridbag.setConstraints( stat, c );
-        panel.add( stat );
-
-        label = "<html><font size=-2>" + game.getNextGen() + " GMT (AutoHost time)</font></html>";//GamesProperties.UPTODATE ? "<html><font size=-2>"+game.getNextGen() + " GMT (AutoHost time)</font></html>" : "";
-        JLabel nextGen = new JLabel( label );
-        c.gridy++;
-        gridbag.setConstraints( nextGen, c );
-        panel.add( nextGen );
-
-    }
-
-
-    /**
-     *  Adds a feature to the PlayerList attribute of the GamePanelFactory
-     *  object
-     *
-     *@param  game  The feature to be added to the PlayerList attribute
-     */
-    private static void addPlayerList( Game game )
-    {
-        /*
-         *  Add player list
-         */
-        Player[] players = game.getPlayers();
-        PlayerJLabel playerLabel;
-        c.anchor = GridBagConstraints.WEST;
-        int oldGridwidth = c.gridwidth;
-        c.gridwidth = 2;
-        for ( int i = 0; i < players.length; i++ )
-        {
-            /*
-             *  add launch turn button
-             */
-            JButton b = new LaunchGameButton( players[i] );
-            c.gridx = 0;
-            c.gridy++;
-            gridbag.setConstraints( b, c );
-            panel.add( b );
-            /*
-             *  add status JLabel
-             */
-            playerLabel = new PlayerJLabel( players[i] );
-            c.gridx++;
-            gridbag.setConstraints( playerLabel, c );
-            panel.add( playerLabel );
-        }
-        c.gridx = 0;
-        c.gridwidth = oldGridwidth;
-    }
-
 }
 
 /**
@@ -196,6 +58,11 @@ class GamePanel extends JPanel implements PropertyChangeListener
 
     Game game;
 
+    JLabel titleYear;
+    JLabel statusLabel;
+    private GridBagConstraints c;
+    private GridBagLayout gridbag;
+
 
     /**
      *  Constructor for the GamePanel object
@@ -205,6 +72,27 @@ class GamePanel extends JPanel implements PropertyChangeListener
     public GamePanel( Game game )
     {
         this.game = game;
+        gridbag = new GridBagLayout();
+        c = new GridBagConstraints();
+        this.setLayout( gridbag );
+        c.gridx = 0;
+        c.gridy = 0;
+        addGameData( game );
+        addBlankSpace();
+        addPlayerList( game );
+        addBlankSpace();
+        c.anchor = GridBagConstraints.CENTER;
+        c.gridwidth = 1;
+        addButtons( game );
+        /*
+         *  add border
+         */
+        Border etched = BorderFactory.createEtchedBorder();
+        this.setBorder( etched );
+        /*
+         *  set up the property change listener
+         */
+        game.addPropertyChangeListener( this );
         GamesProperties.addPropertyChangeListener( this );
     }
 
@@ -224,6 +112,127 @@ class GamePanel extends JPanel implements PropertyChangeListener
                 setVisible( false );
             }
         }
+        statusLabel.setText("<html>" + game.getStatus() + "</html>");
+        titleYear.setText("<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i></html>");
+    }
+
+
+    /**
+     *  Adds a feature to the BlankSpace attribute of the GamePanelFactory
+     *  object
+     */
+    private void addBlankSpace()
+    {
+        Component blank = Box.createVerticalStrut( 20 );
+        c.gridy++;
+        gridbag.setConstraints( blank, c );
+        this.add( blank );
+    }
+
+
+    /**
+     *  Adds a feature to the Buttons attribute of the GamePanelFactory class
+     *
+     *@param  game  The feature to be added to the Buttons attribute
+     */
+    private void addButtons( Game game )
+    {
+        /*
+         *  Add download button
+         */
+        JButton b1 = new DownloadButton( game );
+        c.gridy++;
+        gridbag.setConstraints( b1, c );
+        this.add( b1 );
+        /*
+         *  Add upload button
+         */
+        b1 = new UploadButton( game );
+        c.gridx++;
+        gridbag.setConstraints( b1, c );
+        this.add( b1 );
+        /*
+         *  Add remove game button
+         */
+        b1 = new DeleteGameButton( game );
+        c.gridx++;
+        gridbag.setConstraints( b1, c );
+        this.add( b1 );
+    }
+
+
+    /**
+     *  Adds the game information to the top of the game this
+     *
+     *@param  game  The feature to be added to the GameData attribute
+     */
+    private void addGameData( Game game )
+    {
+        titleYear = new JLabel( "<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i></html>", JLabel.RIGHT );
+        c.gridwidth = 2;
+        gridbag.setConstraints( titleYear, c );
+        this.add( titleYear );
+        String label = "<html>" + game.getStatus() + "</html>";
+        statusLabel = new JLabel( label );
+        c.gridy++;
+        gridbag.setConstraints( statusLabel, c );
+        this.add( statusLabel );
+
+        label = "<html><font size=-2>" + game.getNextGen() + " GMT (AutoHost time)</font></html>";//GamesProperties.UPTODATE ? "<html><font size=-2>"+game.getNextGen() + " GMT (AutoHost time)</font></html>" : "";
+        JLabel nextGen = new JLabel( label );
+        c.gridy++;
+        gridbag.setConstraints( nextGen, c );
+        this.add( nextGen );
+
+    }
+
+
+    /**
+     *  Adds a feature to the PlayerLabel attribute of the GamePanel object
+     *
+     *@param  player  The feature to be added to the PlayerLabel attribute
+     */
+    private void addPlayerLabel( Player player )
+    {
+        /*
+         *  add launch turn button
+         */
+        JButton b = new LaunchGameButton( player );
+        c.gridx = 0;
+        c.gridy++;
+        gridbag.setConstraints( b, c );
+        this.add( b );
+        /*
+         *  add status JLabel
+         */
+        PlayerJLabel playerLabel = new PlayerJLabel( player );
+        c.gridx++;
+        gridbag.setConstraints( playerLabel, c );
+        this.add( playerLabel );
+    }
+
+
+    /**
+     *  Adds a feature to the PlayerList attribute of the GamePanelFactory
+     *  object
+     *
+     *@param  game  The feature to be added to the PlayerList attribute
+     */
+    private void addPlayerList( Game game )
+    {
+        /*
+         *  Add player list
+         */
+        Player[] players = game.getPlayers();
+        c.anchor = GridBagConstraints.WEST;
+        int oldGridwidth = c.gridwidth;
+        c.gridwidth = 2;
+        for ( int i = 0; i < players.length; i++ )
+        {
+            addPlayerLabel( players[i] );
+        }
+        c.gridx = 0;
+        c.gridwidth = oldGridwidth;
     }
 }
 /**
@@ -491,42 +500,6 @@ class PlayerJLabel extends JLabel implements PropertyChangeListener
     private String getStatusString( Player player )
     {
         return player.getAhStatus();
-    }
-}
-
-/**
- *  Description of the Class
- *
- *@author     JCHOYT
- *@created    May 2, 2003
- */
-class GamesPanelChangeListener extends Object implements PropertyChangeListener
-{
-
-
-    JPanel parentPanel;
-
-
-    /**
-     *  Constructor for the GamesPanelChangeListener object
-     *
-     *@param  p  Description of the Parameter
-     */
-    public GamesPanelChangeListener( JPanel p )
-    {
-        parentPanel = p;
-    }
-
-
-    /**
-     *  Description of the Method
-     *
-     *@param  evt  Description of the Parameter
-     */
-    public void propertyChange( PropertyChangeEvent evt )
-    {
-        Log.log( Log.DEBUG, this, "propertyChange received: " + evt.toString() );
-        parentPanel.getParent();
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- *  This file is part of Stars! Autohost Client
+ *  This file is part of Stars! AutoHost Client
  *  Copyright (c) 2003 Jeffrey C. Hoyt
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -33,7 +33,7 @@ public class AutoHostClient extends java.lang.Object
     /**
      *  Description of the Field
      */
-    public static final String VERSION = "v1.1pre2";
+    public static final String VERSION = "v1.1";
     static String propsFile = "ahclient.props";
 
 

@@ -183,40 +183,6 @@ public class Game extends Object
 
 
     /**
-     *  Gets the playerStatus attribute of the Game object
-     *
-     *@param  id  Description of the Parameter
-     *@return     The playerStatus value
-     */
-    public String getPlayerStatus( String id )
-    {
-        String ret = ahStatus.getProperty( "player" + id + "-turn" );
-        if(ret==null)
-        {
-            Log.log(Log.NOTICE,this,"Player "+ id +" could not be found.  Couldn't pull a property with the key \"player" + id + "-turn\"");
-            throw new NullPointerException("Player "+ id +" could not be found.");
-        }
-        if ( ret.equals( "waiting" ) )
-        {
-            ret = " <font color=\"blue\">Turn not submitted</font>";
-        }
-        else if ( ret.equals( "inactive" ) )
-        {
-            ret = " <font color=\"gray\">Inactive";
-        }
-        else if ( ret.startsWith( "in" ) )
-        {
-            ret = " <font color=\"green\">Uploaded " + ret.substring( 3 ) + "</font>";
-        }
-        else if ( ret.startsWith( "dead" ) )
-        {
-            ret = " <font color=\"gray\">Dead or Banned</font>";
-        }
-        return ret;
-    }
-
-
-    /**
      *  Gets the players attribute of the Game object
      *
      *@return    The players value

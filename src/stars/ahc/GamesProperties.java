@@ -39,6 +39,7 @@ public class GamesProperties extends Object
      *  Description of the Field
      */
     public static String AUTOHOST = "ftp://library.southern.edu/starout/";
+    //public static String AUTOHOST = "file:///devel/autohostclient/ahclone/";
     public static boolean UPTODATE = false;
     /**
      *  Description of the Field

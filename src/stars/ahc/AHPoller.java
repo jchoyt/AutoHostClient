@@ -101,7 +101,7 @@ public class AHPoller extends TimerTask
         }
         catch ( FileNotFoundException e )
         {
-            Log.log( Log.MESSAGE, AHPoller.class, "Couldn't find fCile " + mFile.getAbsolutePath() );
+            Log.log( Log.MESSAGE, AHPoller.class, "Couldn't find file " + mFile.getAbsolutePath() );
             AhcGui.setStatus( "Couldn't find file " + mFile.getAbsolutePath() );
         }
         catch ( Exception e )
@@ -119,15 +119,23 @@ public class AHPoller extends TimerTask
     {
         Game[] games = GamesProperties.getGames();
         boolean success = true;
-        AhcGui.setStatus("Polling AutoHost - wait for the update.");
+        AhcGui.setStatus( "Polling AutoHost - wait for the update." );
         for ( int i = 0; i < games.length; i++ )
         {
             success = success && games[i].poll();
+            if ( success )
+            {
+                Player[] players = games[i].getPlayers();
+                for ( int j = 0; j < players.length; j++ )
+                {
+                    players[j].pcs.firePropertyChange( "status updated", "checked", "not checked" );
+                }
+            }
         }
         if ( success )
         {
             AhcGui.setStatus( "All player stati updated." );
-            GamesProperties.UPTODATE=true;
+            GamesProperties.UPTODATE = true;
             GamesProperties.writeProperties();
         }
         else

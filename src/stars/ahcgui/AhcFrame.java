@@ -233,6 +233,7 @@ public class AhcFrame extends javax.swing.JFrame
          */
         GamesProperties.UPTODATE = true;
         timer.schedule( new AHPoller(), 10 * 60 * 1000, 10 * 60 * 1000 );
+        //timer.schedule( new AHPoller(), 1 * 60 * 1000, 10 * 60 * 1000 );
     }
 
 

@@ -175,6 +175,66 @@ public class Player extends Object
 
 
     /**
+     *  Gets the ahStatus attribute of the Player object
+     *
+     *@return    The ahStatus value
+     */
+    public String getAhStatus()
+    {
+        String ret = game.ahStatus.getProperty( "player" + id + "-turn" );
+        if ( ret == null )
+        {
+            Log.log( Log.NOTICE, this, "Player " + id + " could not be found.  Couldn't pull a property with the key \"player" + id + "-turn\"" );
+            throw new NullPointerException( "Player " + id + " could not be found." );
+        }
+        if ( ret.equals( "waiting" ) )
+        {
+            ret = " <font color=\"blue\">";
+            if ( !game.getGameYear().equals( getMFileYear() ) )
+            {
+                ret += "New turn available";
+            }
+            else if ( game.getGameYear().equals( getXFileYear() ) )
+            {
+                ret += "Out, x-file ready for upload";
+            }
+            else
+            {
+                ret += "Out, turn not done";
+            }
+            ret += "</font>";
+        }
+        else if ( ret.equals( "inactive" ) )
+        {
+            ret = " <font color=\"gray\">Inactive";
+        }
+        else if ( ret.startsWith( "in" ) )
+        {
+            ret = " <font color=\"green\">In";
+            //+ ret.substring( 3 ) +
+            if ( !toUpload )
+            {
+                ret += "; not uploading this player";
+            }
+            else if ( AHPoller.xFileIsNewer( this ) )
+            {
+                ret += ", <i>latest x-file NOT uploaded</i>";
+            }
+            else
+            {
+                ret += ", latest x-file uploaded";
+            }
+            ret += "</font>";
+        }
+        else if ( ret.startsWith( "dead" ) )
+        {
+            ret = " <font color=\"gray\">Dead or Banned</font>";
+        }
+        return ret;
+    }
+
+
+    /**
      *  Gets the game attribute of the Player object
      *
      *@return    The game value
@@ -215,6 +275,32 @@ public class Player extends Object
     public long getLastUpload()
     {
         return lastUpload;
+    }
+
+
+    /**
+     *  Gets the localMfile attribute of the Player object
+     *
+     *@return    The localMfile value
+     */
+    public File getLocalMfile()
+    {
+        return new File( game.getDirectory(), game.getName() + ".m" + id );
+    }
+
+
+    /**
+     *  Gets the localStatus attribute of the Player object
+     *
+     *@return    The localStatus value
+     */
+    public String getLocalStatus()
+    {
+        String ahStatus = getAhStatus();
+        /*
+         *  uploaded, skipped, Turn not submitted
+         */
+        return ahStatus;
     }
 
 
@@ -265,6 +351,22 @@ public class Player extends Object
 
 
     /**
+     *  Gets the raceName attribute of the Player object
+     *
+     *@return    The raceName value
+     */
+    public String getRaceName()
+    {
+        String name = game.getPlayerRaceName( id );
+        if ( name == null )
+        {
+            name = "Player " + id;
+        }
+        return name;
+    }
+
+
+    /**
      *  Gets the starsPassword attribute of the Player object
      *
      *@return    The starsPassword value
@@ -294,12 +396,6 @@ public class Player extends Object
     public String getTurnFileName()
     {
         return game.getName() + ".m" + id;
-    }
-
-
-    public File getLocalMfile()
-    {
-        return new File(game.getDirectory(), game.getName() + ".m" + id);
     }
 
 
@@ -416,21 +512,6 @@ public class Player extends Object
         out.write( ret.toString() );
     }
 
-
-    public String getAhStatus()
-    {
-        return game.getPlayerStatus(id);
-    }
-
-    public String getRaceName()
-    {
-        String name = game.getPlayerRaceName(id);
-        if(name==null)
-        {
-            name = "Player " + id;
-        }
-        return name;
-    }
 
     /**
      *  Gets the fileYear attribute of the Player object
