@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<project name="Map Animator Plugin" default="jar" basedir=".">
+	<property name="build" value="./bin" />
+	<property name="ahcdir" value="../autohostclient" />
+	
+  	<target name="jar" description="Rebuild the plugin">
+		<jar jarfile="mapanimator.jar" description="rebuild the map animator plugin jarfile">
+		  <fileset dir="." includes="mapanimator.ahcplugin"/>
+		  <fileset dir="${build}" includes="**" />
+		</jar>
+  		<copy todir="${ahcdir}/plugins" file="mapanimator.jar" verbose="true"/>
+  	</target>
+	
+</project>
