@@ -253,5 +253,29 @@ public class AutoHostGameController implements GameController
         pcs.addPropertyChangeListener( listener );
     }
 
+
+   /* (non-Javadoc)
+    * @see stars.ahc.GameController#getStatusProperties()
+    */
+    public void loadStatusProperties( Properties ahStatus )
+    {
+       try
+       {
+          File statusFile = new File( game.getDirectory(), game.getStatusFileName() );
+          if ( !statusFile.exists() )
+          {
+             poll();
+             //return;
+          }
+          InputStream in = new FileInputStream( statusFile );
+          ahStatus.load( in );
+          pcs.firePropertyChange( "gameStatus", 0, 1 );
+       }
+       catch ( Exception e )
+       {
+          Log.log( Log.ERROR, this, e );
+       }       
+    }
+
 }
 

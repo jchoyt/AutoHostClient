@@ -22,10 +22,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
@@ -88,7 +86,6 @@ public class Game extends Object
         fleets = new FleetList( this );
         shipDesigns = new ShipDesignList( this );
         this.directory = directory;
-        loadProperties();
         sahHosted = GamesProperties.getProperty( shortName+ ".sahHosted", "true" );
         if ( sahHosted.equals( "true" ) )
         {
@@ -100,6 +97,7 @@ public class Game extends Object
             Log.log( Log.DEBUG, this, shortName + ": local game" );
             controller = new LocalGameController( this );
         }
+        loadProperties();
         loadUserDefinedProperties();
     }
 
@@ -411,23 +409,31 @@ public class Game extends Object
      */
     public void loadProperties()
     {
-        ahStatus = new Properties();
-        try
-        {
-            File statusFile = new File( getDirectory(), getStatusFileName() );
-            if ( !statusFile.exists() )
-            {
-                poll();
-                //return;
-            }
-            InputStream in = new FileInputStream( statusFile );
-            ahStatus.load( in );
-            pcs.firePropertyChange( "gameStatus", 0, 1 );
-        }
-        catch ( Exception e )
-        {
-            Log.log( Log.ERROR, this, e );
-        }
+       ahStatus = new Properties();
+       if (controller != null)
+       {
+          controller.loadStatusProperties( ahStatus );
+       }
+       
+       pcs.firePropertyChange( "gameStatus", 0, 1 );
+       
+//        ahStatus = new Properties();
+//        try
+//        {
+//            File statusFile = new File( getDirectory(), getStatusFileName() );
+//            if ( !statusFile.exists() )
+//            {
+//                poll();
+//                //return;
+//            }
+//            InputStream in = new FileInputStream( statusFile );
+//            ahStatus.load( in );
+//            pcs.firePropertyChange( "gameStatus", 0, 1 );
+//        }
+//        catch ( Exception e )
+//        {
+//            Log.log( Log.ERROR, this, e );
+//        }
     }
 
 
@@ -438,7 +444,7 @@ public class Game extends Object
      */
     public boolean poll()
     {
-        return controller.poll();
+        return (controller == null) ? false : controller.poll();
     }
 
 

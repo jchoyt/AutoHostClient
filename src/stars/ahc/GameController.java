@@ -109,5 +109,10 @@ public interface GameController
      */
     public void addPropertyChangeListener( PropertyChangeListener listener );
 
+    
+    /**
+     * Gets the status properties for the game
+     */
+    public void loadStatusProperties( Properties statusProperties );
 }
 

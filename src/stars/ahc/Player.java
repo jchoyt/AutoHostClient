@@ -15,12 +15,14 @@
  */
 package stars.ahc;
 import java.awt.Color;
-import java.beans.*;
-
-import java.io.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Properties;
 
 import stars.ahcgui.AhcGui;

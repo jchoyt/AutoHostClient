@@ -16,6 +16,8 @@
 package stars.ahc;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.File;
+import java.io.FileReader;
 import java.util.Properties;
 
 /**
@@ -48,7 +50,30 @@ public class LocalGameController implements GameController
      */
     public String getCurrentYear()
     {
-        return null;
+       String year = "unknown";
+       
+       String id = game.getPlayers()[0].id;
+       
+       File mFile = new File( game.directory + File.separator + game.name + ".m" + id  );
+       
+       if (mFile.exists())
+       {
+          try
+          {
+          	FileReader in = new FileReader(mFile);
+          	year = Utils.getTurnNumber( in );
+          }
+          catch (Throwable t)
+          {
+             //TODO: decide what to do with this
+          }
+       }
+       else
+       {
+          Log.log( Log.WARNING, this, "File not found: " + mFile.getAbsolutePath() );
+       }
+       
+        return year;
     }
 
 
@@ -59,7 +84,7 @@ public class LocalGameController implements GameController
      */
     public String getGameYear()
     {
-        return null;
+        return getCurrentYear();
     }
 
 
@@ -70,7 +95,7 @@ public class LocalGameController implements GameController
      */
     public String getLongName()
     {
-        return null;
+        return game.name;
     }
 
 
@@ -81,7 +106,7 @@ public class LocalGameController implements GameController
      */
     public String getNextGen()
     {
-        return null;
+        return "Manual generation";
     }
 
 
@@ -105,9 +130,9 @@ public class LocalGameController implements GameController
     public Properties getPlayersByStatus()
     {
         Properties ret = new Properties();
-        ret.setProperty("in", "local");
-        ret.setProperty("out", "local");
-        ret.setProperty("dead", "local");
+        ret.setProperty("in", "");
+        ret.setProperty("out", "");
+        ret.setProperty("dead", "");
         return ret;
     }
 
@@ -119,7 +144,7 @@ public class LocalGameController implements GameController
      */
     public String getStatus()
     {
-        return null;
+        return "Local game";
     }
 
 
@@ -136,7 +161,10 @@ public class LocalGameController implements GameController
      *
      *@return    Description of the Return Value
      */
-    public boolean poll() { return true;}
+    public boolean poll() 
+    {
+       return true;
+    }
 
 
     /**
@@ -159,6 +187,24 @@ public class LocalGameController implements GameController
     {
         pcs.addPropertyChangeListener( listener );
     }
+
+
+   /* (non-Javadoc)
+    * @see stars.ahc.GameController#getStatusProperties()
+    */
+   public void loadStatusProperties( Properties props )
+   {
+      Player[] players = game.getPlayers();
+      
+      for (int n = 0; n < players.length; n++)
+      {
+         String id = game.getPlayers()[n].id ;
+      
+         props.setProperty( "player" + id + "-turn", "local" );
+      }
+      
+      return;
+   }
 
 }
 

@@ -194,20 +194,25 @@ public class GamePanel extends JPanel implements PropertyChangeListener
         c.gridwidth = 1;
         c.gridx = 0;
 
-        /*
-         *  Add download button
-         */
-        JButton b1 = new DownloadButton( game );
+        JButton b1;
         c.gridy++;
-        gridbag.setConstraints( b1, c );
-        this.add( b1 );
-        /*
-         *  Add upload button
-         */
-        b1 = new UploadButton( game );
-        c.gridx++;
-        gridbag.setConstraints( b1, c );
-        this.add( b1 );
+        
+        if (game.getSahHosted().equals("true"))
+        {
+	        /*
+	         *  Add download button
+	         */
+	        b1 = new DownloadButton( game );
+	        gridbag.setConstraints( b1, c );
+	        this.add( b1 );
+	        /*
+	         *  Add upload button
+	         */
+	        b1 = new UploadButton( game );
+	        c.gridx++;
+	        gridbag.setConstraints( b1, c );
+	        this.add( b1 );
+        }
         /*
          *  Add remove game button
          */
@@ -269,7 +274,9 @@ public class GamePanel extends JPanel implements PropertyChangeListener
         gridbag.setConstraints( statusLabel, c );
         this.add( statusLabel );
 
-        label = "<html><font size=-2>" + game.getNextGen() + " GMT (AutoHost time)</font></html>";//GamesProperties.UPTODATE ? "<html><font size=-2>"+game.getNextGen() + " GMT (AutoHost time)</font></html>" : "";
+        String ahTimeStr = game.getSahHosted().equals("true") ? " GMT (AutoHost time)" : "";
+        
+        label = "<html><font size=-2>" + game.getNextGen() + ahTimeStr + "</font></html>";//GamesProperties.UPTODATE ? "<html><font size=-2>"+game.getNextGen() + " GMT (AutoHost time)</font></html>" : "";
         JLabel nextGen = new JLabel( label );
         c.gridy++;
         gridbag.setConstraints( nextGen, c );
