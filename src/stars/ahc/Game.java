@@ -517,7 +517,7 @@ public class Game extends Object
      */
     public int getYear()
     {
-        return Integer.parseInt( getCurrentYear() );
+        return Utils.safeParseInt( getCurrentYear() );
     }
 
     // Pass-through functions for planet list

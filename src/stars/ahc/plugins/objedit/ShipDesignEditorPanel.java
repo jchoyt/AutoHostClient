@@ -77,6 +77,12 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
    private JTextField weaponsCountField;
    private JComboBox weaponsTypeList;
    private JTable weaponsTable;
+   private JTextField capacitorsField;
+   private JTextField deflectorsField;
+   private JTextField jammersField;
+   private JTextField bcompField;
+   private JTextField bscField;
+   private JTextField nexusField;
 
    public ShipDesignEditorPanel( Game game )
    {
@@ -224,7 +230,8 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       
       gbc.gridx++;      
       gbc.gridwidth = 1;
-      massField = new JTextField(5);
+      massField = new JTextField(4);
+      massField.setToolTipText( "Mass of a single ship in kt" );
       fieldPanel.add( massField, gbc );
       
       gbc.gridy++;
@@ -235,20 +242,26 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       gbc.gridx++;      
       gbc.gridwidth = 1;
       armourField = new JTextField(5);
+      armourField.setToolTipText( "Total armour on a single undamaged ship" );
       fieldPanel.add( armourField, gbc );
 
       gbc.gridx++;
       gbc.gridwidth = 1;
       fieldPanel.add( new JLabel("Shields:"), gbc );
       
-      gbc.gridx++;      
-      shieldsField = new JTextField(5);
-      fieldPanel.add( shieldsField, gbc );
+      Box shieldsBox = Box.createHorizontalBox();      
       
-      gbc.gridx++;      
+      shieldsField = new JTextField(5);
+      shieldsBox.add( shieldsField );
+      
       regenShieldsField = new JCheckBox("Regen");
-      fieldPanel.add( regenShieldsField, gbc );
+      shieldsBox.add( regenShieldsField);
 
+      shieldsBox.add( Box.createHorizontalGlue() );
+
+      gbc.gridx++;
+      fieldPanel.add( shieldsBox, gbc );
+      
       gbc.gridy++;
       gbc.gridx = 1;
       gbc.gridwidth = 1;
@@ -264,9 +277,63 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       fieldPanel.add( new JLabel("Initiative:"), gbc );
       
       gbc.gridx++;      
-      initiativeField = new JTextField(5);
+      initiativeField = new JTextField(3);
       fieldPanel.add( initiativeField, gbc );
-            
+
+      gbc.gridy++;
+      gbc.gridx = 1;
+      gbc.gridwidth = 1;
+      fieldPanel.add( new JLabel("Capacitors:"), gbc );
+      
+      gbc.gridx++;      
+      gbc.gridwidth = 1;
+      capacitorsField = new JTextField(3);
+      capacitorsField.setToolTipText( "Number of energy capacitors on the design" );
+      fieldPanel.add( capacitorsField, gbc );
+
+      gbc.gridx++;
+      gbc.gridwidth = 1;
+      fieldPanel.add( new JLabel("Deflectors:"), gbc );
+      
+      gbc.gridx++;      
+      gbc.gridwidth = 1;
+      deflectorsField = new JTextField(3);
+      deflectorsField.setToolTipText( "Number of beam deflectors on the design" );
+      fieldPanel.add( deflectorsField, gbc );
+
+      gbc.gridy++;
+      gbc.gridx = 1;
+      gbc.gridwidth = 1;
+      fieldPanel.add( new JLabel("Jamming:"), gbc );
+      
+      gbc.gridx++;      
+      gbc.gridwidth = 1;
+      jammersField = new JTextField(3);
+      jammersField.setToolTipText( "Total amount of jamming for the design (not number of jammers)" );
+      fieldPanel.add( jammersField, gbc );
+
+      gbc.gridx++;
+      gbc.gridwidth = 1;
+      fieldPanel.add( new JLabel("Computers:"), gbc );
+
+      Box computersPanel = Box.createHorizontalBox();
+      
+      bcompField = new JTextField(2);
+      computersPanel.add( bcompField, gbc );
+      computersPanel.add( new JLabel(" BC ") );
+
+      bscField = new JTextField(2);
+      computersPanel.add( bscField, gbc );
+      computersPanel.add( new JLabel(" BSC ") );
+      
+      nexusField = new JTextField(2);
+      computersPanel.add( nexusField, gbc );
+      computersPanel.add( new JLabel(" Nexi ") );
+      
+      gbc.gridx++;      
+      gbc.gridwidth = 1;
+      fieldPanel.add( computersPanel, gbc );
+      
       editPanel.add( fieldPanel, BorderLayout.NORTH );
       
       editPanel.add( getWeaponsBox(), BorderLayout.CENTER );
@@ -355,6 +422,8 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
    private void refreshList()
    {
       designNames = new Vector();
+      
+      int current = designsList.getSelectedIndex();
 
       designsList.removeAll();
 
@@ -366,10 +435,13 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       
       designsList.setListData( designNames );
 
+      designsList.setSelectedIndex( current );
       if (designsList.getSelectedIndex() < 0)
       {
          designsList.setSelectedIndex(0);
       }
+      
+
    }
    
    private void refreshFields()
@@ -387,10 +459,17 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       massField.setText( ""+design.getMass() );
       armourField.setText( ""+design.getArmour() );
       shieldsField.setText( ""+design.getShields() );
-      moveField.setText( ""+(design.getSpeed4()/4) );
+      moveField.setText( ""+(design.getSpeed4()/4.0) );
       initiativeField.setText( ""+design.getInitiative() );
       regenShieldsField.setSelected( design.isRegenShields() );
+      capacitorsField.setText( ""+design.getCapacitors() );
+      deflectorsField.setText( ""+design.getDeflectors() );
+      jammersField.setText( ""+design.getJamming() );
+      bcompField.setText( ""+design.getComputers(ShipDesign.BATTLE_COMPUTER) );
+      bscField.setText( ""+design.getComputers(ShipDesign.SUPER_COMPUTER) );
+      nexusField.setText( ""+design.getComputers(ShipDesign.BATTLE_NEXUS) );
       
+      weaponsTable.revalidate();
       weaponsTable.repaint();
    }
    
@@ -409,6 +488,14 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       design.setInitiative( Utils.safeParseInt(initiativeField.getText(),0) );
       design.setBattleSpeed( Utils.safeParseFloat(moveField.getText(),0)  );
       design.setRegenShields( regenShieldsField.isSelected() );
+      design.setJamming( Utils.safeParseInt(jammersField.getText(),0) );
+      design.setCapacitors( Utils.safeParseInt(capacitorsField.getText(),0) );
+      design.setDeflectors( Utils.safeParseInt(deflectorsField.getText(),0) );
+      
+      int bc = Utils.safeParseInt(bcompField.getText());
+      int bsc = Utils.safeParseInt(bscField.getText());
+      int nexus = Utils.safeParseInt(nexusField.getText());      
+      design.setComputers( bc, bsc, nexus );
       
       game.saveUserDefinedProperties();
       

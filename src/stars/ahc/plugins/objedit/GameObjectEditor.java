@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
 import stars.ahc.Game;
+import stars.ahc.Log;
 import stars.ahcgui.AhcFrame;
 
 /**
@@ -57,7 +58,7 @@ public class GameObjectEditor extends JFrame
    {
       setTitle( "Planet/fleet editor for " + game.getName() );
       setLocation( 40, 40 );
-      setSize( 620, 400 );
+      setSize( 720, 540 );
       
       AhcFrame.setWindowIcon(this);
       
@@ -89,6 +90,7 @@ public class GameObjectEditor extends JFrame
       }
       catch (Throwable t)
       {
+         Log.log( Log.ERROR, this, "Error adding editor tab: " + editorClassName );
          t.printStackTrace();
       }
    }

@@ -85,4 +85,9 @@ public class ShipStack
       xpos = x;
       ypos = y;
    }
+   
+   public String getStackAsString()
+   {
+      return shipCount + " x " + design.getDesignAsString();
+   }
 }

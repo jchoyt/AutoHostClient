@@ -396,6 +396,17 @@ public class Utils
          return defaultValue;
       }
    }
+   
+   /**
+    * Converts a string to an integer.  If the string does not contain a valid
+    * integer then 0 is returned.
+    *
+    * @author Steve Leach
+    */
+   public static int safeParseInt(String value)
+   {
+      return safeParseInt(value,0);
+   }
 
    /**
     * Returns a pseudo-random floating point value between 0 and 1.

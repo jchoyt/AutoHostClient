@@ -37,7 +37,14 @@ public class BattleSimulatorTest extends TestCase
    private BattleSimulationListener consoleStatusListener = new BattleSimulationListener() {
       public void handleNotification(BattleSimulationNotification notification)
       {
-         System.out.println( "Round " + notification.round + " : " + notification.message );
+         if (notification.round == 0)
+         {
+            System.out.println( notification.message );
+         }
+         else
+         {
+            System.out.println( "Round " + notification.round + " : " + notification.message );
+         }
       }
    };
 
@@ -48,6 +55,7 @@ public class BattleSimulatorTest extends TestCase
    protected void setUp() throws Exception
    {
       rabidDog = new ShipDesign( ShipDesign.HULLTYPE_BATTLECRUISER, "Rabid Dog" );
+      rabidDog.setOwner( "EDog" );
       rabidDog.setMass( 174 );
       rabidDog.setArmour( 1000 );
       rabidDog.setShields( 240 );
@@ -58,6 +66,7 @@ public class BattleSimulatorTest extends TestCase
       rabidDog.addWeapon( Weapon.COLLOIDAL_PHASER, 3 );
       
       ccc = new ShipDesign( ShipDesign.HULLTYPE_CRUISER, "CCC" );
+      ccc.setOwner( "Staz" );
       ccc.setMass( 130 );
       ccc.setArmour( 700 );
       ccc.setShields( 560 );
@@ -158,6 +167,9 @@ public class BattleSimulatorTest extends TestCase
       
       battle.addNewStack( rabidDog, 7 );
       battle.addNewStack( ccc, 14 );
+
+      battle.addStatusListener( consoleStatusListener );
+      battle.showStacksFull();
       
       battle.simulate();
       
@@ -230,9 +242,11 @@ public class BattleSimulatorTest extends TestCase
    public void testBattleThree() throws BattleSimulationError
    {
       BattleSimulation battle = new BattleSimulation();
-      
-      battle.addNewStack( rabidDog, 20 );
+
+      battle.addNewStack( rabidDog, 50 );
       battle.addNewStack( armBB, 4 );
+      
+      //battle.addStatusListener( consoleStatusListener );
       
       battle.simulate();
       
@@ -240,12 +254,12 @@ public class BattleSimulatorTest extends TestCase
       // Test that we got the expected battle outcome
       //
       
-      // ArmBB stack is lightly damaged
-      assertEquals( 4, battle.getStack("ArmBB").shipCount );
+      // Only 2 ArmBBs left, both heavily damaged
+      assertEquals( 2, battle.getStack("ArmBB").shipCount );
 
       // Damage won't always be exactly the same, but should be in the same region
-      assertTrue( "ArmBBs about 27% damaged", battle.getStack("ArmBB").getDamagePercent() > 25 );
-      assertTrue( "ArmBBs about 27% damaged", battle.getStack("ArmBB").getDamagePercent() < 30 );
+      assertTrue( "ArmBBs about 65% damaged", battle.getStack("ArmBB").getDamagePercent() > 60 );
+      assertTrue( "ArmBBs about 65% damaged", battle.getStack("ArmBB").getDamagePercent() < 70 );
             
       // Rabid Dog stack is wiped out
       assertEquals( 0, battle.getStack("Rabid Dog").shipCount );
@@ -306,7 +320,7 @@ public class BattleSimulatorTest extends TestCase
       battle.addStack( cynic );
       battle.addStack( staz );
 
-      battle.addStatusListener( consoleStatusListener );
+      //battle.addStatusListener( consoleStatusListener );
       
       battle.simulate();
    }

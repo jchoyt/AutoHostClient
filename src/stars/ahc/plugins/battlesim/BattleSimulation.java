@@ -141,6 +141,7 @@ public class BattleSimulation
     */
    protected int movesInRound( int speed4, int round )
    {
+      if (speed4 == 0) return 0;
       if (round > 8) round -= 8;
       return movement[speed4-1][round-1];
    }
@@ -168,6 +169,8 @@ public class BattleSimulation
     */
    protected void initialiseBattleBoard() throws BattleSimulationError
    {
+      round = 1;
+      
       for (int n = 0; n < stackCount; n++)
       {
          setInitialPosition( stacks[n], n );
@@ -677,7 +680,17 @@ public class BattleSimulation
       
       power *= rangeMultipliyer;
       
-      // TODO: handle capacitors and deflectors
+      if (design.getCapacitors() > 0)
+      {
+         double capacitorAdjust = Math.pow( 1.1, design.getCapacitors() );
+         capacitorAdjust = Math.min( capacitorAdjust, 2.5 );
+         power *= capacitorAdjust;
+      }
+      if (target.design.getDeflectors() > 0)
+      {
+         double deflectorAdjust = Math.pow( 1.1, design.getDeflectors() );
+         power /= deflectorAdjust;
+      }
       
       if (power < target.shields)
       {
@@ -730,7 +743,7 @@ public class BattleSimulation
       {
          return;
       }
-      int numShots = design.getWeaponCount(slot);
+      int numShots = design.getWeaponCount(slot) * stack.shipCount;
       
       double accuracy = design.getWeaponAccuracy(slot);
       
@@ -931,6 +944,14 @@ public class BattleSimulation
                stacks[n].targetedBy = stack.target;
             }
          }
+      }
+   }
+   
+   public void showStacksFull()
+   {
+      for (int n = 0; n < stackCount; n++)
+      {
+         statusUpdate( stacks[n].getStackAsString() );
       }
    }
 }

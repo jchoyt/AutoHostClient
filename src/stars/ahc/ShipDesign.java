@@ -70,6 +70,11 @@ public class ShipDesign
    private boolean warmonger = false;
    private int jamming = 0;
    private int computing = 0;
+   private int capacitors = 0;
+   private int deflectors = 0;
+   private int bc = 0;
+   private int bsc = 0;
+   private int nexus = 0;
    
    public ShipDesign( int hullType, String name )
    {
@@ -354,6 +359,35 @@ public class ShipDesign
       return this.computing;
    }
 
+   public void setComputers( int bc, int bsc, int nexus )
+   {
+      this.bc = bc;
+      this.bsc = bsc;
+      this.nexus = nexus;
+      
+      computing = 0;
+      addComputer( BATTLE_COMPUTER, bc );
+      addComputer( SUPER_COMPUTER, bsc );
+      addComputer( BATTLE_NEXUS, nexus );
+   }
+   
+   /**
+    * Returns the number of computers of the specified type on the design 
+    */
+   public int getComputers( int type )
+   {
+      switch (type)
+      {
+         case BATTLE_COMPUTER: 
+            return bc;
+         case SUPER_COMPUTER:
+            return bsc;
+         case BATTLE_NEXUS:
+            return nexus;
+      }
+      return 0;
+   }
+   
    public void addComputer( int type, int quantity )
    {
       double typeModifier = 1.0;
@@ -394,5 +428,46 @@ public class ShipDesign
       }
       
       return maxRange;
+   }
+
+   
+   public int getCapacitors()
+   {
+      return capacitors;
+   }
+   public void setCapacitors(int capacitors)
+   {
+      this.capacitors = capacitors;
+   }
+   public int getDeflectors()
+   {
+      return deflectors;
+   }
+   public void setDeflectors(int deflectors)
+   {
+      this.deflectors = deflectors;
+   }
+   public String getDesignAsString()
+   {
+      String s = "";
+      
+      if (Utils.empty(owner) == false)
+      {
+         s += owner + " ";
+      }
+      s += name + " "; 
+      s += "(" + getHullTypeNames()[hullType] + ")\n";
+      s += "amour=" + armour + ", shields=" + shields;      
+      s += (regenShields) ? " (regen)\n" : "\n";
+      s += "speed=" + speed4/4.0 + ", initative=" + initiative + "\n";
+      s += "capacitors=" + capacitors + ", deflectors=" + deflectors + "\n";
+      s += "jamming=" + jamming + "%, computers=" + bc + "/" + bsc + "/" + nexus + "\n";
+      
+      for (int n = 0; n < weaponSlotsUsed; n++)
+      {
+         s += "Slot " + (n+1) + ": " + weaponCount[n] + " x " + weaponName[n] + "\n";
+      }
+         
+      return s;
    }
 }
