@@ -37,7 +37,7 @@ public class GamePanelAnalyzeButton implements GamePanelButtonPlugin
     */
    public String getButtonText()
    {
-      return "Analyze";
+      return "Reports";
    }
 
    /* (non-Javadoc)
