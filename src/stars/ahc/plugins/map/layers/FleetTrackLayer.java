@@ -18,10 +18,12 @@
  */
 package stars.ahc.plugins.map.layers;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -49,6 +51,38 @@ public class FleetTrackLayer extends AbstractMapLayer
    private JComboBox fleetList;
    private JComboBox typeList;
    
+   
+   /**
+    * Cache of line segments used to draw the fleet track
+    */
+   private class LineSegmentCache extends ArrayList
+   {
+      public String description = "empty";
+      public LineSegment getSegment( int index )
+      {
+         return (LineSegment)get( index );
+      }
+   }
+   private LineSegmentCache lineSegmentCache = new LineSegmentCache();
+   
+   /**
+    * Describes a line in the fleet track 
+    */
+   private class LineSegment
+   {
+      public Color color;
+      public Point from, to;
+      
+      /**
+       * Draws the line segment onto the specified graphics device 
+       */
+      public void draw( Graphics2D g )
+      {
+         g.setColor( color );         
+         g.drawLine( from.x, from.y, to.x, to.y );
+      }
+   }
+   
    /* (non-Javadoc)
     * @see stars.ahcgui.pluginmanager.PlugIn#getDescription()
     */
@@ -62,33 +96,73 @@ public class FleetTrackLayer extends AbstractMapLayer
     */
    public void draw(Graphics2D g)
    {
+      // Build a string describing what we want to draw 
+      String required = "" + mapConfig.year + "::" + selectedRace + "::" + selectedFleet + "::" + selectedType;
+   
+      // Check to see whether we already have what we want in the cache
+      if (lineSegmentCache.description.equals(required) == false)
+      {
+         rebuildCache();
+         lineSegmentCache.description = required;
+      }
+      
+      drawFromCache( g );      
+   }
+
+   /**
+    * Rebuild the line segment cache 
+    */
+   private void rebuildCache()
+   {
+      lineSegmentCache.clear();
+      
       int fleetCount = game.getFleetCount( mapConfig.year );
       
+      // Loop through all the fleets
       for (int n = 0; n < fleetCount; n++)
       {
          Fleet fleet = game.getFleet( mapConfig.year, n );
 
+         // If it is a fleet we want to show...
          if (raceTest(fleet) && typeTest(fleet) && fleetTest(fleet))
          {
-	         g.setColor( game.getRaceColor( fleet.getOwner() ) );
+            Color currentColor = game.getRaceColor( fleet.getOwner() );
 	         
 	         Point prevPos = mapConfig.mapToScreen( fleet.getPosition() );
 	         
+	         // Loop back through time building the fleet track
 	         for (int y = mapConfig.year-1; y > 2400; y--)
 	         {
 	            Fleet f = game.getFleetByID( y, fleet.getOwner(), fleet.getID() );
 	            
 	            if (f != null)
 	            {
-	               Point p = mapConfig.mapToScreen( f.getPosition() );
-	               g.drawLine( prevPos.x, prevPos.y, p.x, p.y );
-	               prevPos = p;
+	               LineSegment seg = new LineSegment();
+	               seg.color = currentColor;
+	               seg.from = prevPos;
+	               seg.to = mapConfig.mapToScreen( f.getPosition() );
+
+	               lineSegmentCache.add( seg );
+	               
+	               prevPos = seg.to;
 	            }
 	         }
          }
       }
+      
    }
 
+   /**
+    * Draw the lines from the line segment cache 
+    */
+   private void drawFromCache( Graphics2D g )
+   {
+      for (int n = 0; n < lineSegmentCache.size(); n++)
+      {
+         lineSegmentCache.getSegment(n).draw( g );
+      }
+   }
+   
    /**
     */
    private boolean raceTest( Fleet fleet )
