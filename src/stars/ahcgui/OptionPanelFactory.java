@@ -1,23 +1,23 @@
 /*
- * :mode=java:tabSize=4:indentSize=4:noTabs=true:
- * :folding=indent:collapseFolds=0:wrap=none:maxLineLen=0:
+ *  :mode=java:tabSize=4:indentSize=4:noTabs=true:
+ *  :folding=indent:collapseFolds=0:wrap=none:maxLineLen=0:
  *
- * $Source$
- * Copyright (C) 2004 jchoyt
+ *  $Source$
+ *  Copyright (C) 2004 jchoyt
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or any later version.
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version 2
+ *  of the License, or any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahcgui;
 import java.awt.Dimension;
@@ -129,6 +129,7 @@ class GameOptionPane extends AbstractOptionPane implements PropertyChangeListene
     String playerList;
     ArrayList playerPanesList = new ArrayList();
     JPanel playerPanesPanel = new JPanel();
+    JCheckBox sahHosted = new JCheckBox( "Game hosted on AutoHost", true );
 
 
     /**
@@ -163,13 +164,14 @@ class GameOptionPane extends AbstractOptionPane implements PropertyChangeListene
     {
         //add the change listener to the associated game.
         game.addPropertyChangeListener( this );
-        GamesProperties.addPropertyChangeListener(this);
+        GamesProperties.addPropertyChangeListener( this );
         //set layout of player pane to be vertical
         playerPanesPanel.setLayout( new BoxLayout( playerPanesPanel, BoxLayout.Y_AXIS ) );
         //int height = ( int ) gameName.getSize().getHeight();
         gameName.setMinimumSize( new Dimension( 200, 5 ) );
         addComponent( "Game name: ", gameName );
         addComponent( "Game files location: ", gameFileLocation );
+        addComponent( sahHosted );
         addBlankSpace();
 
         Player[] players = game.getPlayers();
@@ -206,6 +208,7 @@ class GameOptionPane extends AbstractOptionPane implements PropertyChangeListene
                 file = file.getParentFile();
                 gameLoc = file.getCanonicalPath();
                 gameFileLocation.setText( gameLoc.replace( '\\', '/' ) );
+                sahHosted.setSelected( game.getSahHosted().equals( "true" ) );
             }
             catch ( Exception e )
             {
@@ -231,6 +234,7 @@ class GameOptionPane extends AbstractOptionPane implements PropertyChangeListene
     {
         game.setDirectory( gameFileLocation.getText() );
         game.setName( gameName.getText() );
+        game.setSahHosted( sahHosted.isSelected() ? "true" : "false" );
         for ( int i = 0; i < playerPanesList.size(); i++ )
         {
             ( ( PlayerPane ) playerPanesList.get( i ) )._save();
@@ -263,10 +267,10 @@ class GameOptionPane extends AbstractOptionPane implements PropertyChangeListene
             pane.refresh();
             validate();
         }
-        else if(evt.getPropertyName().equals("game removed"))
+        else if ( evt.getPropertyName().equals( "game removed" ) )
         {
-            setVisible(false);
-            AhcGui.getOptionSelector().removeItem(((Game)evt.getOldValue()).getName());
+            setVisible( false );
+            AhcGui.getOptionSelector().removeItem( ( ( Game ) evt.getOldValue() ).getName() );
         }
     }
 
@@ -567,16 +571,16 @@ class NewGamePane extends GameOptionPane
             save();
             try
             {
-               addGame();            
+                addGame();
                 GamesProperties.writeProperties();
             }
-            catch (AutoHostError e)
+            catch ( AutoHostError e )
             {
-             JOptionPane.showInternalMessageDialog(
-                   AhcGui.mainFrame.getContentPane(),
-                   "Error contacting AutoHost",
-                   "Retrieval problem",
-                   JOptionPane.INFORMATION_MESSAGE );
+                JOptionPane.showInternalMessageDialog(
+                        AhcGui.mainFrame.getContentPane(),
+                        "Error contacting AutoHost",
+                        "Retrieval problem",
+                        JOptionPane.INFORMATION_MESSAGE );
             }
             catch ( Exception e )
             {
@@ -624,9 +628,11 @@ class NewGamePane extends GameOptionPane
 
     /**
      *  Adds a feature to the Game attribute of the NewGamePane object
-    * @throws AutoHostError
+     *
+     *@throws  AutoHostError
      */
-    protected void addGame() throws AutoHostError
+    protected void addGame()
+        throws AutoHostError
     {
         game.setDirectory( gameFileLocation.getText() );
         game.setName( gameName.getText() );
@@ -635,7 +641,7 @@ class NewGamePane extends GameOptionPane
         AhcGui.getGameCards().add( GamePanelFactory.createPanel( game ), game.getName() );
         AhcGui.addOption( game.getName(), OptionPanelFactory.createPanel( game ) );
         mainParent.dispose();
-        
+
         Utils.setupDirs( game );
     }
 

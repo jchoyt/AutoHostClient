@@ -2,7 +2,7 @@
  * Created on Oct 6, 2004
  *
  * Copyright (c) 2004, Steve Leach
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
  *  as published by the Free Software Foundation; either version 2
@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- * 
+ *
  */
 package stars.ahc.plugins.map;
 
@@ -82,7 +82,7 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 /**
  * Swing frame in which the game map is displayed
- * 
+ *
  * @author Steve Leach
  */
 public class MapFrame extends JFrame implements MapConfigChangeListener, WindowListener, MapMouseMoveListener
@@ -92,7 +92,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    protected static Map mapFrames = new HashMap();
    private JSlider scaleSlider;
    private MapPanel mapPanel;
-   private JLabel scaleLabel; 
+   private JLabel scaleLabel;
    private ArrayList layers = new ArrayList();
    private Properties savedProperties;
    private JButton prevYearButton;
@@ -102,7 +102,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    private JLabel layerControlEmptyLabel;
    private JTable layerTable;
    private JLabel statusLabel;
-   
+
    /**
     * Other classes should use viewGameMap() instead of the constructor.
     * @param game
@@ -110,29 +110,29 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    protected MapFrame( Game game, MapConfig config ) throws MapDisplayError
    {
       this.game = game;
-      
+
       this.config = config;
-      
+
       if (config.year < 2400)
       {
          config.year = game.getYear();
       }
-      
+
       config.addChangeListener( this );
       addWindowListener( this );
-     
+
       setupMapFrame();
       setupLayers();
       setupMapControls();
-      
+
       //writeProperties();
    }
-   
+
    /**
     * Factory method for MapFrames - called instead of the constructor.
-    * 
+    *
     * Displays the map for the specified game.
-    * 
+    *
     * @param game
     * @throws MapDisplayError
     */
@@ -142,47 +142,47 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       {
          throw new MapDisplayError( "No game specified" );
       }
-      
+
       MapFrame mf = (MapFrame)mapFrames.get( game.getName() );
-      
+
       if (mf == null)
       {
          mf = new MapFrame( game, config );
          mapFrames.put( game.getName(), mf );
       }
-      
+
       mf.show();
-      
+
       return mf;
    }
- 
-   
+
+
    /**
     */
    private void setupLayers() throws MapDisplayError
    {
       ArrayList plugins = PlugInManager.getPluginManager().getPlugins( MapLayer.class );
-      
+
       for (int n = 0; n < plugins.size(); n++)
       {
          try
          {
-	         Class plugin = (Class)plugins.get(n);	         
-	         MapLayer layer = (MapLayer)PlugInManager.getPluginManager().newInstance( plugin );
-	         
-	         layer.initialize( game, config );
-	         
-	         if (layer instanceof ConfigurablePlugIn)
-	         {
-	            ConfigurablePlugIn cp = (ConfigurablePlugIn)layer;
-	            
-	            if (savedProperties != null)
-	            {
-	               cp.loadConfiguration( savedProperties );
-	            }
-	         }
-	         
-	         layers.add( layer );
+             Class plugin = (Class)plugins.get(n);
+             MapLayer layer = (MapLayer)PlugInManager.getPluginManager().newInstance( plugin );
+
+             layer.initialize( game, config );
+
+             if (layer instanceof ConfigurablePlugIn)
+             {
+                ConfigurablePlugIn cp = (ConfigurablePlugIn)layer;
+
+                if (savedProperties != null)
+                {
+                   cp.loadConfiguration( savedProperties );
+                }
+             }
+
+             layers.add( layer );
          }
          catch (Exception e)
          {
@@ -191,7 +191,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       }
    }
 
-   
+
    /**
     * Sets up the frame itself (borders, title, etc)
     */
@@ -204,12 +204,12 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       int width = GamesProperties.getIntProperty( base+".width", 580 );
       setBounds( x, y, width, height );
       setTitle( "Map for " + game.getName() + " (" + game.getCurrentYear() + ")" );
-      
+
       AhcFrame.setWindowIcon(this);
-      
+
       getContentPane().setLayout(new BorderLayout());
    }
-   
+
    /**
     * Sets up the controls within the frame
     */
@@ -217,7 +217,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    {
       JPanel toolbar = new JPanel( new FlowLayout(FlowLayout.LEFT) );
       getContentPane().add( toolbar, BorderLayout.NORTH );
-      
+
       JButton btn = new JButton( "Save Image" );
       btn.setSelected( true );
       btn.setToolTipText( "Save map image to disk" );
@@ -238,39 +238,39 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
             redrawMap();
          }
       });
-      toolbar.add( refreshBtn );      
-      
+      toolbar.add( refreshBtn );
+
       mapPanel = new MapPanel( game, config );
-      
+
       mapPanel.setMapFrame( this );
       mapPanel.addMapLayers( layers );
-      
+
       mapPanel.addMapMouseMoveListener( this );
 
       getContentPane().add( mapPanel, BorderLayout.CENTER );
-      
+
       JPanel controlPanel = new JPanel();
       controlPanel.setLayout( new BoxLayout(controlPanel, BoxLayout.Y_AXIS) );
       //controlPanel.setBorder( new BevelBorder(BevelBorder.LOWERED) );
 
-      
+
       //===============
       JPanel scalePanel = new JPanel();
-      scalePanel.setLayout( new BoxLayout(scalePanel,BoxLayout.X_AXIS) );      
+      scalePanel.setLayout( new BoxLayout(scalePanel,BoxLayout.X_AXIS) );
       scalePanel.setBorder( createStandardBorder("Scale") );
-      
+
       scaleSlider = new JSlider();
       scaleSlider.setMinimum( 10 );
       scaleSlider.setMaximum( 400 );
       scaleSlider.setValue( 100 );
-      
+
       scalePanel.add( scaleSlider );
-      
+
       scaleLabel = new JLabel("100%");
       scalePanel.add( scaleLabel );
-      
+
       controlPanel.add( scalePanel );
-      
+
       scaleSlider.addChangeListener( new ChangeListener() {
          public void stateChanged(ChangeEvent event)
          {
@@ -284,15 +284,15 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
 
       Box yearPanel = Box.createHorizontalBox();
       yearPanel.setBorder( createStandardBorder("Year") );
-      
+
       yearPanel.add( Box.createHorizontalGlue() );
-      
-      Action prevYearAction = new AbstractAction("<") 
+
+      Action prevYearAction = new AbstractAction("<")
       {
          public void actionPerformed(ActionEvent e)
          {
             moveYear(-1);
-         }         
+         }
       };
 
       prevYearButton = new JButton( prevYearAction );
@@ -300,18 +300,18 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       prevYearButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put( KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP,0), "Previous year" );
       prevYearButton.getActionMap().put( "Previous year", prevYearAction );
       yearPanel.add( prevYearButton );
-      
+
       yearLabel = new JLabel( " "+config.year+" " );
       yearPanel.add( yearLabel );
 
-      Action nextYearAction = new AbstractAction(">") 
+      Action nextYearAction = new AbstractAction(">")
       {
          public void actionPerformed(ActionEvent e)
          {
             moveYear(1);
-         }         
+         }
       };
-      
+
       nextYearButton = new JButton( nextYearAction );
       nextYearButton.setMaximumSize( new Dimension(20,20) );
       prevYearButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put( KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN,0), "Next year" );
@@ -319,14 +319,14 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       yearPanel.add( nextYearButton );
 
       yearPanel.add( Box.createHorizontalGlue() );
-      
+
       controlPanel.add( yearPanel );
-      
+
       //===============
-      
+
       Box playersPanel = Box.createVerticalBox();
       playersPanel.setBorder( createStandardBorder("Races") );
-      
+
       PlayerTableModel playerModel = new PlayerTableModel( game );
       JTable playerTable = new JTable( playerModel );
       playerTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
@@ -336,18 +336,18 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       playerTable.setShowGrid(false);
       playerTable.setSelectionMode( ListSelectionModel.SINGLE_SELECTION  );
       playerTable.setBackground( controlPanel.getBackground() );
-      
+
       playersPanel.add( playerTable );
-      
+
       controlPanel.add( playersPanel );
-      
+
       //===============
-      
+
       Box layersPanel = Box.createVerticalBox();
       layersPanel.setBorder( createStandardBorder("Layers") );
-      
+
       LayerTableModel layerModel = new LayerTableModel( this );
-      layerTable = new JTable( layerModel );      
+      layerTable = new JTable( layerModel );
       layerTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
       layerTable.setRowHeight(20);
       layerTable.getColumnModel().getColumn(0).setMaxWidth( 20 );
@@ -364,39 +364,39 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
             }
          }
        });
-      
+
       layersPanel.add( layerTable );
       controlPanel.add( layersPanel );
-      
+
       //===============
-      
+
       layerControlParent = new JPanel();
       layerControlParent.setBorder( createStandardBorder("Layer controls") );
-      
+
       layerControlEmptyLabel = new JLabel("No controls for this layer");
       layerControlParent.add( layerControlEmptyLabel );
-      
+
       controlPanel.add( layerControlParent );
-      
+
       //===============
-            
+
       controlPanel.add( Box.createGlue() );
-      
+
       getContentPane().add( controlPanel, BorderLayout.EAST );
-      
+
       //===============
-      
+
       Box statusBar = Box.createHorizontalBox();
       statusBar.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
 
       statusLabel = new JLabel("Ready");
-      
+
       statusBar.add( statusLabel );
       statusBar.add( Box.createHorizontalGlue() );
-      
+
       getContentPane().add( statusBar, BorderLayout.SOUTH );
    }
-   
+
    /**
     * Sets the text in the status bar at the bottom of the map window
     */
@@ -404,7 +404,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    {
       statusLabel.setText( message );
    }
-   
+
    /**
     */
    private Border createStandardBorder(String title)
@@ -418,37 +418,37 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    private void moveYear( int movement )
    {
       config.year += movement;
-      
+
       if (config.year < 2400) config.year = 2400;
       if (config.year > game.getYear()) config.year = game.getYear();
-      
+
       config.notifyChangeListeners();
    }
-   
+
    private void doSave()
    {
       JFileChooser chooser = new JFileChooser();
       int rc = chooser.showSaveDialog( this );
-      
+
       if (rc != JFileChooser.APPROVE_OPTION )
       {
          return;
       }
-      
+
       File file = chooser.getSelectedFile();
-      
+
       BufferedImage img = new BufferedImage( mapPanel.getHeight(), mapPanel.getWidth(), BufferedImage.TYPE_INT_RGB );
       Graphics g = img.getGraphics();
-      
+
       mapPanel.paint( g );
 
 //    Encode as a JPEG
       try
       {
-	      FileOutputStream fos = new FileOutputStream(file);
-	      JPEGImageEncoder jpeg = JPEGCodec.createJPEGEncoder(fos);
-	      jpeg.encode(img);
-	      fos.close();
+          FileOutputStream fos = new FileOutputStream(file);
+          JPEGImageEncoder jpeg = JPEGCodec.createJPEGEncoder(fos);
+          jpeg.encode(img);
+          fos.close();
       }
       catch (Throwable t)
       {
@@ -457,22 +457,22 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    }
 
    /**
-    * Called when a map layer has been selected from the list 
+    * Called when a map layer has been selected from the list
     */
    private void layerSelected()
    {
       // Clear any existing controls in the layer control panel
       layerControlParent.removeAll();
-      
+
       // Get the selected map layer
-      int layerIndex = layerTable.getSelectedRow();      
+      int layerIndex = layerTable.getSelectedRow();
       MapLayer layer = (MapLayer)layers.get(layerIndex);
 
       if (layer != null)
       {
          // Get the controls for the selected map layer
          Component controls = layer.getControls();
-         
+
          if (controls == null)
          {
             // If there aren't any controls for the layer, display a simple message
@@ -483,12 +483,12 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
             // Otherwise display the controls
             layerControlParent.add( controls );
          }
-         
+
          // Make the new controls visible
          layerControlParent.revalidate();
       }
    }
-   
+
    public void redrawMap()
    {
       mapPanel.repaint();
@@ -501,32 +501,32 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    {
       scaleSlider.setValue( (int)Math.round(config.mapScale * 100) );
       yearLabel.setText( " " + config.year + " " );
-      
+
       //mapPanel.repaint();
    }
-   
+
    public MapLayer[] getMapLayers()
    {
       return (MapLayer[])layers.toArray( new MapLayer[0] );
    }
-   
+
    private void writeProperties()
    {
       // This should all really happen in saveConfiguration()
-      
+
       GamesProperties.setProperty( "Plugins.MapFrame."+game.getName()+".xpos", this.getX() );
       GamesProperties.setProperty( "Plugins.MapFrame."+game.getName()+".ypos", this.getY() );
       GamesProperties.setProperty( "Plugins.MapFrame."+game.getName()+".height", this.getHeight() );
       GamesProperties.setProperty( "Plugins.MapFrame."+game.getName()+".width", this.getWidth() );
-      
+
       for (int n = 0; n < layers.size(); n++)
       {
          MapLayer layer = (MapLayer)layers.get(n);
-         
+
          String layer_id = layer.getName().replaceAll( " ", "_" );
          GamesProperties.setProperty( "Plugins.MapLayers."+game.getName()+"." + layer_id + ".enabled", layer.isEnabled() );
       }
-      
+
       GamesProperties.writeProperties();
    }
 
@@ -551,7 +551,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
     */
    public void windowClosing(WindowEvent arg0)
    {
-      writeProperties();      
+      writeProperties();
    }
 
    /* (non-Javadoc)
@@ -591,24 +591,24 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    public void loadConfiguration(Properties properties)
    {
       this.savedProperties = properties;
-      
+
       for (int n = 0; n < layers.size(); n++)
       {
          MapLayer layer = (MapLayer)layers.get(n);
-         
+
          String key = "Plugins.MapLayers." + game.getName() + "." + layer.getName().replaceAll("_"," ")+".enabled";
          String enabled = savedProperties.getProperty( key );
          if (enabled != null)
          {
             layer.setEnabled( enabled == "true" );
          }
-         
+
          if (layer instanceof ConfigurablePlugIn)
          {
             ((ConfigurablePlugIn)layer).loadConfiguration( properties );
          }
-      }     
-      
+      }
+
    }
 
    /**
@@ -620,20 +620,20 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       properties.setProperty( "Plugins.MapFrame."+game.getName()+".ypos", ""+this.getY() );
       properties.setProperty( "Plugins.MapFrame."+game.getName()+".height", ""+this.getHeight() );
       properties.setProperty( "Plugins.MapFrame."+game.getName()+".width", ""+this.getWidth() );
-      
+
       for (int n = 0; n < layers.size(); n++)
       {
          MapLayer layer = (MapLayer)layers.get(n);
-         
+
          String layer_id = layer.getName().replaceAll( " ", "_" );
          properties.setProperty( "Plugins.MapLayers."+game.getName()+"." + layer_id + ".enabled", ""+layer.isEnabled() );
-         
+
          if (layer instanceof ConfigurablePlugIn)
          {
             ConfigurablePlugIn cp = (ConfigurablePlugIn)layer;
             cp.saveConfiguration( properties );
          }
-      }      
+      }
    }
 
    /* (non-Javadoc)
@@ -645,9 +645,9 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       // Always display the new co-ords (in map space).
       // If near a planet, display it's name as well.
       // If the planet is occupied, display it's owner.
-      
+
       String posText = mapPos.x + "," + mapPos.y;
-      
+
       Planet planet = game.findClosestPlanet( mapPos, 6 );
 
       if (planet != null)
@@ -656,7 +656,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
 
          // Re-get the planet's details for the currently viewed year
          planet = game.getPlanet( planet.getName(), config.year );
-         
+
          if (planet != null)
          {
             if (planet.isOccupied())
@@ -665,7 +665,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
             }
          }
       }
-      
+
       setStatus( posText );
    }
 
@@ -676,15 +676,15 @@ class LayerTableModel extends AbstractTableModel
 {
    private MapLayer[] layers;
    private MapFrame mapFrame;
-   
+
    public LayerTableModel( MapFrame mapFrame )
    {
       this.mapFrame = mapFrame;
       initialize();
    }
-   
+
    /**
-    * 
+    *
     */
    private void initialize()
    {
@@ -722,7 +722,7 @@ class LayerTableModel extends AbstractTableModel
       }
       return null;
    }
-   
+
    public Class getColumnClass(int col)
    {
       switch (col)
@@ -731,13 +731,13 @@ class LayerTableModel extends AbstractTableModel
          default: return String.class;
       }
    }
-   
+
    public boolean isCellEditable(int row, int col)
    {
       return (col == 0);
    }
-   
-   
+
+
    public void setValueAt(Object obj, int row, int col)
    {
       switch (col)
@@ -760,7 +760,7 @@ class PlayerTableModel extends AbstractTableModel
    {
       this.game = game;
       races = new Race[game.getRaceCount()];
-      
+
       Iterator raceList = game.getRaces();
       while (raceList.hasNext())
       {
@@ -771,7 +771,7 @@ class PlayerTableModel extends AbstractTableModel
          }
       }
    }
-   
+
    /* (non-Javadoc)
     * @see javax.swing.table.TableModel#getColumnCount()
     */
@@ -792,19 +792,19 @@ class PlayerTableModel extends AbstractTableModel
     * @see javax.swing.table.TableModel#getValueAt(int, int)
     */
    public Object getValueAt(int row, int col)
-   {      
+   {
       switch (col)
       {
          case 0:
             return races[row].getColor();
          case 1:
             return races[row].getRaceName();
-           
+
       }
       return null;
    }
-   
-   
+
+
    public Class getColumnClass(int col)
    {
       switch (col)

@@ -2,7 +2,7 @@
  * Created on Oct 14, 2004
  *
  * Copyright (c) 2004, Steve Leach
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
  *  as published by the Free Software Foundation; either version 2
@@ -72,31 +72,31 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
    public static JFrame showAnalyzer(Game game)
    {
       GameAnalyzerFrame result = (GameAnalyzerFrame)analyzers.get(game.getName());
-      
+
       if (result == null)
       {
          result = new GameAnalyzerFrame( game );
          analyzers.put( game.getName(), result );
       }
-      
+
       result.show();
-      
+
       return result;
    }
 
    /**
     * Only constructor is private.
     * <p>
-    * To create an instance, use the static showAnalyzer() method 
+    * To create an instance, use the static showAnalyzer() method
     */
    private GameAnalyzerFrame( Game game )
    {
       this.game = game;
       init();
    }
-   
+
    /**
-    * 
+    *
     */
    private void init()
    {
@@ -106,7 +106,7 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
    }
 
    /**
-    * 
+    *
     */
    private void initFrame()
    {
@@ -114,55 +114,55 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
       setLocation( 20, 20 );
       setTitle( "Analyzing " + game.getName() + " (" + game.getCurrentYear() + ") " );
       getContentPane().setLayout( new BorderLayout() );
-      
+
       AhcFrame.setWindowIcon(this);
    }
 
    private void setupReports()
    {
       PlugInManager manager = PlugInManager.getPluginManager();
-      
+
       ArrayList plugins = manager.getPlugins( AnalyzerReport.class );
-      
+
       for (int n = 0; n < plugins.size(); n++)
       {
          Class reportClass = (Class)plugins.get(n);
 
          AnalyzerReport report = (AnalyzerReport)PlugInManager.getPluginManager().newInstance(reportClass);
-         reports.add( report );         
+         reports.add( report );
       }
    }
-   
+
    private void initControls()
    {
-      JPanel controlPanel = new JPanel();      
-      
+      JPanel controlPanel = new JPanel();
+
       controlPanel.setLayout( new FlowLayout(FlowLayout.LEFT) );
-      
+
       JLabel label = new JLabel( "Report:" );
       controlPanel.add( label );
-      
+
       String[] reportNames = new String[ reports.size() ];
       for (int n = 0; n < reportNames.length; n++)
       {
          reportNames[n] = ((AnalyzerReport)reports.get(n)).getDescription();
       }
-      
+
       combo = new JComboBox( reportNames );
       combo.addActionListener( this );
       controlPanel.add( combo );
-    
+
       runButton = new JButton( "Run" );
       runButton.addActionListener( this );
       runButton.setToolTipText( "Run the selected report" );
       controlPanel.add( runButton );
-      
+
       copyButton = new JButton( "Copy" );
       copyButton.addActionListener( this );
       copyButton.setEnabled( false );
       copyButton.setToolTipText( "Copy report text to clipboard" );
       controlPanel.add( copyButton );
-      
+
       saveButton = new JButton( "Save..." );
       saveButton.addActionListener( this );
       saveButton.setEnabled( false );
@@ -174,31 +174,31 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
       printButton.setEnabled( false );
       printButton.setToolTipText( "Print report to default printer" );
       controlPanel.add( printButton );
-      
+
       getContentPane().add( controlPanel, BorderLayout.NORTH );
-      
+
       text = new JTextArea();
       text.setFont( new Font("Courier",0,12) );
       JScrollPane scroller = new JScrollPane( text );
-      
+
       text.setEditable( false );
 
       getContentPane().add( scroller, BorderLayout.CENTER );
-      
+
       statusBar = new JLabel("Ready");
       getContentPane().add( statusBar, BorderLayout.SOUTH );
-      
+
       showReportControls();
    }
-   
+
    private AnalyzerReport getSelectedReport()
    {
       int reportIndex = combo.getSelectedIndex();
-      return (AnalyzerReport)reports.get(reportIndex);      
+      return (AnalyzerReport)reports.get(reportIndex);
    }
-   
+
    /**
-    * 
+    *
     */
    private void showReportControls()
    {
@@ -208,7 +208,7 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
       }
 
       AnalyzerReport report = getSelectedReport();
-      
+
       if (report instanceof ConfigurableReport)
       {
          ConfigurableReport rpt = (ConfigurableReport)report;
@@ -221,13 +221,13 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
          {
             blankControlPanel = new JPanel();
          }
-         
+
          currentControlPanel = blankControlPanel;
       }
-      
+
 
       getContentPane().add( currentControlPanel, BorderLayout.EAST );
-      
+
       validate();
    }
 
@@ -235,13 +235,13 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
    {
       statusBar.setText( message );
    }
-   
+
    /**
     * Load properties
     */
    public void loadProperties( Properties props )
    {
-      
+
    }
 
    /* (non-Javadoc)
@@ -272,7 +272,7 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
    }
 
    /**
-    * 
+    *
     */
    private void copyReportToClipboard()
    {
@@ -283,37 +283,37 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
    }
 
    /**
-    * 
+    *
     */
    private void runReport()
    {
       AnalyzerReport report = getSelectedReport();
-      
+
       try
       {
          String output = report.run( game, new Properties() );
-         
+
          text.setText( output );
-         
+
          enableButtons();
-         
+
          setStatus( "Report completed: " + report.getDescription() );
       }
       catch (AnalyzerReportError e)
       {
          text.setText( "Error: " + e.getMessage() );
       }
-      
+
       text.setCaretPosition( 0 );
    }
 
    /**
-    * 
+    *
     */
    private void enableButtons()
    {
       boolean enabled = Utils.empty( text.getText() ) == false;
-      
+
       copyButton.setEnabled( enabled );
       saveButton.setEnabled( enabled );
       printButton.setEnabled( enabled );
@@ -324,18 +324,18 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
       JFileChooser chooser = new JFileChooser( "." );
       chooser.setDialogTitle( "Save report text" );
       //chooser.setFileFilter( new FileExtensionFilter(".txt","Text files (*.txt)") );
-      chooser.setFileSelectionMode( JFileChooser.FILES_ONLY );      
-      
+      chooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
+
       int result = chooser.showSaveDialog( this );
-      
+
       if (result == JFileChooser.APPROVE_OPTION)
       {
          File file = chooser.getSelectedFile();
-       
+
          saveReportText( file );
       }
-   }      
-   
+   }
+
    private void saveReportText( File file )
    {
       try
@@ -346,9 +346,9 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
       }
       catch (Throwable t)
       {
-         Log.log( Log.ERROR, this, "An error occurred while saving the report" );               
+         Log.log( Log.ERROR, this, "An error occurred while saving the report" );
          JOptionPane.showMessageDialog( this, "An error occurred while saving the report" );
-      }      
+      }
    }
 
    private void printReportText()
@@ -358,20 +358,20 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
 
       if (job != null)
       {
-	      ReportPrinter rp = new ReportPrinter();
-	      rp.setReportText( text.getText() );
-	      
-	      try
-	      {
-	         rp.printReport( job );
-	         
-	         setStatus( "Report printed" );
-	      }
-	      catch (Exception e)
-	      {
-	         e.printStackTrace();
-	      }
+          ReportPrinter rp = new ReportPrinter();
+          rp.setReportText( text.getText() );
+
+          try
+          {
+             rp.printReport( job );
+
+             setStatus( "Report printed" );
+          }
+          catch (Exception e)
+          {
+             e.printStackTrace();
+          }
       }
    }
-   
+
 }

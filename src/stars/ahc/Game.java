@@ -50,6 +50,7 @@ public class Game extends Object
     private ArrayList races = new ArrayList();
     private Properties userDefinedProperties = new Properties();
     protected String sahHosted = "true";
+    private GameController controller;
 
 
     /**
@@ -88,6 +89,17 @@ public class Game extends Object
         shipDesigns = new ShipDesignList( this );
         this.directory = directory;
         loadProperties();
+        sahHosted = GamesProperties.getProperty( shortName+ ".sahHosted", "true" );
+        if ( sahHosted.equals( "true" ) )
+        {
+            Log.log( Log.DEBUG, this, shortName + ": SahHosted game" );
+            controller = new AutoHostGameController( this );
+        }
+        else
+        {
+            Log.log( Log.DEBUG, this, shortName + ": local game" );
+            controller = new LocalGameController( this );
+        }
         loadUserDefinedProperties();
     }
 
@@ -135,7 +147,7 @@ public class Game extends Object
      */
     public String getCurrentYear()
     {
-        return ahStatus.getProperty( "game-year" );
+        return controller.getCurrentYear();
     }
 
 
@@ -157,7 +169,7 @@ public class Game extends Object
      */
     public String getGameYear()
     {
-        return ahStatus.getProperty( "game-year" );
+        return controller.getGameYear();
     }
 
 
@@ -168,11 +180,7 @@ public class Game extends Object
      */
     public String getLongName()
     {
-        if ( ahStatus == null )
-        {
-            loadProperties();
-        }
-        return ahStatus.getProperty( "game-name" );
+        return controller.getLongName();
     }
 
 
@@ -194,7 +202,7 @@ public class Game extends Object
      */
     public String getNextGen()
     {
-        return ahStatus.getProperty( "next-gen-time" );
+        return controller.getNextGen();
     }
 
 
@@ -206,7 +214,7 @@ public class Game extends Object
      */
     public String getPlayerRaceName( String id )
     {
-        return ahStatus.getProperty( "player" + id + "-race" );
+        return controller.getPlayerRaceName( id );
     }
 
 
@@ -284,82 +292,7 @@ public class Game extends Object
      */
     public Properties getPlayersByStatus()
     {
-        StringBuffer in = new StringBuffer();
-        StringBuffer out = new StringBuffer();
-        StringBuffer dead = new StringBuffer();
-        int in_lines = 1;
-        int out_lines = 1;
-        int dead_lines = 1;
-        final int COLS = 65;
-        String ret;
-        for ( int i = 1; i <= 16; i++ )
-        {
-            ret = ahStatus.getProperty( "player" + i + "-turn" );
-            if ( ret == null )
-            {
-                continue;
-            }
-            if ( ret.equals( "waiting" ) )
-            {
-                if ( out.length() != 0 )
-                {
-                    out.append( ", " );
-                    if ( out.length() > COLS * out_lines )
-                    {
-                        out.append( "<br>" );
-                        out_lines++;
-                    }
-                }
-                out.append( ahStatus.getProperty( "player" + i + "-race" ) );
-            }
-            else if ( ret.startsWith( "skipped" ) )
-            {
-                if ( out.length() != 0 )
-                {
-                    out.append( ", " );
-                    if ( out.length() > COLS * out_lines )
-                    {
-                        out.append( "<br>" );
-                        out_lines++;
-                    }
-                }
-                out.append( ahStatus.getProperty( "player" + i + "-race" ) );
-                out.append( " ( skipped " );
-                out.append( ret.substring( 8 ) );
-                out.append( " )" );
-            }
-            else if ( ret.equals( "inactive" ) || ret.startsWith( "dead" ) )
-            {
-                if ( dead.length() != 0 )
-                {
-                    dead.append( ", " );
-                    if ( dead.length() > COLS * dead_lines )
-                    {
-                        dead.append( "<br>" );
-                        dead_lines++;
-                    }
-                }
-                dead.append( ahStatus.getProperty( "player" + i + "-race" ) );
-            }
-            else if ( ret.startsWith( "in" ) )
-            {
-                if ( in.length() != 0 )
-                {
-                    in.append( ", " );
-                    if ( in.length() > COLS * in_lines )
-                    {
-                        in.append( "<br>" );
-                        in_lines++;
-                    }
-                }
-                in.append( ahStatus.getProperty( "player" + i + "-race" ) );
-            }
-        }
-        Properties stati = new Properties();
-        stati.setProperty( "in", String.valueOf( in ) );
-        stati.setProperty( "out", String.valueOf( out ) );
-        stati.setProperty( "dead", String.valueOf( dead ) );
-        return stati;
+        return controller.getPlayersByStatus();
     }
 
 
@@ -381,7 +314,7 @@ public class Game extends Object
      */
     public String getStatus()
     {
-        return ahStatus.getProperty( "status" );
+        return controller.getStatus();
     }
 
 
@@ -469,6 +402,7 @@ public class Game extends Object
     public void addPropertyChangeListener( PropertyChangeListener listener )
     {
         pcs.addPropertyChangeListener( listener );
+        controller.addPropertyChangeListener( listener );
     }
 
 
@@ -480,7 +414,7 @@ public class Game extends Object
         ahStatus = new Properties();
         try
         {
-            File statusFile = new File( directory, getStatusFileName() );
+            File statusFile = new File( getDirectory(), getStatusFileName() );
             if ( !statusFile.exists() )
             {
                 poll();
@@ -504,31 +438,7 @@ public class Game extends Object
      */
     public boolean poll()
     {
-        if ( sahHosted.equals( "false" ) )
-        {
-            /*
-             *  TODO: need code in here to check the status of hte local files and essentially recreate the .status file
-             *  Or do I want to just subclass Game to create an OfflineGame class????
-             */
-            return true;
-        }
-        /*
-         *  get status file from AH
-         */
-        try
-        {
-            Utils.getFileFromAutohost( name, getStatusFileName(), directory );
-        }
-        catch ( AutoHostError e )
-        {
-            Log.log( Log.ERROR, this, e );
-            return false;
-        }
-        /*
-         *  load new status into game  GUI should be updated by reloading ahStatus
-         */
-        loadProperties();
-        return true;
+        return controller.poll();
     }
 
 
@@ -555,42 +465,9 @@ public class Game extends Object
         StringBuffer ret = new StringBuffer();
         ret.append( "Game=" + name + lineEnding );
         StringWriter out = new StringWriter();
-        try
-        {
-            writeProperties( out );
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
-        ret.append( out.toString() );
+        ret.append( name + ".GameDir=" + directory + lineEnding );
+        ret.append( name + ".sahHosted=" + sahHosted );
         return ret.toString();
-    }
-
-
-    /**
-     *  Description of the Method
-     *
-     *@param  out              Description of the Parameter
-     *@exception  IOException  Description of the Exception
-     *@deprecated              setProperties() is used instead
-     */
-    public void writeProperties( Writer out )
-        throws IOException
-    {
-        String lineEnding = System.getProperty( "line.separator" );
-        String playerNumbers = "";
-        for ( int i = 0; i < players.size(); i++ )
-        {
-            playerNumbers += ( ( Player ) players.get( i ) ).getId();
-            if ( i < players.size() - 1 )
-            {
-                playerNumbers += ",";
-            }
-            ( ( Player ) players.get( i ) ).writeProperties( out );
-        }
-        out.write( name + ".GameDir=" + directory + lineEnding );
-        out.write( name + ".PlayerNumbers=" + playerNumbers + lineEnding );
     }
 
 
@@ -602,7 +479,7 @@ public class Game extends Object
      */
     public void setPlayerTurnStatus( int playerNum, String value )
     {
-        ahStatus.setProperty( "player" + playerNum + "-turn", value );
+        controller.setPlayerTurnStatus( playerNum, value );
     }
 
 
@@ -857,7 +734,7 @@ public class Game extends Object
         }
 
         props.setProperty( name + ".RaceNames", raceNames );
-
+        props.setProperty( name + ".sahHosted", sahHosted );
         props.setProperty( name + ".GameDir", directory );
         props.setProperty( name + ".PlayerNumbers", playerNumbers );
     }
@@ -930,10 +807,10 @@ public class Game extends Object
 
 
     /**
-     * Loads user defined properties from the game's user properties file
-     * <p>
-     * Also sets up any ship designs that are included in the properties file.
-     * 
+     *  Loads user defined properties from the game's user properties file <p>
+     *
+     *  Also sets up any ship designs that are included in the properties file.
+     *
      *@author    Steve Leach
      */
     public void loadUserDefinedProperties()
@@ -964,24 +841,25 @@ public class Game extends Object
 
 
     /**
-    * Adds any ship designs that are stored in the specified properties list
-    * 
-    * @author Steve Leach 
-    */
-   private void setupShipDesigns( Properties props )
-   {
-      int designCount = Utils.safeParseInt( props.getProperty("ShipDesigns.count"), 0 );
-      
-      for (int n = 0; n < designCount; n++)
-      {
-         ShipDesign design = new ShipDesign();
-         design.loadProperties( props, n+1 );
-         shipDesigns.addDesign( design );
-      }
-   }
+     *  Adds any ship designs that are stored in the specified properties list
+     *
+     *@param  props  Description of the Parameter
+     *@author        Steve Leach
+     */
+    private void setupShipDesigns( Properties props )
+    {
+        int designCount = Utils.safeParseInt( props.getProperty( "ShipDesigns.count" ), 0 );
+
+        for ( int n = 0; n < designCount; n++ )
+        {
+            ShipDesign design = new ShipDesign();
+            design.loadProperties( props, n + 1 );
+            shipDesigns.addDesign( design );
+        }
+    }
 
 
-   /**
+    /**
      *  Support function for use by Planet, Fleet and Race classes
      *
      *@param  propertyName  Description of the Parameter
@@ -1012,8 +890,8 @@ public class Game extends Object
      */
     public void saveUserDefinedProperties()
     {
-       getShipDesignProperties( userDefinedProperties );
-       
+        getShipDesignProperties( userDefinedProperties );
+
         File userPropertiesFile = getUserDefinedPropertiesFile();
 
         try
@@ -1034,20 +912,21 @@ public class Game extends Object
 
 
     /**
-    */
-   private void getShipDesignProperties(Properties properties)
-   {
-      properties.setProperty( "ShipDesigns.count", ""+shipDesigns.getDesignCount() );
-      
-      for (int n = 0; n < shipDesigns.getDesignCount(); n++)
-      {
-         ShipDesign design = shipDesigns.getDesign(n);
-         design.storeProperties( properties, n+1 );
-      }
-   }
+     *@param  properties  Description of the Parameter
+     */
+    private void getShipDesignProperties( Properties properties )
+    {
+        properties.setProperty( "ShipDesigns.count", "" + shipDesigns.getDesignCount() );
+
+        for ( int n = 0; n < shipDesigns.getDesignCount(); n++ )
+        {
+            ShipDesign design = shipDesigns.getDesign( n );
+            design.storeProperties( properties, n + 1 );
+        }
+    }
 
 
-   /**
+    /**
      *  Returns details of the specified fleet in the specified year
      *
      *@param  year   Description of the Parameter
@@ -1159,20 +1038,51 @@ public class Game extends Object
     {
         this.sahHosted = sahHosted;
     }
-    
+
+
+    /**
+     *  Adds a feature to the ShipDesign attribute of the Game object
+     *
+     *@param  design  The feature to be added to the ShipDesign attribute
+     */
     public void addShipDesign( ShipDesign design )
     {
-       shipDesigns.addDesign( design );
+        shipDesigns.addDesign( design );
     }
-    
+
+
+    /**
+     *  Gets the shipDesign attribute of the Game object
+     *
+     *@param  index  Description of the Parameter
+     *@return        The shipDesign value
+     */
     public ShipDesign getShipDesign( int index )
     {
-       return shipDesigns.getDesign( index );
-    }    
-    
+        return shipDesigns.getDesign( index );
+    }
+
+
+    /**
+     *  Gets the shipDesignCount attribute of the Game object
+     *
+     *@return    The shipDesignCount value
+     */
     public int getShipDesignCount()
     {
-       return shipDesigns.getDesignCount();
+        return shipDesigns.getDesignCount();
     }
+
+
+    /**
+     *  Gets the ahStatus attribute of the Game object
+     *
+     *@return    The ahStatus value
+     */
+    public Properties getAhStatus()
+    {
+        return ahStatus;
+    }
+
 }
 

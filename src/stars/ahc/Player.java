@@ -408,37 +408,11 @@ public class Player extends Object
         StringBuffer ret = new StringBuffer();
         ret.append( "Game=" + game.getName() + lineEnding );
         ret.append( "Id=" + id + lineEnding );
-        StringWriter out = new StringWriter();
-        try
-        {
-            writeProperties( out );
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
-        ret.append( out.toString() );
-        return ret.toString();
-    }
-
-
-    /**
-     *  Description of the Method
-     *
-     *@param  out              Description of the Parameter
-     *@exception  IOException  Description of the Exception
-     *@deprecated              setProperties() is used instead
-     */
-    public void writeProperties( Writer out )
-        throws IOException
-    {
-        String lineEnding = System.getProperty( "line.separator" );
-        StringBuffer ret = new StringBuffer();
         ret.append( game.getName() + ".player" + id + ".lastUpload=" + lastUpload + lineEnding );
         ret.append( game.getName() + ".player" + id + ".StarsPassword=" + starsPassword + lineEnding );
         ret.append( game.getName() + ".player" + id + ".UploadPassword=" + uploadPassword + lineEnding );
         ret.append( game.getName() + ".player" + id + ".upload=" + toUpload + lineEnding );
-        out.write( ret.toString() );
+        return ret.toString();
     }
 
 
@@ -507,12 +481,12 @@ public class Player extends Object
        // FIXME: what happens if one of these returns null ?
        String mFileYear = getMFileYear();
        String currentYear = game.getCurrentYear();
-       
+
        if ((mFileYear == null) || (currentYear == null))
        {
           return true;
        }
-       
+
        return mFileYear.compareTo( currentYear ) < 0;
     }
 

@@ -279,8 +279,8 @@ public class Utils
         String backup = game.getDirectory() + "/backup";
         File fFile = new File( gameDir, game.getFFileName( playerNumber ) );
         File pFile = new File( gameDir, game.getPFileName( playerNumber ) );
-        File backupFDest = new File( backup, createBackupFileName( fFile, game.getGameYear() ) );
-        File backupPDest = new File( backup, createBackupFileName( pFile, game.getGameYear() ) );
+        File backupFDest = new File( backup, createBackupFileName( fFile, game.getCurrentYear() ) );
+        File backupPDest = new File( backup, createBackupFileName( pFile, game.getCurrentYear() ) );
         try
         {
             Utils.fileCopy( fFile, backupFDest );
@@ -462,7 +462,7 @@ public class Utils
       }
       catch (Throwable t)
       {
-         return defaultValue;         
+         return defaultValue;
       }
    }
 }

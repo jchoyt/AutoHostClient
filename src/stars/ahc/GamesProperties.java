@@ -339,7 +339,7 @@ public class GamesProperties
         try
         {
            initProperties();
-           
+
             if ( propsLocation == null )
             {
                 propsLocation = "ahclient.props";
@@ -398,28 +398,28 @@ public class GamesProperties
                     String playerList = props.getProperty( gameNames[i] + ".PlayerNumbers" );
                     if (playerList != null)
                     {
-	                    String[] playerNumbers = playerList.split( "[, ]" );
-	                    Player[] players = new Player[playerNumbers.length];
-	                    for ( int j = 0; j < playerNumbers.length; j++ )
-	                    {
-	                        if ( playerNumbers[j].equals( "" ) )
-	                        {
-	                            continue;
-	                        }
-	                        Player newPlayer = new Player();
-	                        newPlayer.setGame( currentGame );
-	                        newPlayer.setStarsPassword( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".StarsPassword" ) );
-	                        newPlayer.setUploadPassword( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".UploadPassword" ) );
-	                        newPlayer.setId( playerNumbers[j] );
-	                        newPlayer.setToUpload( Boolean.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".upload" ) ).booleanValue() );
-	                        newPlayer.setLastUpload( Long.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".lastUpload" ) ).longValue() );
-	                        players[j] = newPlayer;
-	                    }
-	                    currentGame.setPlayers( players );
+                        String[] playerNumbers = playerList.split( "[, ]" );
+                        Player[] players = new Player[playerNumbers.length];
+                        for ( int j = 0; j < playerNumbers.length; j++ )
+                        {
+                            if ( playerNumbers[j].equals( "" ) )
+                            {
+                                continue;
+                            }
+                            Player newPlayer = new Player();
+                            newPlayer.setGame( currentGame );
+                            newPlayer.setStarsPassword( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".StarsPassword" ) );
+                            newPlayer.setUploadPassword( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".UploadPassword" ) );
+                            newPlayer.setId( playerNumbers[j] );
+                            newPlayer.setToUpload( Boolean.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".upload" ) ).booleanValue() );
+                            newPlayer.setLastUpload( Long.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".lastUpload" ) ).longValue() );
+                            players[j] = newPlayer;
+                        }
+                        currentGame.setPlayers( players );
                     }
-                    
+
                     currentGame.loadGameProperties( props );
-                    
+
                     games.add( currentGame );
                 }
                 if ( gameNames.length == 1 )
@@ -440,22 +440,22 @@ public class GamesProperties
     private static void refreshGamesProperties()
     {
        String gameNames = "";
-       
+
        for ( int i = 0; i < games.size(); i++ )
        {
           Game game = (Game)games.get(i);
-       
+
           if (Utils.empty(gameNames) == false)
           {
              gameNames += ",";
           }
           gameNames += game.name;
-          
+
           game.setProperties( props );
-          
+
           game.saveUserDefinedProperties();
        }
-       
+
        setProperty( "Games", gameNames );
     }
 
@@ -469,14 +469,8 @@ public class GamesProperties
          */
         try
         {
-            //FileWriter out = new FileWriter( propsFile );
-            //writeProperties( out );
-            //out.close();
-           
            refreshGamesProperties();
            saveAllPluginSettings();
-           //refreshPluginConfig();
-           
            FileOutputStream fos = new FileOutputStream( propsFile );
            props.store( fos, "AutoHostClient properties" );
            fos.close();
@@ -490,46 +484,7 @@ public class GamesProperties
 
 
     /**
-     *  Description of the Method
-     *
-     *@param  out              Description of the Parameter
-     *@exception  IOException  Description of the Exception
-     */
-    public static void writeProperties( Writer out )
-        throws IOException
-    {
-//       
-//        /*
-//         *  GamesProperties stuff
-//         */
-//        out.write( "StarsExecutable=" + starsExecutable + lineEnding );
-//        if ( proxyHost != null )
-//        {
-//            out.write( "ProxyHost=" + proxyHost + lineEnding );
-//            out.write( "ProxyPort=" + proxyPort + lineEnding );
-//        }
-//        /*
-//         *  write the properties for each game
-//         */
-//        if ( games != null && games.size() > 0 )
-//        {
-//            String gameNames = "";
-//            for ( int i = 0; i < games.size(); i++ )
-//            {
-//                gameNames += ( ( Game ) games.get( i ) ).getName();
-//                if ( i < games.size() - 1 )
-//                {
-//                    gameNames += ",";
-//                }
-//                ( ( Game ) games.get( i ) ).writeProperties( out );
-//            }
-//            out.write( "Games=" + gameNames + lineEnding );
-//        }
-//        
-    }
-
-    /**
-     * Sets an ad-hoc property 
+     * Sets an ad-hoc property
      */
     public static void setProperty( String name, Object value )
     {
@@ -543,36 +498,36 @@ public class GamesProperties
     {
        props.setProperty( name, value ? "true" : "false" );
     }
-    
+
     public static int getIntProperty( String key, int defaultValue )
     {
        String s = props.getProperty( key );
        return Utils.safeParseInt( s, defaultValue );
     }
-    
+
     public static Properties getProperties()
     {
        return props;
     }
-    
+
     /**
      * Register a configurable plugin.
      * <p>
      * Will also load any saved configuration for the plugin.
-     * 
+     *
      * @deprecated - this is no longer required
-     * @author Steve Leach 
+     * @author Steve Leach
      */
     public static void registerConfigurablePlugin( ConfigurablePlugIn plugin )
     {
        plugin.loadConfiguration( props );
-       
+
        plugins.add( plugin );
     }
-    
+
     /**
      * Tells each registered plugin to save it's properties
-     * 
+     *
      * @deprecated - saveAllPluginSettings() is the new way of doing this
      * @author Steve Leach
      */
@@ -586,7 +541,7 @@ public class GamesProperties
     }
 
    /**
-    * 
+    *
     */
    public static void initProperties()
    {
@@ -599,17 +554,17 @@ public class GamesProperties
    public static boolean actionRequired()
    {
       boolean actionRequired = false;
-      
+
       for (int n = 0; n < games.size(); n++)
       {
          Game game = (Game)games.get(n);
-       
+
          if (game.actionRequired())
          {
             actionRequired = true;
          }
       }
-      
+
       return actionRequired;
    }
 
@@ -621,14 +576,24 @@ public class GamesProperties
    {
       return props.getProperty(key);
    }
-   
+
    /**
-    * Save configuration of all plugin instances 
+    * @param string
+    * @return
+    */
+   public static String getProperty(String key, String default_value)
+   {
+      return props.getProperty(key, default_value);
+   }
+
+
+   /**
+    * Save configuration of all plugin instances
     */
    public static void saveAllPluginSettings()
    {
       PlugIn[] plugins = PlugInManager.getPluginManager().getPluginInstances();
-      
+
       for (int n = 0; n < plugins.length; n++)
       {
          if (plugins[n] instanceof ConfigurablePlugIn)
