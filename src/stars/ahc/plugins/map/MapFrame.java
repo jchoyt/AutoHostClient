@@ -19,6 +19,7 @@
 package stars.ahc.plugins.map;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -30,6 +31,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -53,9 +55,12 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 import stars.ahc.Game;
 import stars.ahc.GamesProperties;
+import stars.ahc.Race;
+import stars.ahc.Utils;
 import stars.ahcgui.pluginmanager.ConfigurablePlugIn;
 import stars.ahcgui.pluginmanager.MapLayer;
 import stars.ahcgui.pluginmanager.PlugInManager;
+import stars.ahcgui.ColorRenderer;
 
 /**
  * Swing frame in which the game map is displayed
@@ -239,6 +244,21 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       
       layersPanel.add( layerTable );
       controlPanel.add( layersPanel );
+      
+      //===============
+      
+      Box playersPanel = Box.createVerticalBox();
+      playersPanel.setBorder( BorderFactory.createEmptyBorder(2,2,2,2) );
+      playersPanel.add( new JLabel("Players") );
+      
+      PlayerTableModel playerModel = new PlayerTableModel( game );
+      JTable playerTable = new JTable( playerModel );
+      playerTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
+      playerTable.setDefaultRenderer(Color.class, new ColorRenderer(true));
+      
+      playersPanel.add( playerTable );
+      
+      controlPanel.add( playersPanel );
       
       //===============
       
@@ -495,6 +515,72 @@ class LayerTableModel extends AbstractTableModel
             layers[row].setEnabled( ((Boolean)obj).booleanValue() );
             mapFrame.redrawMap();
             break;
+      }
+   }
+}
+
+class PlayerTableModel extends AbstractTableModel
+{
+   private Game game;
+   private Race[] races;
+   private int raceCount = 0;
+
+   public PlayerTableModel( Game game )
+   {
+      this.game = game;
+      races = new Race[game.getRaceCount()];
+      
+      Iterator raceList = game.getRaces();
+      while (raceList.hasNext())
+      {
+         Race race = (Race)raceList.next();
+         if (Utils.empty(race.getRaceName()) == false)
+         {
+            races[raceCount++] = race;
+         }
+      }
+   }
+   
+   /* (non-Javadoc)
+    * @see javax.swing.table.TableModel#getColumnCount()
+    */
+   public int getColumnCount()
+   {
+      return 2;
+   }
+
+   /* (non-Javadoc)
+    * @see javax.swing.table.TableModel#getRowCount()
+    */
+   public int getRowCount()
+   {
+      return raceCount;
+   }
+
+   /* (non-Javadoc)
+    * @see javax.swing.table.TableModel#getValueAt(int, int)
+    */
+   public Object getValueAt(int row, int col)
+   {      
+      switch (col)
+      {
+         case 0:
+            return races[row].getColor();
+         case 1:
+            return races[row].getRaceName();
+           
+      }
+      return null;
+   }
+   
+   
+   public Class getColumnClass(int col)
+   {
+      switch (col)
+      {
+         case 0: return Color.class;
+         case 1: return String.class;
+         default: return null;
       }
    }
 }
