@@ -1,0 +1,13 @@
+StarsExecutable=D:/jeff's~1/stars/stars.exe
+ProxyHost=gatekeeper.mitre.org
+ProxyPort=80
+GameName=mover
+GameDir=D:/Jeff's~1/stars/mover
+PlayerNumber=1
+StarsPassword=
+
+#buguni3.PlayerNumbers=10,11
+#buguni3.GameDir=D:/Jeff's~1/stars/test
+#buguni3.player10.Password=Mystic
+#buguni3.player11.Password=Mystic
+

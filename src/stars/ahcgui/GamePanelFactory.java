@@ -1,0 +1,411 @@
+/*
+ *  This file is part of the AutoHost Client - [What it does in brief]
+ *  Copyright (c) 2003 Jeffrey Hoyt
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version 2
+ *  of the License, or any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+package stars.ahcgui;
+import java.awt.*;
+import java.awt.event.*;
+
+import java.beans.*;
+import java.io.*;
+import java.io.*;
+
+import java.net.*;
+import javax.swing.*;
+import javax.swing.border.Border;
+import stars.ahc.*;
+
+/**
+ *  Description of the Class
+ *
+ *@author     jchoyt
+ *@created    December 25, 2002
+ */
+public class GamePanelFactory extends java.lang.Object
+{
+    private static GridBagConstraints c;
+    private static GridBagLayout gridbag;
+    private static JPanel panel;
+
+
+    /**
+     *  Description of the Method
+     *
+     *@param  game  Description of the Parameter
+     *@return       Description of the Return Value
+     */
+    public static JPanel createPanel( Game game )
+    {
+        panel = new JPanel();
+        gridbag = new GridBagLayout();
+        c = new GridBagConstraints();
+        panel.setLayout( gridbag );
+        c.gridx = 0;
+        c.gridy = 0;
+        addGameData( game );
+        addBlankSpace();
+        addPlayerList( game );
+        addBlankSpace();
+        c.anchor = GridBagConstraints.CENTER;
+        c.gridwidth = 1;
+        addButtons( game );
+        /*
+         *  add border
+         */
+        Border etched = BorderFactory.createEtchedBorder();
+        panel.setBorder( etched );
+
+        return panel;
+    }
+
+
+    /**
+     *  Adds a feature to the BlankSpace attribute of the GamePanelFactory
+     *  object
+     */
+    private static void addBlankSpace()
+    {
+        Component blank = Box.createVerticalStrut( 20 );
+        c.gridy++;
+        gridbag.setConstraints( blank, c );
+        panel.add( blank );
+    }
+
+
+    /**
+     *  Adds a feature to the Buttons attribute of the GamePanelFactory class
+     *
+     *@param  game  The feature to be added to the Buttons attribute
+     */
+    private static void addButtons( Game game )
+    {
+        /*
+         *  Add download button
+         */
+        JButton b1 = new DownloadButton( game );
+        c.gridy++;
+        gridbag.setConstraints( b1, c );
+        panel.add( b1 );
+        /*
+         *  Add upload button
+         */
+        b1 = new UploadButton( game );
+        c.gridx++;
+        gridbag.setConstraints( b1, c );
+        panel.add( b1 );
+    }
+
+
+    /**
+     *  Constructor for the addGameData object
+     *
+     *@param  game  The feature to be added to the GameData attribute
+     */
+    private static void addGameData( Game game )
+    {
+        JLabel gameDiamond = new JLabel( "Game: " + game.getName(), JLabel.RIGHT );
+        c.gridwidth = 2;
+        gridbag.setConstraints( gameDiamond, c );
+        panel.add( gameDiamond );
+
+        JLabel year = new JLabel( "Turn year: " + game.getCurrentYear() );
+        c.gridy++;
+        gridbag.setConstraints( year, c );
+        panel.add( year );
+    }
+
+
+    /**
+     *  Adds a feature to the PlayerList attribute of the GamePanelFactory
+     *  object
+     *
+     *@param  game  The feature to be added to the PlayerList attribute
+     */
+    private static void addPlayerList( Game game )
+    {
+        /*
+         *  Add player list  TODO: add diamonds for options
+         */
+        Player[] players = game.getPlayers();
+        PlayerJLabel playerLabel;
+        c.anchor = GridBagConstraints.WEST;
+        int oldGridwidth = c.gridwidth;
+        c.gridwidth = 2;
+        for ( int i = 0; i < players.length; i++ )
+        {
+            /*
+             *  add launch turn button
+             */
+            JButton b = new LaunchGameButton( players[i] );
+            //b.disable();
+            c.gridx = 0;
+            c.gridy++;
+            gridbag.setConstraints( b, c );
+            panel.add( b );
+            /*
+             *  add status JLabel
+             */
+            playerLabel = new PlayerJLabel( players[i] );
+            c.gridx++;
+            gridbag.setConstraints( playerLabel, c );
+            panel.add( playerLabel );
+        }
+        c.gridx = 0;
+        c.gridwidth = oldGridwidth;
+    }
+}
+
+/**
+ *  Description of the Class
+ *
+ *@author     jchoyt
+ *@created    December 25, 2002
+ */
+class DownloadButton extends JButton implements ActionListener
+{
+
+
+    Game game;
+
+
+    /**
+     *  Constructor for the DownloadButton object
+     *
+     *@param  game  Description of the Parameter
+     */
+    public DownloadButton( Game game )
+    {
+        this.game = game;
+        setMnemonic( KeyEvent.VK_D );
+        setText( "Download Turns" );
+        addActionListener( this );
+    }
+
+
+    /**
+     *  Retrieves turns from Autohost, copies them into the game directory and
+     *  backup directory. Sets the last download time and updates the properties
+     *  file on disk.
+     *
+     *@param  e  Description of the Parameter
+     */
+    public void actionPerformed( ActionEvent e )
+    {
+        String stage = game.getDirectory() + "/staging";
+        String backup = game.getDirectory() + "/backup";
+        Player[] players = game.getPlayers();
+        try
+        {
+            for ( int i = 0; i < players.length; i++ )
+            {
+                Utils.getFileFromAutohost( game.getName(), players[i].getTurnFileName(), stage );
+                File stagedSrc = new File( stage, players[i].getTurnFileName() );
+                File backupDest = new File( backup, Utils.createBackupFileName( stagedSrc ) );
+                File playFile = new File( game.getDirectory(), players[i].getTurnFileName() );
+                Utils.fileCopy( stagedSrc, backupDest );
+                Utils.fileCopy( stagedSrc, playFile );
+                players[i].setLastDownload( System.currentTimeMillis() );
+                players[i].setNeedsDownload( false );
+                Utils.genPxxFiles( game.getName(), players[i].getId(), players[i].getStarsPassword(), new File( game.getDirectory() ) );
+                Log.log(Log.MESSAGE,this,"Player " + players[i].getId() + " m-file downloaded from AutoHost");
+                AhcGui.setStatus( "Player " + players[i].getId() + " m-file downloaded from AutoHost" );
+            }
+            //this will force it to recalculate the current year
+            game.setCurrentYear();
+            GamesProperties.writeProperties();
+        }
+        catch ( IOException ioe )
+        {
+            Log.log( Log.MESSAGE, this, "Couldn't get the file from AutoHost.  Are you connected to the internet?" );
+            AhcGui.setStatus("Couldn't get the file from AutoHost.  Are you connected to the internet?" );
+        }
+        catch ( Exception ex )
+        {
+            Log.log( Log.WARNING, this, ex );
+        }
+    }
+}
+
+/**
+ *  Description of the Class
+ *
+ *@author     jchoyt
+ *@created    December 26, 2002
+ */
+class UploadButton extends JButton implements ActionListener
+{
+
+
+    Game game;
+
+
+    /**
+     *  Constructor for the DownloadButton object
+     *
+     *@param  game  Descriptio of the Parameter
+     */
+    public UploadButton( Game game )
+    {
+        this.game = game;
+        setMnemonic( KeyEvent.VK_U );
+        setText( "Upload Turns" );
+        addActionListener( this );
+    }
+
+
+    /**
+     *  Retrieves turns from Autohost, copies them into the game directory and
+     *  backup directory.
+     *
+     *@param  e  Description of the Parameter
+     */
+    public void actionPerformed( ActionEvent e )
+    {
+        Player[] players = game.getPlayers();
+        File playerXFile = null;
+        for ( int i = 0; i < players.length; i++ )
+        {
+            if ( players[i].getToUpload() )
+            {
+                playerXFile = new File( players[i].getGame().getDirectory(), players[i].getXFileName() );
+                EssaiPostURLConnection.upload(
+                        playerXFile,
+                        players[i].getUploadPassword() );
+                players[i].setLastUpload( playerXFile.lastModified() );
+                players[i].setNeedsUpload( false );
+            }
+        }
+        GamesProperties.writeProperties();
+        AhcGui.setStatus("All players for " + game.getName() + " have been uploaded");
+    }
+}
+/**
+ *  Description of the Class
+ *
+ *@author     jchoyt
+ *@created    December 26, 2002
+ */
+class LaunchGameButton extends JButton implements ActionListener
+{
+
+
+    Player player;
+
+
+    /**
+     *  Constructor for the DownloadButton object
+     *
+     *@param  player  Description of the Parameter
+     */
+    public LaunchGameButton( Player player )
+    {
+        this.player = player;
+        //setMnemonic( KeyEvent.VK_U );
+        setText( "Launch Stars!" );
+        addActionListener( this );
+    }
+
+
+    /**
+     *  Launches Stars! for a given player
+     *
+     *@param  e  Description of the Parameter
+     */
+    public void actionPerformed( ActionEvent e )
+    {
+        try
+        {
+            String[] cmds = new String[4];
+            cmds[0] = new File( GamesProperties.getStarsExecutable() ).getCanonicalPath();
+            cmds[1] = player.getTurnFileName();
+            cmds[2] = "-p";
+            cmds[3] = player.getStarsPassword();
+            Process proc = Runtime.getRuntime().exec( cmds, null, new File( player.getGame().getDirectory() ) );
+        }
+        catch ( IOException ioe )
+        {
+            Log.log( Log.WARNING, this, ioe );
+        }
+    }
+}
+
+/**
+ *  Description of the Class
+ *
+ *@author     jchoyt
+ *@created    January 3, 2003
+ */
+class PlayerJLabel extends JLabel implements PropertyChangeListener
+{
+
+
+    Player player;
+
+
+    /**
+     *  Constructor for the PlayerJLabel object
+     *
+     *@param  player  Description of the Parameter
+     */
+    public PlayerJLabel( Player player )
+    {
+        this.player = player;
+        player.addPropertyChangeListener( this );
+        setText();
+    }
+
+
+    /**
+     *  Gets the attribute of the GamePanelFactory object
+     *
+     *@param  player  Description of the Parameter
+     *@return         The String value
+     */
+    private static String getStatusString( Player player )
+    {
+        if ( player.getNeedsDownload() )
+        {
+            return "new m-file is available";
+        }
+        else if ( player.getNeedsUpload() && player.getToUpload() )
+        {
+            return "x-file needs to be uploaded";
+        }
+        else
+        {
+            return "appears to be current";
+        }
+    }
+
+
+    /**
+     *  Description of the Method
+     *
+     *@param  evt  Description of the Parameter
+     */
+    public void propertyChange( PropertyChangeEvent evt )
+    {
+        setText();
+    }
+
+
+    /**
+     *  Constructor for the setText object
+     */
+    private void setText()
+    {
+        setText( "Player " + player.getId() + " " + getStatusString( player ) );
+    }
+}
+

@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<project name="Stars! AutoHost Client" default="jar" basedir=".">
+  <property name="src" value="./src" />
+  <property name="propFile" value="D:\\devel\\autohostClient\\test.props" />
+  <property name="build" value="./build" />
+  <property name="doc" value="./doc" />
+  <property name="jarfile" value="ahclient.jar" />
+  <property name="build.compiler" value="modern" />
+
+  <target name="init">
+    <tstamp />
+    <mkdir dir="${build}" />
+    <mkdir dir="${build}/images" />
+    <echo message="Build file: ${DSTAMP}, ${TSTAMP}" />
+  </target>
+
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" target="1.1" destdir="${build}" deprecation="on" debug="on" description="Compile the java code from ${src} into ${build}">
+      <include name="**/*.java" />
+    </javac>
+    <copy todir="${build}/images">
+      <fileset dir="images"/>
+    </copy>
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar jarfile="${jarfile}" basedir="${build}" excludes="**/*Test.*" manifest="META-INF/MANIFEST.MF" description="rebuild the jarfile">
+    </jar>
+  </target>
+
+  <target name="test" depends="compile">
+    <junit haltonfailure="yes">
+      <formatter type="plain" usefile="false" />
+
+      <classpath>
+        <pathelement location="${build}" />
+      </classpath>
+
+      <sysproperty key="propertiesFile" value="${propFile}" />
+
+      <batchtest fork="yes" todir="${build}">
+        <fileset dir="${src}">
+          <include name="**/*Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="clean" depends="init" description="Delete the build and javadoc directory trees and the ${jarfile}">
+    <delete dir="${doc}" />
+    <delete dir="${build}" />
+    <delete file="${jarfile}" />
+  </target>
+
+  <target name="doc" depends="init">
+    <mkdir dir="${doc}" />
+    <javadoc packagenames="*" sourcepath="src" destdir="${doc}" author="true" version="true" windowtitle="Stars! TurnMover" />
+  </target>
+</project>
+
+
