@@ -46,19 +46,24 @@ public class BannedShipsReport extends AbstractAnalyzerReport
       // Make sure we are reporting on the latest data
       loadReports(game);
       
-      String bannedShipsFileName = game.getDirectory() + File.separator + "bannedships.txt"; 
+      File bannedShipsFile = new File( game.getDirectory() + File.separator + "bannedships.txt" ); 
 
-      loadBannedShipsList( bannedShipsFileName );
+      if (bannedShipsFile.exists() == false)
+      {
+         return "File not found: " + bannedShipsFile.getAbsolutePath();
+      }
+      
+      loadBannedShipsList( bannedShipsFile );
       
       String reportText = "";
       
       // Write the report title
-      reportText += "Cloaked Fleet Report \n";
-      reportText += "==================== \n\n";
+      reportText += "Banned Fleet Report \n";
+      reportText += "=================== \n\n";
       
       reportText += game.getName() + ", " + game.getYear() + "\n\n";
 
-      reportText += "Banned ships file: " + bannedShipsFileName + "\n\n";
+      reportText += "Banned ships file: " + bannedShipsFile.getAbsolutePath() + "\n\n";
       
       // Initialise the report columns infrastructure
       initColumns();
@@ -131,27 +136,22 @@ public class BannedShipsReport extends AbstractAnalyzerReport
    /**
     * 
     */
-   private void loadBannedShipsList( String fileName )
+   private void loadBannedShipsList( File bannedShipsFile )
    {
       ArrayList bannedShipsList = new ArrayList();
       
-      File bannedShipsFile = new File(fileName);
-      
       try
       {
-	      if (bannedShipsFile.exists())
-	      {
-	         BufferedReader reader = new BufferedReader(new FileReader(bannedShipsFile));
-	         
-	         String line;
-	         
-	         while ((line = reader.readLine()) != null)
-	         {
-	            bannedShipsList.add( line.trim() );
-	         }
-	         
-	         reader.close();
-	      }
+         BufferedReader reader = new BufferedReader(new FileReader(bannedShipsFile));
+         
+         String line;
+         
+         while ((line = reader.readLine()) != null)
+         {
+            bannedShipsList.add( line.trim() );
+         }
+         
+         reader.close();
       }
       catch (Throwable t)
       {

@@ -382,7 +382,7 @@ class HabEditor extends JPanel
       minField = new JTextField(5);
       add( minField );
       
-      add( new JLabel( "to") );
+      add( new JLabel( " to ") );
       
       maxField = new JTextField(5);
       add( maxField );

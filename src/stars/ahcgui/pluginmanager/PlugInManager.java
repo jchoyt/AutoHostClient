@@ -384,4 +384,25 @@ public class PlugInManager
    {
       return (PlugIn[])instances.toArray( new PlugIn[0] );
    }
+   
+   /**
+    * Returns true if the specified plugin class is available 
+    */
+   public boolean pluginAvailable( String className )
+   {
+      boolean result = false;
+      
+      for (int n = 0; n < plugins.size(); n++)
+      {
+         Class pluginClass = (Class)plugins.get(n);
+         
+         if (pluginClass.getName().equals( className ))
+         {
+            result = true;
+            break;
+         }
+      }
+      
+      return result;
+   }
 }
