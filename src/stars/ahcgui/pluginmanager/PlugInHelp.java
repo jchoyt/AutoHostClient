@@ -5,6 +5,8 @@
  */
 package stars.ahcgui.pluginmanager;
 
+import java.util.Locale;
+
 /**
  * Interface implemented by PlugIns that provide help text for the user.
  * 
@@ -13,4 +15,7 @@ package stars.ahcgui.pluginmanager;
 public interface PlugInHelp
 {
    public String getHelpText();
+   public String getHelpText( Locale locale );
+   public String getHelpText( String key );
+   public String getHelpText( String key, Locale locale );
 }

@@ -104,7 +104,18 @@ public class Planet implements MapObject
    
    private int getIntValue( int index, int defaultValue )
    {
-      String value = getValue(index).replaceAll( "%", "" );
+      String value = getValue(index);
+      System.out.println( value );
+            
+      if (value != null)
+      {
+         if (value.endsWith("%"))
+         {
+            value = value.substring(0,value.length()-1);
+         }
+         value.replaceAll( "[%]", "" ).trim();
+      }
+      System.out.println( value );
       return Utils.safeParseInt( value, defaultValue );
    }
    
