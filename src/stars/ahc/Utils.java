@@ -435,5 +435,28 @@ public class Utils
          throw new ParseException( "String cannot be parsed as a color: '" + str + "'", 0 );
       }
    }
+   
+   /**
+    * Adjusts the specified colour to the given brightness value
+    * <p>
+    * The brightness value should be between 0 (darkest) and 255 (lightest).
+    * <p>
+    * Works in HSV color space by adjusting V to the specified value.   
+    */
+   public static Color adjustBrightness( Color baseColor, int value )
+   {
+      int r = baseColor.getRed();
+      int b = baseColor.getBlue();
+      int g = baseColor.getGreen();
+      
+      float[] vals = Color.RGBtoHSB( r, g, b, null );
+      
+      vals[2] = 1.0f * value / 255;
+      
+      Color result = Color.getHSBColor( vals[0], vals[1], vals[2] );
+      
+      return result;
+      
+   }
 }
 

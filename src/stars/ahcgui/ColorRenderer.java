@@ -31,6 +31,8 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
 
+import stars.ahc.Utils;
+
 /**
  * Renderer to show a color in a table
  *  
@@ -102,8 +104,24 @@ class RaceColorSwatch extends JComponent
       
       img = new BufferedImage( imgSize, imgSize, BufferedImage.TYPE_INT_RGB );
       Graphics g = img.getGraphics();
-      g.setColor( color );
-      g.fillOval( 4, 4, imgSize-8, imgSize-8 );
+
+      Color c;
+      
+      for (int n = 1; n < 5; n++)
+      {
+         c = Utils.adjustBrightness( color, n * 40 );      
+         g.setColor( c );
+         int dim = 10-n;
+         g.fillOval( n+1, n+1, imgSize-n*2-1, imgSize-n*2-1 );
+      }
+      
+      c = Utils.adjustBrightness( color, 255 );      
+      g.setColor( c );
+      g.fillOval( 7, 7, 5, 5 );
+
+      g.setColor( Color.BLACK );
+      g.drawOval( 7, 7, 5, 5 );
+      
    }
    
    public void paint(Graphics g)

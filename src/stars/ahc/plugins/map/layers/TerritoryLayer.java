@@ -25,6 +25,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
 import stars.ahc.Planet;
+import stars.ahc.Utils;
 import stars.ahc.plugins.map.AbstractCachedMapLayer;
 
 /**
@@ -99,7 +100,7 @@ public class TerritoryLayer extends AbstractCachedMapLayer
                
                Ellipse2D ellipse = new Ellipse2D.Float( screenPos[n].x-r, screenPos[n].y-r, r*2+1, r*2+1 );
                   
-               g.setColor( setValue( baseColor[n], step*3 ) );
+               g.setColor( Utils.adjustBrightness( baseColor[n], step*3 ) );
                g.fill( ellipse );               
             }
          }
