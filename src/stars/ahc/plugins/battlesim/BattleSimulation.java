@@ -50,6 +50,13 @@ public abstract class BattleSimulation
     * The maxmimum initiative (hull+computers+weapon) that a ship can have
     */
    public static final int MAX_INITIATIVE = 40;
+   /**
+    * The number of moves a stack must make before disengaging
+    */
+   public static final int DISENGAGE_MOVES = 7;
+   
+   public static final int BBOARD_MIN_X = 1;
+   public static final int BBOARD_MAX_X = 10;
    
    private ArrayList statusListers = new ArrayList();
 

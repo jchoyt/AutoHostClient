@@ -17,12 +17,12 @@
  */
 package test.stars.ahc;
 
+import junit.framework.TestCase;
 import stars.ahc.ShipDesign;
 import stars.ahc.Weapon;
 import stars.ahc.plugins.battlesim.BattleSimulation;
 import stars.ahc.plugins.battlesim.OneOnOneBattle;
 import stars.ahc.plugins.battlesim.StatusListener;
-import junit.framework.TestCase;
 
 /**
  * @author Steve Leach
@@ -38,6 +38,10 @@ public class BattleSimulatorTest extends TestCase
          System.out.println( "Round " + round + " : " + message );
       }
    };
+
+   private ShipDesign cynicDD;
+
+   private ShipDesign interceptor2;
    
    protected void setUp() throws Exception
    {
@@ -76,6 +80,23 @@ public class BattleSimulatorTest extends TestCase
       armBB.addWeapon( Weapon.SYNCRO_SAPPER, 2 );
       armBB.addWeapon( Weapon.ARM, 4 );
       
+      cynicDD = new ShipDesign( ShipDesign.HULLTYPE_DESTROYER, "cynic DD" );
+      cynicDD.setMass(46);
+      cynicDD.setArmour(200);
+      cynicDD.setShields(0);
+      cynicDD.setBattleSpeed( 1.25 );
+      cynicDD.setInitiative( 3 );
+      cynicDD.addWeapon( Weapon.YAKIMORA, 1 );
+      cynicDD.addWeapon( Weapon.YAKIMORA, 1 );
+
+      interceptor2 = new ShipDesign( ShipDesign.HULLTYPE_DESTROYER, "Interceptor 2" );
+      interceptor2.setMass(57);
+      interceptor2.setArmour(200);
+      interceptor2.setShields(0);
+      interceptor2.setBattleSpeed( 1.75 );
+      interceptor2.setInitiative( 3 );
+      interceptor2.addWeapon( Weapon.PHASER_BAZOOKER, 1 );
+      interceptor2.addWeapon( Weapon.PHASER_BAZOOKER, 1 );
    }
    
    protected void tearDown() throws Exception
@@ -198,7 +219,7 @@ public class BattleSimulatorTest extends TestCase
    
    public void testBattleThree()
    {
-      BattleSimulation battle = new OneOnOneBattle( rabidDog, 16, armBB, 4 );
+      BattleSimulation battle = new OneOnOneBattle( rabidDog, 20, armBB, 4 );
 
       battle.addStatusListener( consoleStatusListener );
       
@@ -212,13 +233,28 @@ public class BattleSimulatorTest extends TestCase
       assertEquals( 4, battle.getStack("ArmBB").shipCount );
 
       // Damage won't always be exactly the same, but should be in the same region
-      assertTrue( "ArmBBs about 15% damaged", battle.getStack("ArmBB").getDamagePercent() > 13 );
-      assertTrue( "ArmBBs about 15% damaged", battle.getStack("ArmBB").getDamagePercent() < 17 );
+      assertTrue( "ArmBBs about 27% damaged", battle.getStack("ArmBB").getDamagePercent() > 25 );
+      assertTrue( "ArmBBs about 27% damaged", battle.getStack("ArmBB").getDamagePercent() < 30 );
             
       // Rabid Dog stack is wiped out
       assertEquals( 0, battle.getStack("Rabid Dog").shipCount );
       
    }
    
-
+   public void testDisengageOne()
+   {
+      // This won't work until I get 2D battle-board movement working
+      
+//      ShipStack cynic = new ShipStack( cynicDD, 1 );
+//      cynic.battleOrders = ShipStack.ORDERS_DISENGAGE;
+//      
+//      ShipStack staz = new ShipStack( interceptor2, 3 );
+//      
+//      BattleSimulation battle = new OneOnOneBattle( cynic, staz );
+//
+//      battle.addStatusListener( consoleStatusListener );
+//      
+//      battle.simulate();
+      
+   }
 }

@@ -29,6 +29,9 @@ import stars.ahc.ShipDesign;
  */
 public class ShipStack
 {
+   public static final int ORDERS_MAX_RATIO = 1;
+   public static final int ORDERS_DISENGAGE = 2;
+   
    public int shipCount = 0;
    public ShipDesign design = null;
    /**
@@ -42,6 +45,8 @@ public class ShipStack
    public int randomMass = 0;
    public ShipStack target = null;
    public int preferredRange = 0;
+   public int battleOrders = ORDERS_MAX_RATIO;
+   public int movesMade = 0;
    
    public ShipStack( ShipDesign design, int count )
    {
