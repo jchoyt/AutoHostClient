@@ -33,7 +33,7 @@ public class Eval
 {
     List fleets = new ArrayList();
     Map fleetsByOwner = new HashMap();
-    String filesEvaluated = null;
+    String filesEvaluated = "";		// Changed from null, 6 Oct 04, Steve Leach
     public final static String WARSHIP_INCLUDE = "Include warships";
     public final static String UTILITY_INCLUDE = "Include utility ships";
     public final static String SCOUT_INCLUDE = "Include scouts";
@@ -47,6 +47,11 @@ public class Eval
      */
     public void loadFleets( File[] fFile )
     {
+       if (fFile == null)
+       {
+          return;
+       }
+       
         for ( int i = 0; i < fFile.length; i++ )
         {
             try
@@ -74,9 +79,9 @@ public class Eval
 
     /**
      *  Gets the filesToEvaluate attribute of the Eval object
-     *
+     * 
      *@param  game  Description of the Parameter
-     *@return       The filesToEvaluate value
+     *@return       The filesToEvaluate value, or null if the user cancelled the operation
      */
     public File[] getFilesToEvaluate( Game game )
     {
@@ -124,6 +129,12 @@ public class Eval
          *  Load up info
          */
         File[] files = getFilesToEvaluate( game );
+        
+        if (files == null)
+        {
+           return;
+        }
+        
         loadFleets( files );
         createFleetsByOwner();
         //System.out.println("Total number of unique fleets = " + fleets.size());

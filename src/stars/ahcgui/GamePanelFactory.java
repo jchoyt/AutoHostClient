@@ -15,24 +15,35 @@
  */
 package stars.ahcgui;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Properties;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import stars.ahc.*;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
+
+import stars.ahc.EssaiPostURLConnection;
+import stars.ahc.Game;
+import stars.ahc.GamesProperties;
+import stars.ahc.Log;
+import stars.ahc.Player;
+import stars.ahc.Utils;
+import stars.ahcgui.pluginmanager.GamePanelButtonPlugin;
+import stars.ahcgui.pluginmanager.PlugInManager;
+import stars.ahcgui.pluginmanager.PluginLoadError;
 
 /**
  *  Description of the Class
@@ -66,10 +77,12 @@ class GamePanel extends JPanel implements PropertyChangeListener
 
     Game game;
     JLabel statusLabel;
+    private ArrayList buttonPlugins = new ArrayList();
 
     TitledBorder nameBorder;
     private GridBagConstraints c;
     private GridBagLayout gridbag;
+    private static final int GRID_COLS = 5;
     private StatusJLabel inLabel, outLabel, deadLabel;
 
     /**
@@ -85,6 +98,16 @@ class GamePanel extends JPanel implements PropertyChangeListener
         this.setLayout( gridbag );
         c.gridx = 0;
         c.gridy = 0;
+
+        try
+		{
+		   PlugInManager.getPluginManager().findAndLoadPlugins();
+		}
+		catch (PluginLoadError e)
+		{
+		   Log.log( Log.ERROR, this, e );
+		}
+     
         addGameData( game );
         addBlankSpace();
         addPlayerList( game );
@@ -103,6 +126,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
          */
         game.addPropertyChangeListener( this );
         GamesProperties.addPropertyChangeListener( this );
+        
     }
 
 
@@ -139,7 +163,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
     private void addAllStati( Game game )
     {
         int oldGridwidth = c.gridwidth;
-        c.gridwidth = 4;
+        c.gridwidth = GRID_COLS;
         c.anchor = GridBagConstraints.CENTER;
         Properties playersByStatus = game.getPlayersByStatus();
         inLabel = new StatusJLabel( "In", "green" );
@@ -172,7 +196,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
     private void addBlankSpace()
     {
         Component blank = Box.createVerticalStrut( 20 );
-        c.gridwidth = 4;
+        c.gridwidth = GRID_COLS;
         c.gridx = 0;
         c.gridy++;
         gridbag.setConstraints( blank, c );
@@ -219,6 +243,23 @@ class GamePanel extends JPanel implements PropertyChangeListener
         c.gridx++;
         gridbag.setConstraints( b1, c );
         this.add( b1 );
+
+        //=====================
+        // Add plug-in buttons
+        //
+        GamePanelButtonPlugin[] pluginButtons = PlugInManager.getPluginManager().getGamePanelButtons();
+        
+        for (int n = 0; n < pluginButtons.length; n++)
+        {
+           pluginButtons[n].init( game );
+           
+           b1 = new PluginButton( pluginButtons[n] );
+           c.gridx++;
+           gridbag.setConstraints( b1, c );
+           
+           this.add( b1 );
+        }
+        //=====================
     }
 
 
@@ -229,7 +270,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
      */
     private void addGameData( Game game )
     {
-        c.gridwidth = 4;
+        c.gridwidth = GRID_COLS;
         /*
          *  titleYear = new JLabel( "<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i></html>", JLabel.RIGHT );
          *  gridbag.setConstraints( titleYear, c );
@@ -576,6 +617,35 @@ class LaunchGameButton extends JButton implements ActionListener
     }
 }
 
+class PluginButton extends JButton implements ActionListener
+{
+   GamePanelButtonPlugin plugin = null;
+   
+   public PluginButton( GamePanelButtonPlugin plugin )
+   {
+      super( plugin.getButtonText() );
+      this.plugin = plugin;
+      addActionListener( this );
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+    */
+   public void actionPerformed(ActionEvent event)
+   {
+      try
+      {
+         plugin.execute();
+      }
+      catch (Throwable t)
+      {
+         t.printStackTrace();
+         JOptionPane.showMessageDialog(this, "Error: " + t.getMessage() );
+      }
+   }
+}
+
+
 class StatusJLabel extends JLabel
 {
     String color, status;
@@ -614,6 +684,7 @@ class StatusJLabel extends JLabel
     }
 
 }
+
 /**
  *  Description of the Class
  *
@@ -656,7 +727,15 @@ class PlayerJLabel extends JLabel implements PropertyChangeListener
      */
     private void setText()
     {
-        setText( "<html>" + player.getRaceName() + ": " + getStatusString( player ) + "</html>" );
+       try
+       {
+          setText( "<html>" + player.getRaceName() + ": " + getStatusString( player ) + "</html>" );
+       }
+       catch (Throwable t)
+       {
+          Log.log( Log.ERROR, this.getClass(), t );
+          setText( "<html>Error: " + t.getMessage() + "</html>" );
+       }
     }
 
 

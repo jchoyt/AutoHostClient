@@ -25,6 +25,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Timer;
@@ -240,15 +242,67 @@ public class AhcFrame extends javax.swing.JFrame
         timer.schedule( new AHPoller(), 10 * 60 * 1000, 10 * 60 * 1000 ); //10 minutes
     }
 
+    /**
+     * Returns a URL representing a file name if the file exists
+     * 
+     * @param fileName
+     * @return a URL, or null
+     */
+    private static URL filenameToURL( String fileName )
+    {
+       File file = new File( fileName );
+       
+       if ( file.exists() )
+       {
+         try
+         {
+            return file.toURL();
+         }
+         catch (MalformedURLException e)
+         {
+            return null;
+         }
+       }
+       else
+       {
+          return null;
+       }
+    }
 
+    /**
+     * Locates the banner image 
+     * @return the URL of the image if it could be found
+     */    
+    private static URL findBannerImage()
+    {
+       URL iconURL = ClassLoader.getSystemResource( "images/ahc_sm.png" );
+       
+       if ( iconURL == null )
+       {
+          iconURL = filenameToURL( "./ahc_sm.png" );
+       }
+       
+       if ( iconURL == null )
+       {
+          iconURL = filenameToURL( "./images/ahc_sm.png" );
+       }
+       
+       return iconURL;
+    }
+    
     /**
      *  Adds a feature to the Banner attribute of the AhcFrame object
      *
      *@return    Description of the Return Value
+     *
+     * Updated 5 Oct 2004, Steve Leach
+     *    Now also looks for the image in the file system.
+     *    Returns a valid label even if the image is not found.
      */
     protected JLabel addBanner()
     {
-        URL iconURL = ClassLoader.getSystemResource( "images/ahc_sm.png" );
+       	URL iconURL = findBannerImage();
+       	
         if ( iconURL != null )
         {
             ImageIcon icon = new ImageIcon( iconURL );
@@ -257,7 +311,8 @@ public class AhcFrame extends javax.swing.JFrame
         }
         else
         {
-            return null;
+           Log.log( Log.ERROR, this.getClass(), "Image not found: ahc_sm.png" );
+           return new JLabel("{Image not found}");
         }
     }
 

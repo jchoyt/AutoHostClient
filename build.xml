@@ -25,9 +25,17 @@
 
   <target name="jar" depends="compile">
     <jar jarfile="${jarfile}" basedir="${build}" excludes="**/*Test.*" manifest="META-INF/MANIFEST.MF" description="rebuild the jarfile">
+    	<exclude name="**/plugins/**"/>
     </jar>
   </target>
 
+  <target name="jar-map" description="Rebuild the map plugin file">
+    <jar jarfile="plugins/map.jar" manifest="META-INF/MANIFEST.MF" description="rebuild the plugins jarfile">
+    	<fileset dir="." includes="plugin.data"/>
+    	<fileset dir="${build}" includes="**/plugins/**" />
+    </jar>
+  </target>
+	
   <target name="test" depends="compile">
     <junit haltonfailure="yes">
       <formatter type="plain" usefile="false" />
