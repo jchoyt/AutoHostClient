@@ -177,7 +177,11 @@ public class Race
     */
    public boolean habRangeKnown()
    {
-      return true; // TODO: implement
+      if ((getMaxGravClicks() == getMinGravClicks()) && (gravImmune() == false))
+      {
+         return false;
+      }
+      return true; 
    }
    
    public void setGravRange( double min, double max )
@@ -290,6 +294,7 @@ public class Race
    public int getMaxTerraForm()
    {
       String lrts = getUserProperty( "lrts" );
+      if (lrts == null) return 15;
       return (lrts.toUpperCase().indexOf("TT") >= 0) ? 30 : 15;
    }
 }

@@ -282,7 +282,7 @@ public class Planet implements MapObject
          return -1;
       }
 
-      int baseTemp = Utils.safeParseInt(baseTempStr,0);
+      int baseTemp = Utils.getLeadingInt(baseTempStr,0);
       return HabCalculator.tempToClicks( baseTemp );
    }
 
@@ -295,7 +295,15 @@ public class Planet implements MapObject
          return -1;
       }
 
-      int baseRad = Utils.safeParseInt(baseRadStr,0);
+      int baseRad = Utils.getLeadingInt(baseRadStr,0);
       return HabCalculator.radToClicks( baseRad );
+   }
+
+   /**
+    * @return
+    */
+   public int getCurrentHab()
+   {
+      return getIntValue(PLANET_VALUE, 0 );
    }
 }

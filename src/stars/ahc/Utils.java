@@ -465,11 +465,57 @@ public class Utils
       }
    }
    
+   public static boolean isIntDigit( char c )
+   {
+      if (c == '.')					return true;
+      if (c == '-')					return true;
+      if ((c >= '0') && (c<='9'))	return true;
+      return false;      
+   }
+   public static boolean isFloatDigit( char c )
+   {
+      if (c == '.')					return true;
+      return isIntDigit(c);
+   }
+   
+   public static int getLeadingInt( String text, int defaultValue )
+   {
+      char[] a = text.toCharArray();
+      int digits = 0;
+      for (int n = 0; n < a.length; n++)
+      {
+         if ( isIntDigit(a[n]) )
+         {
+            digits++;
+         }
+         else
+         {
+            break;
+         }
+      }
+      text = new String( a, 0, digits );
+      return safeParseInt( text, defaultValue );
+   }
+   
    /**
     * Gets a floating point number from the start of the string 
     */
    public static double getLeadingFloat( String text, double defaultValue )
    {
+      char[] a = text.toCharArray();
+      int digits = 0;
+      for (int n = 0; n < a.length; n++)
+      {
+         if ( isFloatDigit(a[n]) )
+         {
+            digits++;
+         }
+         else
+         {
+            break;
+         }
+      }
+      text = new String( a, 0, digits );
       return safeParseFloat( text, defaultValue );
    }
 }
