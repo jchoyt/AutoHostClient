@@ -16,11 +16,10 @@
 package stars.ahc;
 import java.io.File;
 import java.io.IOException;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-
-import javax.swing.filechooser.FileFilter;
-import stars.ahcgui.*;
+import stars.ahcgui.AhcFrame;
 
 /**
  *  Description of the Class
@@ -223,7 +222,7 @@ public class AutoHostClient extends java.lang.Object
                 Utils.fileCopy( stagedSrc, playFile );
                 players[i].setLastDownload( System.currentTimeMillis() );
                 players[i].setNeedsDownload( false );
-                Utils.genPxxFiles( game.getName(), players[i].getId(), players[i].getStarsPassword(), new File( game.getDirectory() ) );
+                Utils.genPxxFiles( game, players[i].getId(), players[i].getStarsPassword(), new File( game.getDirectory() ) );
                 System.out.println( "Player " + players[i].getId() + " m-file downloaded from AutoHost" );
             }
         }

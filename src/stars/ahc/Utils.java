@@ -16,22 +16,20 @@
 package stars.ahc;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import javax.swing.JOptionPane;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import stars.ahcgui.*;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
-
 import java.util.Date;
+import javax.swing.JOptionPane;
+import stars.ahcgui.AhcGui;
 
 /**
  *  Description of the Class
@@ -44,22 +42,7 @@ public class Utils
     /**
      *  Description of the Field
      */
-    public static String mapNeededRegex = "[02468]";
-    /**
-     *  Description of the Field
-     */
     public static File starsExecutable = null;
-
-
-    /**
-     *  Sets the mapNeededRegex attribute of the Utils class
-     *
-     *@param  regex  The new mapNeededRegex value
-     */
-    public static void setMapNeededRegex( String regex )
-    {
-        Utils.mapNeededRegex = regex;
-    }
 
 
     /**
@@ -118,9 +101,9 @@ public class Utils
     /**
      *  Gets the allyTurnsFromAutohost attribute of the Utils class
      *
-     *@param  gameName         Description of the Parameter
-     *@param  destination      Description of the Parameter
-     *@param  fileName         Description of the Parameter
+     *@param  gameName     Description of the Parameter
+     *@param  destination  Description of the Parameter
+     *@param  fileName     Description of the Parameter
      */
     public static void getFileFromAutohost( String gameName, String fileName, String destination )
     {
@@ -214,20 +197,33 @@ public class Utils
      *  Description of the Method
      *
      *@param  file  Description of the Parameter
+     *@param  year  Description of the Parameter
      *@return       Description of the Return Value
      */
-    public static String createBackupFileName( File file )
+    public static String createBackupFileName( File file, String year )
+    {
+        String filename = file.getName();
+        int extensionPoint = filename.lastIndexOf( "." );
+        return filename.substring( 0, extensionPoint ) + "." + year + filename.substring( extensionPoint );
+    }
+
+
+    /**
+     *  Description of the Method
+     *
+     *@param  mfile  Description of the Parameter
+     *@return        Description of the Return Value
+     */
+    public static String createBackupFileName( File mfile )
     {
         try
         {
-            String filename = file.getName();
-            int extensionPoint = filename.lastIndexOf( "." );
-            InputStream instream = new FileInputStream( file );
+            InputStream instream = new FileInputStream( mfile );
             Reader in = new InputStreamReader( instream );
             String year = Utils.getTurnNumber( in );
             in.close();
             instream.close();
-            return filename.substring( 0, extensionPoint ) + "." + year + filename.substring( extensionPoint );
+            return createBackupFileName( mfile, year );
         }
         catch ( Exception e )
         {
@@ -267,35 +263,69 @@ public class Utils
     /**
      *  Description of the Method
      *
+     *@param  game          Description of the Parameter
+     *@param  playerNumber  Description of the Parameter
+     */
+    public static void backupPxxFiles( Game game, String playerNumber )
+    {
+        String gameDir = game.getDirectory();
+        String backup = game.getDirectory() + "/backup";
+        File fFile = new File( gameDir, game.getFFileName( playerNumber ) );
+        File pFile = new File( gameDir, game.getPFileName( playerNumber ) );
+        File backupFDest = new File( backup, createBackupFileName( fFile, game.getGameYear() ) );
+        File backupPDest = new File( backup, createBackupFileName( pFile, game.getGameYear() ) );
+        try
+        {
+            Utils.fileCopy( fFile, backupFDest );
+            Utils.fileCopy( pFile, backupPDest );
+        }
+        catch ( IOException e )
+        {
+            JOptionPane.showInternalMessageDialog(
+                    AhcGui.mainFrame.getContentPane(),
+                    "Couldn't backup .Pxx and .Fxx files",
+                    "File backup problem",
+                    JOptionPane.INFORMATION_MESSAGE );
+            return;
+        }
+    }
+
+
+    /**
+     *  Description of the Method
+     *
      *@param  playerNumber  Description of the Parameter
      *@param  password      Description of the Parameter
-     *@param  gameName      Description of the Parameter
      *@param  workingDir    Description of the Parameter
+     *@param  game          Description of the Parameter
      *@return               String containing any output from the process
      */
-    public static String genPxxFiles( String gameName, String playerNumber, String password, File workingDir )
+    public static String genPxxFiles( Game game, String playerNumber, String password, File workingDir )
     {
         try
         {
             String[] cmds = new String[5];
             cmds[0] = starsExecutable.getCanonicalPath();
             cmds[1] = "-dpf";
-            cmds[2] = gameName + ".m" + playerNumber;
+            cmds[2] = game.getName() + ".m" + playerNumber;
             cmds[3] = "-p";
             cmds[4] = password;
             Process proc = Runtime.getRuntime().exec( cmds, null, workingDir );
-            /* String line;
-            BufferedReader input =
-                    new BufferedReader( new InputStreamReader( proc.getInputStream() ) );
-            StringBuffer ret = new StringBuffer();
-            while ( ( line = input.readLine() ) != null )
-            {
-                ret.append( line );
-            }
+            /*
+             *  String line;
+             *  BufferedReader input =
+             *  new BufferedReader( new InputStreamReader( proc.getInputStream() ) );
+             *  StringBuffer ret = new StringBuffer();
+             *  while ( ( line = input.readLine() ) != null )
+             *  {
+             *  ret.append( line );
+             *  }
+             *  proc.waitFor();
+             *  input.close();
+             *  return ret.toString();
+             */
             proc.waitFor();
-            input.close();
-            return ret.toString(); */
-            proc.waitFor();
+            backupPxxFiles( game, playerNumber );
             return "";
         }
         catch ( Exception e )
@@ -305,18 +335,6 @@ public class Utils
             newex.fillInStackTrace();
             throw newex;
         }
-    }
-
-
-    /**
-     *  Description of the Method
-     *
-     *@param  year  Description of the Parameter
-     *@return       Description of the Return Value
-     */
-    public static boolean mapNeeded( String year )
-    {
-        return year.matches( mapNeededRegex );
     }
 }
 

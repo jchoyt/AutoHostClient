@@ -15,25 +15,19 @@
  */
 package stars.ahc;
 
-import javax.swing.JOptionPane;
-import java.io.StringWriter;
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
-import stars.ahcgui.AhcGui;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-
-/*
- *  EssaiPostURLConnection.java
- *
- *  Created on 21 janvier 2002, 12:14
- */
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.JOptionPane;
+import stars.ahcgui.AhcGui;
 
 /**
  *  Description of the Class

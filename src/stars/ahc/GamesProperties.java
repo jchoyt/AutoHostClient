@@ -308,29 +308,6 @@ public class GamesProperties extends Object
         writeProperties();
     }
 
-    /**
-     *  Description of the Method
-     *
-     *@return    Description of the Return Value
-     */
-    public static String dumpToString()
-    {
-        StringBuffer ret = new StringBuffer();
-        ret.append( "CurrentGame=" + currentGame + lineEnding );
-        ret.append( "initialized=" + initiated + lineEnding );
-        StringWriter out = new StringWriter();
-        try
-        {
-            writeProperties( out );
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
-        ret.append( out.toString() );
-        return ret.toString();
-    }
-
 
     /**
      *  Description of the Method

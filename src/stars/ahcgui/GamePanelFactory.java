@@ -15,26 +15,24 @@
  */
 package stars.ahcgui;
 import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
-
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
-
 import stars.ahc.EssaiPostURLConnection;
 import stars.ahc.Game;
 import stars.ahc.GamesProperties;
@@ -43,7 +41,6 @@ import stars.ahc.Player;
 import stars.ahc.Utils;
 import stars.ahcgui.pluginmanager.GamePanelButtonPlugin;
 import stars.ahcgui.pluginmanager.PlugInManager;
-import stars.ahcgui.pluginmanager.PluginLoadError;
 
 /**
  *  Description of the Class
@@ -117,7 +114,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
          */
         game.addPropertyChangeListener( this );
         GamesProperties.addPropertyChangeListener( this );
-        
+
     }
 
 
@@ -239,15 +236,15 @@ class GamePanel extends JPanel implements PropertyChangeListener
         // Add plug-in buttons
         //
         GamePanelButtonPlugin[] pluginButtons = PlugInManager.getPluginManager().getGamePanelButtons();
-        
+
         for (int n = 0; n < pluginButtons.length; n++)
         {
            pluginButtons[n].init( game );
-           
+
            b1 = new PluginButton( pluginButtons[n] );
            c.gridx++;
            gridbag.setConstraints( b1, c );
-           
+
            this.add( b1 );
         }
         //=====================
@@ -425,7 +422,7 @@ class DownloadButton extends JButton implements ActionListener
                 Utils.fileCopy( stagedSrc, playFile );
                 players[i].setLastDownload( System.currentTimeMillis() );
                 players[i].setNeedsDownload( false );
-                Utils.genPxxFiles( game.getName(), players[i].getId(), players[i].getStarsPassword(), new File( game.getDirectory() ) );
+                Utils.genPxxFiles( game, players[i].getId(), players[i].getStarsPassword(), new File( game.getDirectory() ) );
                 Log.log( Log.MESSAGE, this, "Player " + players[i].getId() + " m-file downloaded from AutoHost" );
                 AhcGui.setStatus( "Player " + players[i].getId() + " m-file downloaded from AutoHost" );
             }
@@ -611,7 +608,7 @@ class LaunchGameButton extends JButton implements ActionListener
 class PluginButton extends JButton implements ActionListener
 {
    GamePanelButtonPlugin plugin = null;
-   
+
    public PluginButton( GamePanelButtonPlugin plugin )
    {
       super( plugin.getButtonText() );
