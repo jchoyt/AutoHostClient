@@ -72,6 +72,8 @@ public class BattleSimulatorTest extends TestCase
       ccc.setRegenShields(true);
       ccc.setBattleSpeed( 1.25 );
       ccc.setInitiative( 5 );
+      ccc.setBoraniumCost( 35 );
+      ccc.setResourceCost( 100 );
       ccc.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
       ccc.addWeapon( Weapon.PULSED_SAPPER, 2 );
       ccc.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
@@ -410,5 +412,36 @@ public class BattleSimulatorTest extends TestCase
       //sim.addStatusListener( consoleStatusListener );
       
       sim.simulate();
+   }
+   
+   public void testMultipleSimulations() throws BattleSimulationError
+   {
+      int klingons = 1;
+      int borg = 2;
+      ShipStack armBBstack = new ShipStack( armBB_2, 30, klingons );
+      ShipStack chaffStack = new ShipStack( chaff, 500, borg );
+      ShipStack cccStack = new ShipStack( armBB_2, 20, borg );
+      
+      BattleSimulation sim = new BattleSimulation();
+      sim.addStack( armBBstack );
+      sim.addStack( chaffStack );
+      sim.addStack( cccStack );
+      
+      System.out.println( armBBstack.getStackAsString() );
+      
+      //sim.addStatusListener( consoleStatusListener );
+      
+      int iterations = 100;
+      
+      long start = System.currentTimeMillis();
+      
+      sim.simulateRepeatedly( iterations );
+      
+      long duration = System.currentTimeMillis() - start;
+      System.out.println( "" + iterations + " simulations in " + (duration/1000.0) + "s" );
+      
+      System.out.println( armBBstack.design.getName() + "... " + armBBstack.getCumulativeResults() );
+      System.out.println( chaffStack.design.getName() + "... " + chaffStack.getCumulativeResults() );
+      System.out.println( cccStack.design.getName() + "... " + cccStack.getCumulativeResults() );
    }
 }

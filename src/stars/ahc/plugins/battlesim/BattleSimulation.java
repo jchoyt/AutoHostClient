@@ -42,6 +42,10 @@ public class BattleSimulation
     */
    protected ShipStack[] stacks;
    /**
+    * Maxmimum number of stacks that can participate in a battle
+    */
+   protected static final int MAX_STACKS = 256; 
+   /**
     * The number of stacks of ships involved in this battle
     */
    protected int stackCount = 0;
@@ -52,10 +56,11 @@ public class BattleSimulation
    /**
     * The maxmimum initiative (hull+computers+weapon) that a ship can have
     */
-   public static final int MAX_INITIATIVE = 40;
+   public static final int MAX_INITIATIVE = 64;
    /**
     * The number of moves a stack must make before disengaging
     */
+   // TODO: check whether this should be 7 or 8
    public static final int DISENGAGE_MOVES = 7;
    
    public static final int BBOARD_MIN_X = 1;
@@ -76,14 +81,14 @@ public class BattleSimulation
          { 3,	2,	3,	2,	3,	2,	3,	2 }			// 2.5
    };
    
-   protected static int[][] distanceTable = null;
+   //protected static int[][] distanceTable = null;
    
    /**
     * Creates a Battle Simulation object supporting up to 16 ship stacks 
     */
    public BattleSimulation()
    {
-      initStacks( 16 );
+      initStacks( MAX_STACKS );
    }
    
    public BattleSimulation( int maxStacks )
@@ -165,7 +170,36 @@ public class BattleSimulation
       // Show the results of the battle
       showStackDetails();
    }
+
+   /**
+    * Run the simulation repeatedly, storing accumulated results so that statistics can be examined 
+    */
+   public void simulateRepeatedly( int iterations ) throws BattleSimulationError
+   {
+      for (int n = 0; n < stackCount; n++)
+      {
+         stacks[n].resetAccumulator();
+      }
+      
+      for (int n = 0; n < iterations; n++)
+      {
+         simulate();
+         
+         accumulateResults();
+      }
+   }
    
+   /**
+    * Adds the results of the latest simulation into the accumulator
+    */
+   private void accumulateResults()
+   {
+      for (int n = 0; n < stackCount; n++)
+      {
+         stacks[n].accumulateResults();
+      }
+   }
+
    /**
     * Sets up the starting state of the battle  
     * @throws BattleSimulationError
@@ -178,19 +212,10 @@ public class BattleSimulation
       {
          setInitialPosition( stacks[n], n );
          
-         initStackDamage( stacks[n] );
+         stacks[n].reset();
       }
    }
-   
-   protected void initStackDamage( ShipStack stack )
-   {
-      // Shields "stack" - the stack's shields are the sum of the shields of the ships
-      stack.shields = stack.design.getShields() * stack.shipCount;
-
-      // Initially the ships are all undamaged
-      stack.damage = 0;
-   }
-   
+      
    /**
     * Sets the initial position of the stacks 
     */
@@ -213,6 +238,7 @@ public class BattleSimulation
       }
       else
       {
+         // TODO: allow more than 2 sides when setting up initial positions
          throw new BattleSimulationError( "Cannot handle more than 2 sides yet" );
       }
    }
@@ -464,24 +490,26 @@ public class BattleSimulation
       int dx = Math.abs( (stack1.xpos + xOffset) - stack2.xpos );
       int dy = Math.abs( (stack1.ypos + yOffset) - stack2.ypos );
    
+      return Math.max( dx, dy );
+      
       // Use a distance table lookup for distances.
       // This limits the number of expensive Math.sqrt calls to 100.
       // Will only make a difference in large battles.
       
-      if (distanceTable == null)
-      {
-         distanceTable = new int[10][10];
-         for (int x = 0; x < 10; x++)
-         {
-            for (int y = 0; y < 10; y++)
-            {
-               int d =  (int)Math.round( Math.floor( Math.sqrt( x * x + y * y ) ) );
-               distanceTable[x][y] = d;
-            }
-         }
-      }
-      
-      return distanceTable[dx][dy];
+//      if (distanceTable == null)
+//      {
+//         distanceTable = new int[10][10];
+//         for (int x = 0; x < 10; x++)
+//         {
+//            for (int y = 0; y < 10; y++)
+//            {
+//               int d =  (int)Math.round( Math.floor( Math.sqrt( x * x + y * y ) ) );
+//               distanceTable[x][y] = d;
+//            }
+//         }
+//      }
+//      
+//      return distanceTable[dx][dy];
    }
 
    /**
@@ -589,6 +617,8 @@ public class BattleSimulation
    {
       int kills;
       
+      // TODO: armour damage should be handled in units of 1/512 of the total for the stack
+      
       // How much damage has each ship sustained so far ?
       int damagePerShip = target.damage / target.shipCount;            
       int remainingArmourPerShip = target.design.getArmour() - damagePerShip;
@@ -597,7 +627,11 @@ public class BattleSimulation
       {
          // Damage overwhelms all remaining ship armour
          kills = target.shipCount;
-         target.shipCount = 0;
+         
+         // We can't kill more ships than there are in the stack
+         if (kills > maxKills) kills = maxKills;
+         
+         target.shipCount -= kills;
       }
       else
       {      
@@ -669,6 +703,9 @@ public class BattleSimulation
       int armourDamage = 0; 	// initially there is no armour damage
       int kills = 0;			// initially there are no kills
       
+      // TODO: excess damage should hit other tokens
+      // TODO: gattling weapons should hit all targets in range
+      
       ShipDesign design = stack.design;		// for convenience      
       ShipStack target = stack.target;
    
@@ -677,6 +714,7 @@ public class BattleSimulation
       // Are we out of range ?
       if (range > stack.design.getWeaponRange(slot))
       {
+         // TODO: pick another target if possible
          return;
       }
       
@@ -685,6 +723,7 @@ public class BattleSimulation
          if (target.shields == 0)
          {
             // Don't bother firing sappers if the target has no shields left
+            // TODO: pick another target if possible
             return;
          }
       }
@@ -697,8 +736,10 @@ public class BattleSimulation
       
       power *= rangeMultipliyer;
       
+      // TODO: duplicate Stars! rounding errors using integer arithmatic
       if (design.getCapacitors() > 0)
       {
+         // TODO: handle HE flux capacitors with x1.2 adjustment
          double capacitorAdjust = Math.pow( 1.1, design.getCapacitors() );
          capacitorAdjust = Math.min( capacitorAdjust, 2.5 );
          power *= capacitorAdjust;
@@ -754,7 +795,7 @@ public class BattleSimulation
       notification.activeStack = stack;
       notification.targetStack = target;
       notification.message = stack.toString() + " fires " + stack.design.getWeaponName(slot) 
-      				+ " [" + (slot+1) + "] doing " + shieldDamage + " damage to shields and " 
+      				+ " [" + (slot+1) + "] at " + target.design.getName() + " doing " + shieldDamage + " damage to shields and " 
       				+ armourDamage + " to armour (" + kills + " kills)";
       statusUpdate( notification );
    }
@@ -800,6 +841,8 @@ public class BattleSimulation
          totalPower *= 2;
       }
    
+      // TODO: find out exactly what order the various affects are applied
+      
       int shieldDamage = Math.min( target.shields, totalPower / 2 );
       int armourDamage = totalPower - shieldDamage;
       
@@ -876,8 +919,11 @@ public class BattleSimulation
       mover.xpos += xOffset;
       mover.ypos += yOffset;
       
-      // Count the move in case we are trying to disengage
-      mover.movesMade++;
+      if (mover.battleOrders == ShipStack.ORDERS_DISENGAGE)
+      {
+         // Count the move if we are trying to disengage
+         mover.movesMade++;
+      }
    
       // Have we moved towards or away from the target ?
       int newDistance = distanceBetween(mover,target);
@@ -911,6 +957,9 @@ public class BattleSimulation
       // Count down from maximum initiative (max initiative fires first)
       for (int initLevel = MAX_INITIATIVE; initLevel > 0; initLevel--)
       {
+         // TODO: opinion on HomeWorldForum is that the manual is wrong and weapon range
+         // has no effect on firing order.   
+         
          // Count up from range 0 to range 7 (shorter range first first)
          for (int range = 0; range <= 7; range++)
          {
@@ -990,6 +1039,7 @@ public class BattleSimulation
       int bestTarget = -1;
 
       // First, try selecting a target that has nothing targeting it already
+      // TODO: confirm this is correct behaviour, and remove if not
       pickTarget( stack, false );
       
       // If that doesn't work, pick a target that is already targeted
@@ -1060,6 +1110,8 @@ public class BattleSimulation
     */
    public static double getAttractiveness( ShipStack attacker, int weaponSlot, ShipStack target ) throws BattleSimulationError
    {
+      // TODO: verify attractiveness algorithm
+      
       double cost = target.design.getBoraniumCost() + target.design.getResourceCost();
       
       double attackPowerNeeded;

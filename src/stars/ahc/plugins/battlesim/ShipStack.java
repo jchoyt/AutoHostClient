@@ -50,6 +50,13 @@ public class ShipStack
    public int movesMade = 0;
    public int sortValue = 0;
    public int side = 0;
+   public int originalShipCount = 0;
+   
+   // For storing results of multiple runs by the simulator
+   public int cumulativeSimulations = 0;
+   public int cumulativeSurvivors = 0;
+   public int minimumSurvivors = Integer.MAX_VALUE;
+   public int maximumSurvivors = 0;
    
    public ShipStack( ShipDesign design, int count )
    {
@@ -64,13 +71,23 @@ public class ShipStack
    public void init( ShipDesign design, int count, int side )
    {
       this.design = design;
-      this.shipCount = count;
+      this.shipCount = this.originalShipCount = count;
       this.side = side;
       
       if (design != null)
       {
          this.shields = design.getShields() * count;
       }
+   }
+   
+   /**
+    * Reset the stack back to it's starting values 
+    */
+   public void reset()
+   {
+      shipCount = originalShipCount;
+      damage = 0;		// TODO: ships don't necesarily start undamaged
+      shields = design.getShields() * shipCount;
    }
    
    /**
@@ -105,5 +122,36 @@ public class ShipStack
    public String getStackAsString()
    {
       return shipCount + " x " + design.getDesignAsString();
+   }
+   
+   /**
+    * Reset the "multiple simulation result" accumulator 
+    */
+   public void resetAccumulator()
+   {
+      cumulativeSimulations = 0;
+      cumulativeSurvivors = 0;
+      minimumSurvivors = Integer.MAX_VALUE;
+      maximumSurvivors = 0;
+   }
+   
+   /**
+    * Add latest result to "multiple simulation result" accumulator 
+    */
+   public void accumulateResults()
+   {
+      cumulativeSimulations++;
+      cumulativeSurvivors += shipCount;
+      minimumSurvivors = Math.min(shipCount,minimumSurvivors);
+      maximumSurvivors = Math.max(shipCount,maximumSurvivors);
+   }
+
+   /**
+    * @return
+    */
+   public String getCumulativeResults()
+   {
+      int average = cumulativeSurvivors / cumulativeSimulations;
+      return "Over "+ cumulativeSimulations + " runs: " + minimumSurvivors + ", " + average + ", " + maximumSurvivors + " survived";
    }
 }
