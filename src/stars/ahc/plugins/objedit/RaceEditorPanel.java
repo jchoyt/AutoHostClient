@@ -356,7 +356,7 @@ public class RaceEditorPanel extends JPanel implements ObjectEditorTab, ListSele
          }
       }
       
-      
+      game.notifyUpdateListeners( race );
    }
    
    private void pickColor()

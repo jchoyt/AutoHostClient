@@ -27,6 +27,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.Vector;
 
 /**
  *  Description of the Class
@@ -49,6 +50,12 @@ public class Game extends Object
     private Properties userDefinedProperties = new Properties();
     protected String sahHosted = "true";
     private GameController controller;
+    
+    /**
+     * A list of objects (all implementing GameUpdateListener) that wish to be notified
+     * when the game details change
+     */
+    private Vector updateListeners = new Vector();	// use a vector as it is synchronized
 
 
     /**
@@ -383,6 +390,13 @@ public class Game extends Object
         return ret;
     }
 
+    /**
+     * Used to notify other objects that something has changed in the game 
+     */
+    public void firePropertyChange( String propertyName, Object oldValue, Object newValue )
+    {
+       pcs.firePropertyChange( propertyName, oldValue, newValue );
+    }
 
     /**
      *  Adds a feature to the Player attribute of the Game object
@@ -1153,6 +1167,51 @@ public class Game extends Object
              throw new TurnGenerationError( "Not ready to generate" );
           }
       }
+   }
+   
+   /**
+    * Registers an object to receive notifications when details of the game change 
+    */
+   public void addUpdateListener( GameUpdateListener listener )
+   {
+      updateListeners.add( listener );
+   }
+   
+   /**
+    * Notifies all registered listeners that an update to the game data has occurred
+    * <p>
+    * Designed to be called from User Interface code 
+    */
+   public void notifyUpdateListeners( Object updatedObject, String propertyName, Object oldValue, Object newValue )
+   {
+      GameUpdateNotification notification = new GameUpdateNotification( this, updatedObject, propertyName, newValue, oldValue );
+      
+      for (int n = 0; n < updateListeners.size(); n++)
+      {
+         // Do the notification inside a try block because we cannot trust the listener code
+         try
+         {
+            GameUpdateListener listener = (GameUpdateListener)updateListeners.get(n);
+            listener.processGameUpdate( notification );
+         }
+         catch (Throwable t)
+         {
+            Log.log( Log.ERROR, updateListeners.get(n), "Error notifying game update listener" );
+         }
+      }
+   }
+   
+   /**
+    * Notifies registered update listeners that the specified object has been updated
+    * <p>
+    * The listeners are not informed what property of the object has changed, or what the
+    * new and old values are.
+    * <p> 
+    * Designed to be called from User Interface code 
+    */
+   public void notifyUpdateListeners( Object updatedObject )
+   {
+      notifyUpdateListeners( updatedObject, null, null, null );
    }
 }
 

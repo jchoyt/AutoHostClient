@@ -67,6 +67,8 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
 import stars.ahc.Game;
+import stars.ahc.GameUpdateListener;
+import stars.ahc.GameUpdateNotification;
 import stars.ahc.GamesProperties;
 import stars.ahc.Planet;
 import stars.ahc.Race;
@@ -85,7 +87,7 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
  *
  * @author Steve Leach
  */
-public class MapFrame extends JFrame implements MapConfigChangeListener, WindowListener, MapMouseMoveListener
+public class MapFrame extends JFrame implements MapConfigChangeListener, WindowListener, MapMouseMoveListener, GameUpdateListener
 {
    protected Game game = null;
    protected MapConfig config = null;
@@ -118,14 +120,13 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
          config.year = game.getYear();
       }
 
-      config.addChangeListener( this );
-      addWindowListener( this );
+      config.addChangeListener( this );		// We want to know when the map configuration changes
+      game.addUpdateListener( this );		// and when the underlying game data changes 
+      addWindowListener( this );			// and when the window changes
 
       setupMapFrame();
       setupLayers();
       setupMapControls();
-
-      //writeProperties();
    }
 
    /**
@@ -180,6 +181,13 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
                 {
                    cp.loadConfiguration( savedProperties );
                 }
+             }
+             
+             if (layer instanceof GameUpdateListener)
+             {
+                // If the map layer implements the GameUpdateListener interface then
+                // add it to the list of listeners for the game.
+                game.addUpdateListener( (GameUpdateListener)layer );
              }
 
              layers.add( layer );
@@ -667,6 +675,14 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       }
 
       setStatus( posText );
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.GameUpdateListener#processGameUpdate(stars.ahc.GameUpdateNotification)
+    */
+   public void processGameUpdate(GameUpdateNotification notification)
+   {
+      repaint();
    }
 
 }

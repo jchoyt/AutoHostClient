@@ -34,7 +34,10 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import stars.ahc.GameUpdateListener;
+import stars.ahc.GameUpdateNotification;
 import stars.ahc.Planet;
+import stars.ahc.Race;
 import stars.ahc.Utils;
 import stars.ahc.plugins.map.AbstractCachedMapLayer;
 
@@ -42,7 +45,7 @@ import stars.ahc.plugins.map.AbstractCachedMapLayer;
  * @author Steve
  *
  */
-public class TerritoryLayer extends AbstractCachedMapLayer
+public class TerritoryLayer extends AbstractCachedMapLayer implements GameUpdateListener
 {
    private final int DEFAULT_SIZE_MULTIPLYER = 100;
    private Box controls = null;
@@ -196,4 +199,17 @@ public class TerritoryLayer extends AbstractCachedMapLayer
       controls.add( sizePanel );
       
    }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.GameUpdateListener#processGameUpdate(stars.ahc.GameUpdateNotification)
+    */
+   public void processGameUpdate(GameUpdateNotification notification)
+   {
+      if ((notification.getUpdatedObject() instanceof Race) || (notification.getUpdatedObject() instanceof Planet))
+      {
+         System.out.println( "Game updated - invalidating cache" );
+         super.invalidateCurrentCache();
+      }
+   }
+
 }
