@@ -254,7 +254,7 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       gbc.gridx++;      
       gbc.gridwidth = 1;
       armourField = new JTextField(5);
-      armourField.setToolTipText( "Total armour on a single undamaged ship" );
+      armourField.setToolTipText( "Total armour on a single undamaged ship, including any RS decrease" );
       fieldPanel.add( armourField, gbc );
 
       gbc.gridx++;
@@ -264,9 +264,11 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       Box shieldsBox = Box.createHorizontalBox();      
       
       shieldsField = new JTextField(5);
+      shieldsField.setToolTipText( "Total shields per ship, including any RS increase" );
       shieldsBox.add( shieldsField );
       
       regenShieldsField = new JCheckBox("Regen");
+      regenShieldsField.setToolTipText( "Check if the owner of this design has regenerating shields" );
       shieldsBox.add( regenShieldsField);
 
       shieldsBox.add( Box.createHorizontalGlue() );
@@ -282,6 +284,7 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       gbc.gridx++;      
       gbc.gridwidth = 1;
       moveField = new JTextField(5);
+      moveField.setToolTipText( "The battle speed of the design, including any WM bonus (0.25 to 2.50)" );
       fieldPanel.add( moveField, gbc );
 
       gbc.gridx++;
@@ -290,6 +293,7 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       
       gbc.gridx++;      
       initiativeField = new JTextField(3);
+      initiativeField.setToolTipText( "The initiative of the hull, including modifications from computers" );
       fieldPanel.add( initiativeField, gbc );
 
       gbc.gridy++;
@@ -331,14 +335,17 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       Box computersPanel = Box.createHorizontalBox();
       
       bcompField = new JTextField(2);
+      bcompField.setToolTipText( "The number of battle computers on the design" );
       computersPanel.add( bcompField, gbc );
       computersPanel.add( new JLabel(" BC ") );
 
       bscField = new JTextField(2);
+      bscField.setToolTipText( "The number of battle super computers on the design" );
       computersPanel.add( bscField, gbc );
       computersPanel.add( new JLabel(" BSC ") );
       
       nexusField = new JTextField(2);
+      nexusField.setToolTipText( "The number of battle nexi on the design" );
       computersPanel.add( nexusField, gbc );
       computersPanel.add( new JLabel(" Nexi ") );
       
@@ -371,7 +378,7 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
          weaponTypeSelector.addItem( Weapon.getAllWeapons()[n].name );
       }
       
-      weaponsTable.getColumnModel().getColumn(0).setCellEditor( new DefaultCellEditor(weaponTypeSelector) );
+      weaponsTable.getColumnModel().getColumn(WeaponsTableModel.COL_TYPE).setCellEditor( new DefaultCellEditor(weaponTypeSelector) );
       
       weaponsTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
       
@@ -425,7 +432,20 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       game.addShipDesign( design );      
       
       refreshList();
+      selectInList( design );
       refreshFields();
+   }
+
+   private void selectInList(ShipDesign design)
+   {
+      for (int n = 0; n < game.getShipDesignCount(); n++)
+      {
+         if (game.getShipDesign(n) == design)
+         {
+            designsList.setSelectedIndex(n);
+            break;
+         }
+      }
    }
 
    /**
@@ -447,6 +467,11 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       
       designsList.setListData( designNames );
 
+      if (current >= game.getShipDesignCount())
+      {
+         current = game.getShipDesignCount() - 1;
+      }
+      
       designsList.setSelectedIndex( current );
       if (designsList.getSelectedIndex() < 0)
       {
@@ -595,6 +620,11 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
 
 class WeaponsTableModel extends AbstractTableModel
 {
+   public static final int COL_SLOT = 0;
+   public static final int COL_TYPE = 1;
+   public static final int COL_COUNT = 2;
+   private static final int COLCOUNT = 3;
+   
    private ShipDesignEditorPanel editor;
 
    public WeaponsTableModel( ShipDesignEditorPanel editor )
@@ -607,7 +637,7 @@ class WeaponsTableModel extends AbstractTableModel
     */
    public int getColumnCount()
    {
-      return 2;
+      return COLCOUNT;
    }
 
    /* (non-Javadoc)
@@ -626,9 +656,10 @@ class WeaponsTableModel extends AbstractTableModel
    {
       switch (col)
       {
-         case 0:	return editor.getCurrentDesign(false).getWeaponName(row);
-         case 1:	return new Integer( editor.getCurrentDesign(false).getWeaponCount(row) );
-         default:	return "";
+         case COL_SLOT:		return "" + (row+1);
+         case COL_TYPE:		return editor.getCurrentDesign(false).getWeaponName(row);
+         case COL_COUNT:	return new Integer( editor.getCurrentDesign(false).getWeaponCount(row) );
+         default:			return "";
       }
    }
    
@@ -636,15 +667,16 @@ class WeaponsTableModel extends AbstractTableModel
    {
       switch (col)
       {
-         case 0: 	return String.class;
-         case 1: 	return Integer.class;
-         default: 	return null;
+         case COL_SLOT:		return String.class;
+         case COL_TYPE: 	return String.class;
+         case COL_COUNT: 	return Integer.class;
+         default: 			return null;
       }
    }
    
    public boolean isCellEditable(int row, int col)
    {
-      return true;
+      return (col >= COL_TYPE);
    }
    
    
@@ -658,12 +690,12 @@ class WeaponsTableModel extends AbstractTableModel
       
       switch (col)
       {
-         case 0:
+         case COL_TYPE:
             String newName = value.toString();
             Weapon wpn = Weapon.getWeaponByName(newName);
             design.setWeapon( row, design.getWeaponCount(row), wpn );
             break;
-         case 1:
+         case COL_COUNT:
             int newCount = ((Integer)value).intValue();
             design.setWeaponCount(row,newCount);
             break;
@@ -673,9 +705,10 @@ class WeaponsTableModel extends AbstractTableModel
    {
       switch (col)
       {
-         case 0: 	return "Weapon";
-         case 1: 	return "Count";
-         default:	return null;
+         case COL_SLOT:		return "Slot";
+         case COL_TYPE: 	return "Weapon";
+         case COL_COUNT: 	return "Count";
+         default:			return null;
       }
    }
 }

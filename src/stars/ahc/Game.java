@@ -1115,10 +1115,9 @@ public class Game extends Object
 
 
     /**
-     *  Gets the shipDesign attribute of the Game object
-     *
-     *@param  index  Description of the Parameter
-     *@return        The shipDesign value
+     * Gets the specified ship design.
+     * <p>
+     * @param index is the number of the ship design to retrieve, from 0 to getShipDesignCount()-1
      */
     public ShipDesign getShipDesign( int index )
     {
