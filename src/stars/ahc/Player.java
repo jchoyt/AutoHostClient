@@ -461,8 +461,8 @@ public class Player extends Object
         }
         catch ( IOException e )
         {
-            Log.log( Log.MESSAGE, this, "Couldn't connect to AutoHost - returning nothing" );
-            AhcGui.setStatus( "Couldn't get the file from AutoHost.  Are you connected to the internet?" );
+            Log.log( Log.MESSAGE, this, "Couldn't read the game file at " + file.getAbsolutePath() + " - returning nothing" );
+            AhcGui.setStatus( "Couldn't read " + file.getAbsolutePath() );
             return year;
         }
         return year;
