@@ -2,6 +2,19 @@
  * Created on Oct 9, 2004
  *
  * Copyright (c) 2004, Steve Leach
+ * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version 2
+ *  of the License, or any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * 
  */
 package stars.ahc.plugins.map.layers;
 
@@ -86,7 +99,7 @@ public class TerritoryLayer extends AbstractCachedMapLayer
                
                Ellipse2D ellipse = new Ellipse2D.Float( screenPos[n].x-r, screenPos[n].y-r, r*2+1, r*2+1 );
                   
-               g.setColor( setSaturation( baseColor[n], step+40 ) );
+               g.setColor( setValue( baseColor[n], step*3 ) );
                g.fill( ellipse );               
             }
          }
@@ -101,7 +114,7 @@ public class TerritoryLayer extends AbstractCachedMapLayer
 
    /**
     */
-   private Color setSaturation(Color base, int value)
+   private Color setValue(Color base, int value)
    {
       int r = base.getRed();
       int b = base.getBlue();
@@ -109,7 +122,7 @@ public class TerritoryLayer extends AbstractCachedMapLayer
       
       float[] vals = Color.RGBtoHSB( r, g, b, null );
       
-      vals[1] = 1.0f * value / 255;
+      vals[2] = 1.0f * value / 255;
       
       Color result = Color.getHSBColor( vals[0], vals[1], vals[2] );
       

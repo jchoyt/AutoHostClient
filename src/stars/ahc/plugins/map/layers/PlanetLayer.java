@@ -64,6 +64,9 @@ public class PlanetLayer extends AbstractMapLayer
          }
          
          g.fillOval( screenPos.x-2, screenPos.y-2, 5, 5 );
+         
+         g.setColor( Color.BLACK );
+         g.drawOval( screenPos.x-2, screenPos.y-2, 5, 5 );
       }
    }
 

@@ -2,6 +2,19 @@
  * Created on Oct 11, 2004
  *
  * Copyright (c) 2004, Steve Leach
+ * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version 2
+ *  of the License, or any later version.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * 
  */
 package stars.ahc;
 
@@ -40,6 +53,7 @@ public class Race
       
       return color;
    }
+   
    /**
     * 
     */
@@ -48,8 +62,8 @@ public class Race
       Random rnd = new Random();
       
       float h = Utils.getRandomFloat();						// hue is totally random (0 to 1.0)
-      float s = 1.0f;										// saturation is always maximum (1.0)
-      float v = Utils.getRandomFloat() * 0.5f + 0.5f;		// value is random but high (0.5 to 1.0)
+      float s = Utils.getRandomFloat() * 0.5f + 0.5f;		// saturation is random but high (0.5 to 1.0)
+      float v = 1.0f;										// value is always maximum (1.0)
       
       color = Color.getHSBColor( h, s, v );
    }
