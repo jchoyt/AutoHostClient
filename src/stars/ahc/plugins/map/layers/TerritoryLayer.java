@@ -108,27 +108,7 @@ public class TerritoryLayer extends AbstractCachedMapLayer
       
       long elapsed = System.currentTimeMillis() - start;
       
-      //System.out.println( "Territory drawn in " + elapsed + " millis" );
-      
       return img;
    }
-
-   /**
-    */
-   private Color setValue(Color base, int value)
-   {
-      int r = base.getRed();
-      int b = base.getBlue();
-      int g = base.getGreen();
-      
-      float[] vals = Color.RGBtoHSB( r, g, b, null );
-      
-      vals[2] = 1.0f * value / 255;
-      
-      Color result = Color.getHSBColor( vals[0], vals[1], vals[2] );
-      
-      return result;
-   }
-
    
 }

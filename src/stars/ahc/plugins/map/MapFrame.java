@@ -20,6 +20,7 @@ package stars.ahc.plugins.map;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -46,6 +47,11 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
@@ -220,15 +226,13 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       
       JPanel controlPanel = new JPanel();
       controlPanel.setLayout( new BoxLayout(controlPanel, BoxLayout.Y_AXIS) );
-      controlPanel.setBorder( new BevelBorder(BevelBorder.LOWERED) );
+      //controlPanel.setBorder( new BevelBorder(BevelBorder.LOWERED) );
 
+      
       //===============
       JPanel scalePanel = new JPanel();
-      scalePanel.setLayout( new BoxLayout(scalePanel,BoxLayout.X_AXIS) );
-      scalePanel.setBorder( BorderFactory.createEmptyBorder(4,4,4,4) );
-      
-      JLabel label = new JLabel( "Scale: " );
-      scalePanel.add( label );
+      scalePanel.setLayout( new BoxLayout(scalePanel,BoxLayout.X_AXIS) );      
+      scalePanel.setBorder( createStandardBorder("Scale") );
       
       scaleSlider = new JSlider();
       scaleSlider.setMinimum( 10 );
@@ -253,9 +257,13 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
 
       //===============
 
-      JPanel yearPanel = new JPanel();
+      Box yearPanel = Box.createHorizontalBox();
+      yearPanel.setBorder( createStandardBorder("Year") );
+      
+      yearPanel.add( Box.createHorizontalGlue() );
       
       prevYearButton = new JButton( "<" );
+      prevYearButton.setMaximumSize( new Dimension(20,20) );
       prevYearButton.addActionListener( new ActionListener() {
          public void actionPerformed(ActionEvent event)
          {
@@ -264,10 +272,11 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       } );
       yearPanel.add( prevYearButton );
       
-      yearLabel = new JLabel( ""+config.year );
+      yearLabel = new JLabel( " "+config.year+" " );
       yearPanel.add( yearLabel );
       
       nextYearButton = new JButton( ">" );
+      nextYearButton.setMaximumSize( new Dimension(20,20) );
       nextYearButton.addActionListener( new ActionListener() {
          public void actionPerformed(ActionEvent event)
          {
@@ -275,14 +284,15 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
          }
       } );
       yearPanel.add( nextYearButton );
+
+      yearPanel.add( Box.createHorizontalGlue() );
       
       controlPanel.add( yearPanel );
       
       //===============
       
       Box playersPanel = Box.createVerticalBox();
-      playersPanel.setBorder( BorderFactory.createEmptyBorder(4,4,4,4) );
-      playersPanel.add( new JLabel("Players") );
+      playersPanel.setBorder( createStandardBorder("Races") );
       
       PlayerTableModel playerModel = new PlayerTableModel( game );
       JTable playerTable = new JTable( playerModel );
@@ -290,6 +300,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       playerTable.setDefaultRenderer(Color.class, new ColorRenderer(true));
       playerTable.setRowHeight(20);
       playerTable.getColumnModel().getColumn(0).setMaxWidth( 20 );
+      playerTable.setShowGrid(false);
       
       playersPanel.add( playerTable );
       
@@ -297,15 +308,15 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       
       //===============
       
-      JPanel layersPanel = new JPanel();
-      layersPanel.setLayout( new BoxLayout(layersPanel,BoxLayout.Y_AXIS) );
-      layersPanel.setBorder( BorderFactory.createEmptyBorder(4,4,4,4) );
+      Box layersPanel = Box.createVerticalBox();
+      layersPanel.setBorder( createStandardBorder("Layers") );
       
-      layersPanel.add( new JLabel("Layers") );
       LayerTableModel layerModel = new LayerTableModel( this );
       JTable layerTable = new JTable( layerModel );      
       layerTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
       layerTable.setRowHeight(20);
+      layerTable.getColumnModel().getColumn(0).setMaxWidth( 20 );
+      layerTable.setShowGrid(false);
       
       layersPanel.add( layerTable );
       controlPanel.add( layersPanel );
@@ -317,9 +328,23 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       getContentPane().add( controlPanel, BorderLayout.EAST );
    }
    
+   /**
+    */
+   private Border createStandardBorder(String title)
+   {
+      Border stdBorder = new EtchedBorder();
+      stdBorder = new CompoundBorder( stdBorder, new EmptyBorder(4,4,4,4) );
+      stdBorder = new CompoundBorder( stdBorder, new TitledBorder(title) );
+      return stdBorder;
+   }
+
    private void moveYear( int movement )
    {
       config.year += movement;
+      
+      if (config.year < 2400) config.year = 2400;
+      if (config.year > game.getYear()) config.year = game.getYear();
+      
       config.notifyChangeListeners();
    }
    
@@ -365,7 +390,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    public void mapConfigChanged(MapConfig config)
    {
       scaleSlider.setValue( (int)Math.round(config.mapScale * 100) );
-      yearLabel.setText( "" + config.year );
+      yearLabel.setText( " " + config.year + " " );
       mapPanel.repaint();
    }
    
