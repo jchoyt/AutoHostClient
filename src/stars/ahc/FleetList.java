@@ -24,6 +24,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Steve Leach
@@ -35,6 +37,8 @@ public class FleetList
    private static final int MAX_YEARS = 300;
    private static final int BASE_YEAR = 2400;
    
+   private Map importedReports = new HashMap();
+   
    FleetData[] fleetDataArray = new FleetData[MAX_YEARS];
    
    public FleetList( Game game )
@@ -44,6 +48,12 @@ public class FleetList
    
    public void loadFleetReport( File reportFile, int year ) throws ReportLoaderException
    {
+      if (importedReports.get(reportFile.getName()) != null)
+      {
+         // we have already loaded this report file, so return
+         return;
+      }
+      
       try
       {
          BufferedReader reader = new BufferedReader(new FileReader(reportFile));
@@ -58,6 +68,8 @@ public class FleetList
 
             addFleetData( year, tokens );
          }
+         
+         importedReports.put( reportFile.getName(), reportFile.getName() );
          
          reader.close();
       }
