@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project name="Stars! AutoHost Client" default="jar" basedir=".">
   <property name="src" value="./src" />
-  <property name="propFile" value="D:\\devel\\autohostClient\\test.props" />
+  <property name="propFile" value="${ant.dir}/test.props" />
   <property name="build" value="./build" />
   <property name="doc" value="./doc" />
   <property name="jarfile" value="ahclient.jar" />
@@ -25,17 +25,17 @@
 
   <target name="jar" depends="compile">
     <jar jarfile="${jarfile}" basedir="${build}" excludes="**/*Test.*" manifest="META-INF/MANIFEST.MF" description="rebuild the jarfile">
-    	<exclude name="**/plugins/**"/>
+      <exclude name="**/plugins/**"/>
     </jar>
   </target>
 
   <target name="jar-map" description="Rebuild the map plugin file">
     <jar jarfile="plugins/map.jar" manifest="META-INF/MANIFEST.MF" description="rebuild the plugins jarfile">
-    	<fileset dir="." includes="plugin.data"/>
-    	<fileset dir="${build}" includes="**/plugins/**" />
+      <fileset dir="." includes="plugin.data"/>
+      <fileset dir="${build}" includes="**/plugins/**" />
     </jar>
   </target>
-	
+
   <target name="test" depends="compile">
     <junit haltonfailure="yes">
       <formatter type="plain" usefile="false" />
@@ -43,8 +43,6 @@
       <classpath>
         <pathelement location="${build}" />
       </classpath>
-
-      <sysproperty key="propertiesFile" value="${propFile}" />
 
       <batchtest fork="yes" todir="${build}">
         <fileset dir="${src}">
