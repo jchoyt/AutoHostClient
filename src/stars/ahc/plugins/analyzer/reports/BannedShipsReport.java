@@ -148,7 +148,6 @@ public class BannedShipsReport extends AbstractAnalyzerReport
 	         while ((line = reader.readLine()) != null)
 	         {
 	            bannedShipsList.add( line.trim() );
-	            System.out.println( line.trim() + " is banned" );
 	         }
 	         
 	         reader.close();
