@@ -50,17 +50,17 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
-
 import stars.ahc.Game;
 import stars.ahc.GamesProperties;
 import stars.ahc.Race;
 import stars.ahc.Utils;
+import stars.ahcgui.ColorRenderer;
 import stars.ahcgui.pluginmanager.ConfigurablePlugIn;
 import stars.ahcgui.pluginmanager.MapLayer;
 import stars.ahcgui.pluginmanager.PlugInManager;
-import stars.ahcgui.ColorRenderer;
+
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 /**
  * Swing frame in which the game map is displayed
@@ -233,6 +233,23 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
 
       //===============
       
+      Box playersPanel = Box.createVerticalBox();
+      playersPanel.setBorder( BorderFactory.createEmptyBorder(4,4,4,4) );
+      playersPanel.add( new JLabel("Players") );
+      
+      PlayerTableModel playerModel = new PlayerTableModel( game );
+      JTable playerTable = new JTable( playerModel );
+      playerTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
+      playerTable.setDefaultRenderer(Color.class, new ColorRenderer(true));
+      playerTable.setRowHeight(20);
+      playerTable.getColumnModel().getColumn(0).setMaxWidth( 20 );
+      
+      playersPanel.add( playerTable );
+      
+      controlPanel.add( playersPanel );
+      
+      //===============
+      
       JPanel layersPanel = new JPanel();
       layersPanel.setLayout( new BoxLayout(layersPanel,BoxLayout.Y_AXIS) );
       layersPanel.setBorder( BorderFactory.createEmptyBorder(4,4,4,4) );
@@ -240,25 +257,11 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       layersPanel.add( new JLabel("Layers") );
       LayerTableModel layerModel = new LayerTableModel( this );
       JTable layerTable = new JTable( layerModel );      
-      layerTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );      
+      layerTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
+      layerTable.setRowHeight(20);
       
       layersPanel.add( layerTable );
       controlPanel.add( layersPanel );
-      
-      //===============
-      
-      Box playersPanel = Box.createVerticalBox();
-      playersPanel.setBorder( BorderFactory.createEmptyBorder(2,2,2,2) );
-      playersPanel.add( new JLabel("Players") );
-      
-      PlayerTableModel playerModel = new PlayerTableModel( game );
-      JTable playerTable = new JTable( playerModel );
-      playerTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
-      playerTable.setDefaultRenderer(Color.class, new ColorRenderer(true));
-      
-      playersPanel.add( playerTable );
-      
-      controlPanel.add( playersPanel );
       
       //===============
       

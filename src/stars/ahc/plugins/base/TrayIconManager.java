@@ -37,10 +37,27 @@ import com.jeans.trayicon.TrayIconPopupSimpleItem;
 import com.jeans.trayicon.WindowsTrayIcon;
 
 /**
+ * Plugin to manage interactions with the Windows system tray
+ * 
  * @author Steve Leach
  */
 public class TrayIconManager implements BasePlugIn, NotificationListener
 {
+   //
+   // IMPORTANT
+   // In order for this file to compile you will need the trayicon.jar file
+   // from the plugins directory in your CLASSPATH.
+   //
+   // trayicon.jar is the Java component of the Windows Tray Icon library by Jan Struyf.
+   // To run the plugin you also need the compiled C component, trayicon12.dll.
+   //
+   // Jan's details are...
+   // jan.struyf@cs.kuleuven.ac.be
+   // http://jeans.studentenweb.org/java/trayicon/trayicon.html
+   //
+   // Steve Leach, October 2004
+   //
+   
    private static TrayIconManager manager = null;
    private JFrame mainFrame;
    private String appName;
