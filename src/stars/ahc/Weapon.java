@@ -56,12 +56,28 @@ public class Weapon
    public static final Weapon STREAMING_PULV = new Weapon("Streaming Pulverizer", TYPE_BEAM, 433, 1, 9, 100 );
    public static final Weapon AMP = new Weapon("Antimatter Pulverizer", TYPE_BEAM, 433, 2, 8, 100 );
    
+   public static final Weapon ALPHA = new Weapon("Alpha Torpedo", TYPE_TORPEDO, 5, 4, 0, 35 );
+   public static final Weapon BETA = new Weapon("Beta Torpedo", TYPE_TORPEDO, 12, 4, 1, 35 );
+   public static final Weapon DELTA = new Weapon("Delta Torpedo", TYPE_TORPEDO, 26, 4, 1, 60 );
+   public static final Weapon EPSILON = new Weapon("Epsilon Torpedo", TYPE_TORPEDO, 48, 5, 2, 65 );
+   public static final Weapon RHO = new Weapon("Rho Torpedo", TYPE_TORPEDO, 90, 5, 2, 75 );
+   public static final Weapon UPSILON = new Weapon("Upsilon Torpedo", TYPE_TORPEDO, 169, 5, 3, 75 );
+   public static final Weapon OMEGA = new Weapon("Omega Torpedo", TYPE_TORPEDO, 316, 5, 4, 80 );
+   public static final Weapon AM_TORP = new Weapon("Antimatter Torpedo", TYPE_TORPEDO, 60, 6, 0, 85 );
+   
+   public static final Weapon JIHAD = new Weapon("Jihad Missile", TYPE_MISSILE, 85, 5, 0, 20 );
+   public static final Weapon JUGG = new Weapon("Juggernaught Missile", TYPE_MISSILE, 150, 5, 1, 20 );
+   public static final Weapon DOOM = new Weapon("Doomsday Missile", TYPE_MISSILE, 280, 6, 2, 25 );
+   public static final Weapon ARM = new Weapon("Armageddon Missile", TYPE_MISSILE, 525, 6, 3, 30 );
+   
    private static final Weapon[] WEAPONS = 
    {
          LASER, X_RAY, MINIGUN, YAKIMORA, BLACKJACK, PHASER_BAZOOKER, PULSED_SAPPER, COLLOIDAL_PHASER,
          GATTLING_GUN, MINI_BLASTER, BLUDGEON, MK_IV_BLASTER, PHASED_SAPPER, HEAVY_BLASTER,
          GATTLING_NEUTRINO, MYOPIC_DISRUPTOR, BLUNDERBUSS, DISRUPTOR, MCM, SYNCRO_SAPPER, MEGA_DISRUPTOR,
-         BIG_MUTHA, STREAMING_PULV, AMP
+         BIG_MUTHA, STREAMING_PULV, AMP, 
+         ALPHA, BETA, DELTA, EPSILON, RHO, UPSILON, OMEGA, AM_TORP,
+         JIHAD, JUGG, DOOM, ARM
    };
    
    public String name;

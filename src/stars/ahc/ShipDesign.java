@@ -39,6 +39,10 @@ public class ShipDesign
    public static final int HULLTYPE_DREADNAUGHT = 7;
    public static final int HULLTYPE_NUBIAN = 8;
    
+   public static final int BATTLE_COMPUTER = 101;
+   public static final int SUPER_COMPUTER = 102;
+   public static final int BATTLE_NEXUS = 103;
+   
    private static final int[] hullWeaponSlots = { 1, 1, 3, 3, 6, 9, 20, 0, 0 };
    
    private int hullType = HULLTYPE_UNKNOWN;
@@ -64,6 +68,8 @@ public class ShipDesign
    private String imageFileName = null;
    private boolean regenShields = false;
    private boolean warmonger = false;
+   private int jamming = 0;
+   private int computing = 0;
    
    public ShipDesign( int hullType, String name )
    {
@@ -218,6 +224,10 @@ public class ShipDesign
    {
       return weaponRange[slot];
    }
+   public double getWeaponAccuracy(int slot)
+   {
+      return weaponAccuracy[slot];
+   }
    public String getOwner()
    {
       return owner;
@@ -258,6 +268,7 @@ public class ShipDesign
       properties.setProperty( base+".speed4", ""+speed4 );
       properties.setProperty( base+".initiative", ""+initiative );
       properties.setProperty( base+".regenShields", ""+regenShields );
+      properties.setProperty( base+".jamming", ""+jamming );
       
       properties.setProperty( base+".weaponSlots.count", ""+getWeaponSlots() );
       
@@ -284,10 +295,11 @@ public class ShipDesign
       shields = Utils.safeParseInt( properties.getProperty( base + ".shields" ), 0 );
       initiative = Utils.safeParseInt( properties.getProperty( base + ".initiative" ), 0 );
       speed4 = Utils.safeParseInt( properties.getProperty( base + ".speed4" ), 0 );
+      jamming = Utils.safeParseInt( properties.getProperty( base + ".jamming" ), 0 );
       
       String s = ""+properties.getProperty( base + ".regenShields" );
       regenShields = s.equals("true");
-      
+
       weaponSlotsUsed = Utils.safeParseInt( properties.getProperty(base+".weaponSlots.count"), 0 );
       
       for (int n = 0; n < weaponSlotsUsed; n++)
@@ -322,5 +334,50 @@ public class ShipDesign
    public int getMaxSlots()
    {
       return hullWeaponSlots[ hullType ];
+   }
+
+   public int getJamming()
+   {
+      return jamming;
+   }
+   
+   public void setJamming( int jamming )
+   {
+      this.jamming = jamming;
+   }
+
+   /**
+    * @return
+    */
+   public int getComputing()
+   {
+      return this.computing;
+   }
+
+   public void addComputer( int type, int quantity )
+   {
+      double typeModifier = 1.0;
+      
+      switch (type)
+      {
+         case BATTLE_COMPUTER: 
+            typeModifier = 0.2;
+            break;
+         case SUPER_COMPUTER:
+            typeModifier = 0.3;
+            break;
+         case BATTLE_NEXUS:
+            typeModifier = 0.5;
+            break;
+      }
+      
+      int comp = 100 - computing;
+      
+      for (int n = 0; n < quantity; n++)
+      {
+         comp *= (1.0 - typeModifier);
+      }
+      
+      computing = 100 - comp;
    }
 }

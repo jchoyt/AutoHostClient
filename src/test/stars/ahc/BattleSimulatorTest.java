@@ -30,7 +30,7 @@ import junit.framework.TestCase;
  */
 public class BattleSimulatorTest extends TestCase
 {
-   private ShipDesign rabidDog, ccc;
+   private ShipDesign rabidDog, ccc, armBB;
    
    private StatusListener consoleStatusListener = new StatusListener() {
       public void battleStatusUpdate(int round, String message)
@@ -60,7 +60,22 @@ public class BattleSimulatorTest extends TestCase
       ccc.setInitiative( 5 );
       ccc.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
       ccc.addWeapon( Weapon.PULSED_SAPPER, 2 );
-      ccc.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );      
+      ccc.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
+      
+      // BB, 4 x TDG, 4 x syncro sappers (wings), 16 x arms, 4 x BSC, 3 x jammer 20, no armour
+      armBB = new ShipDesign( ShipDesign.HULLTYPE_BATTLESHIP, "ArmBB" );
+      armBB.setMass(901);
+      armBB.setArmour(2000);
+      armBB.setShields(1400);
+      armBB.setBattleSpeed( 1.0 );
+      armBB.setInitiative( 18 );
+      armBB.setJamming( 49 );
+      armBB.addWeapon( Weapon.ARM, 6 );
+      armBB.addWeapon( Weapon.ARM, 6 );
+      armBB.addWeapon( Weapon.SYNCRO_SAPPER, 2 );
+      armBB.addWeapon( Weapon.SYNCRO_SAPPER, 2 );
+      armBB.addWeapon( Weapon.ARM, 4 );
+      
    }
    
    protected void tearDown() throws Exception
@@ -90,7 +105,7 @@ public class BattleSimulatorTest extends TestCase
    {
       BattleSimulation battle = new OneOnOneBattle( rabidDog, 12, ccc, 14 );
       
-      battle.addStatusListener( consoleStatusListener );
+      //battle.addStatusListener( consoleStatusListener );
 
       battle.simulate();
       
@@ -115,7 +130,7 @@ public class BattleSimulatorTest extends TestCase
    {
       BattleSimulation battle = new OneOnOneBattle( rabidDog, 7, ccc, 14 );
       
-      battle.addStatusListener( consoleStatusListener );
+      //battle.addStatusListener( consoleStatusListener );
 
       battle.simulate();
       
@@ -130,5 +145,58 @@ public class BattleSimulatorTest extends TestCase
       // Rabid Dog stack is wiped out
       assertEquals( 0, battle.getStack("Rabid Dog").shipCount );
       
+   }
+   
+   public void testAccuracyJammersOnly()
+   {      
+      ShipDesign attacker = new ShipDesign();     
+      ShipDesign defender = new ShipDesign();
+      defender.setJamming( 49 );
+      
+      double accuracy = OneOnOneBattle.getFinalAccuracy( 0.75, attacker, defender );
+      
+      assertEquals( 0.38, accuracy, 0.01 );
+   }
+
+   public void testAccuracyComputersOnly()
+   {      
+      ShipDesign attacker = new ShipDesign();
+      attacker.addComputer( ShipDesign.BATTLE_NEXUS, 1 );
+      ShipDesign defender = new ShipDesign();
+      
+      double accuracy = OneOnOneBattle.getFinalAccuracy( 0.75, attacker, defender );
+      
+      assertEquals( 0.88, accuracy, 0.01 );
+      
+      attacker = new ShipDesign();
+      attacker.addComputer( ShipDesign.SUPER_COMPUTER, 2 );
+      
+      accuracy = OneOnOneBattle.getFinalAccuracy( 0.75, attacker, defender );
+      
+      assertEquals( 0.88, accuracy, 0.01 );      
+   }
+   
+   public void testAccuracyComputersBeatJammers()
+   {
+      ShipDesign attacker = new ShipDesign();
+      attacker.addComputer( ShipDesign.SUPER_COMPUTER, 3 );
+      ShipDesign defender = new ShipDesign();
+      defender.setJamming( 49 );
+      
+      double accuracy = OneOnOneBattle.getFinalAccuracy( 0.75, attacker, defender );
+      
+      assertEquals( 0.83, accuracy, 0.01 );
+   }
+
+   public void testAccuracyJammersBeatComputers()
+   {
+      ShipDesign attacker = new ShipDesign();
+      attacker.addComputer( ShipDesign.BATTLE_COMPUTER, 1 );
+      ShipDesign defender = new ShipDesign();
+      defender.setJamming( 49 );
+      
+      double accuracy = OneOnOneBattle.getFinalAccuracy( 0.75, attacker, defender );
+      
+      assertEquals( 0.53, accuracy, 0.01 );
    }
 }
