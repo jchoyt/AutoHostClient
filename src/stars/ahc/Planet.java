@@ -234,4 +234,16 @@ public class Planet implements MapObject
       str += year;
       return str;
    }
+
+   /**
+    */
+   public int getReportAge()
+   {
+      return getIntValue( PLANET_REPORTAGE, 0 );
+   }
+   
+   public String getStarBase()
+   {
+      return getValue( PLANET_BASE );
+   }
 }
