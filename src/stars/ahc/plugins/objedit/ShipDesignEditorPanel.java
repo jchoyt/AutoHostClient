@@ -20,7 +20,6 @@
 package stars.ahc.plugins.objedit;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -29,21 +28,30 @@ import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
 
 import stars.ahc.Game;
 import stars.ahc.ShipDesign;
+import stars.ahc.Utils;
+import stars.ahc.Weapon;
 
 /**
  * @author Steve Leach
@@ -57,6 +65,16 @@ public class ShipDesignEditorPanel extends JPanel
    private JTextField nameField;
    private JTextField ownerField;
    private JComboBox hullTypeField;
+   private JTextField massField;
+   private JTextField armourField;
+   private JTextField shieldsField;
+   private JCheckBox regenShieldsField;
+   private JTextField moveField;
+   private JTextField initiativeField;
+   private JList weaponsList;
+   private JTextField weaponsCountField;
+   private JComboBox weaponsTypeList;
+   private JTable weaponsTable;
 
    public ShipDesignEditorPanel( Game game )
    {
@@ -86,9 +104,8 @@ public class ShipDesignEditorPanel extends JPanel
 
    private JComponent createToolbar()
    {
-      JPanel toolbar = new JPanel();
-      
-      toolbar.setLayout( new FlowLayout() );
+      Box toolbar = Box.createHorizontalBox();
+      toolbar.setBorder( new EmptyBorder(2,2,2,2) );
       
       Action newDesignAction = new AbstractAction("New Design") {
          public void actionPerformed(ActionEvent event)
@@ -106,7 +123,22 @@ public class ShipDesignEditorPanel extends JPanel
          }
       };
 
+      toolbar.add( Box.createHorizontalStrut(2) );
+      
       toolbar.add( new JButton(battleSimAction) );
+      
+      Action saveAction = new AbstractAction("Save") {
+         public void actionPerformed(ActionEvent event)
+         {
+            saveChanges();
+         }
+      };
+      
+      toolbar.add( Box.createHorizontalStrut(2) );
+      
+      toolbar.add( new JButton(saveAction) );
+      
+      toolbar.add( Box.createHorizontalGlue() );
       
       return toolbar;
    }
@@ -147,49 +179,147 @@ public class ShipDesignEditorPanel extends JPanel
       
       gbc.gridy = 1;
       gbc.gridx = 1;
+      gbc.gridwidth = 1;
       editPanel.add( new JLabel("Design:"), gbc );
 
       gbc.gridx++;
+      gbc.gridwidth = 4;
       nameField = new JTextField(30);
       editPanel.add( nameField, gbc );
       
-      
       gbc.gridy++;
       gbc.gridx = 1;
+      gbc.gridwidth = 1;
       editPanel.add( new JLabel("Owner:"), gbc );
       
       gbc.gridx++;
+      gbc.gridwidth = 4;
       ownerField = new JTextField(30);
       editPanel.add( ownerField, gbc );
 
       gbc.gridy++;
       gbc.gridx = 1;
+      gbc.gridwidth = 1;
       editPanel.add( new JLabel("Hull Type:"), gbc );
       
-      gbc.gridx++;      
+      gbc.gridx++;     
+      gbc.gridwidth = 4;
       hullTypeField = new JComboBox(ShipDesign.getHullTypeNames());
       editPanel.add( hullTypeField, gbc );
+
+      gbc.gridy++;
+      gbc.gridx = 1;
+      gbc.gridwidth = 1;
+      editPanel.add( new JLabel("Mass:"), gbc );
       
-      Action saveAction = new AbstractAction("Save") {
-         public void actionPerformed(ActionEvent event)
-         {
-            saveChanges();
-         }
-      };
+      gbc.gridx++;      
+      gbc.gridwidth = 1;
+      massField = new JTextField(5);
+      editPanel.add( massField, gbc );
       
       gbc.gridy++;
       gbc.gridx = 1;
-      editPanel.add( new JButton(saveAction), gbc );
+      gbc.gridwidth = 1;
+      editPanel.add( new JLabel("Armour:"), gbc );
+      
+      gbc.gridx++;      
+      gbc.gridwidth = 1;
+      armourField = new JTextField(5);
+      editPanel.add( armourField, gbc );
+
+      gbc.gridx++;
+      gbc.gridwidth = 1;
+      editPanel.add( new JLabel("Shields:"), gbc );
+      
+      gbc.gridx++;      
+      shieldsField = new JTextField(5);
+      editPanel.add( shieldsField, gbc );
+      
+      gbc.gridx++;      
+      regenShieldsField = new JCheckBox("Regen");
+      editPanel.add( regenShieldsField, gbc );
+
+      gbc.gridy++;
+      gbc.gridx = 1;
+      gbc.gridwidth = 1;
+      editPanel.add( new JLabel("Move:"), gbc );
+      
+      gbc.gridx++;      
+      gbc.gridwidth = 1;
+      moveField = new JTextField(5);
+      editPanel.add( moveField, gbc );
+
+      gbc.gridx++;
+      gbc.gridwidth = 1;
+      editPanel.add( new JLabel("Initiative:"), gbc );
+      
+      gbc.gridx++;      
+      initiativeField = new JTextField(5);
+      editPanel.add( initiativeField, gbc );
+            
       
       gbc.gridy++;
       gbc.gridx = 1;
+      gbc.gridwidth = 5;
       gbc.weightx = 1;
       gbc.weighty = 1;
-      editPanel.add( new JLabel(" "), gbc );
+      editPanel.add( getWeaponsBox(), gbc );
+      
+//      gbc.gridy++;
+//      gbc.gridx = 5;
+//      gbc.weightx = 1;
+//      gbc.weighty = 1;
+//      editPanel.add( new JLabel(" "), gbc );
       
       refreshFields();
       
       return editPanel;
+   }
+   
+   private JComponent getWeaponsBox()
+   {
+      Box weaponsBox = Box.createVerticalBox();
+      
+      weaponsBox.setBorder( BorderFactory.createTitledBorder("Weapons") );
+
+      weaponsTable = new JTable( new WeaponsTableModel(this) );
+      weaponsTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
+      
+      JScrollPane scroller = new JScrollPane(weaponsTable);
+      
+      weaponsBox.add( weaponsTable );
+      
+      weaponsBox.add( Box.createVerticalStrut(2) );
+      
+      Box weaponsControls = Box.createHorizontalBox();
+      
+      weaponsCountField = new JTextField(2);
+      weaponsCountField.setText("1");
+      weaponsControls.add( weaponsCountField );
+      
+      Vector weaponsTypes = new Vector();
+      weaponsTypes.add( "Colloidal" );
+      
+      weaponsTypeList = new JComboBox(weaponsTypes);
+      
+      weaponsControls.add( weaponsTypeList );
+      
+      Action addWeaponAction = new AbstractAction("Add") {
+         public void actionPerformed(ActionEvent event)
+         {
+            
+         }
+      };
+      
+      weaponsControls.add( new JButton(addWeaponAction) );
+      
+      weaponsControls.add( Box.createHorizontalGlue() );
+      
+      weaponsBox.add( weaponsControls );
+      
+      weaponsBox.add( Box.createVerticalGlue() );
+      
+      return weaponsBox;
    }
    
    private void newDesign()
@@ -233,19 +363,17 @@ public class ShipDesignEditorPanel extends JPanel
          return;	// edit panel hasn't been created yet
       }
       
-      int index = designsList.getSelectedIndex();
-      
-      ShipDesign design = game.getShipDesign( index );
-      
-      if (design == null)
-      {
-         design = new ShipDesign(ShipDesign.HULLTYPE_SCOUT,"");
-      }
+      ShipDesign design = getCurrentDesign(false);
       
       nameField.setText( design.getName() );
-      ownerField.setText( design.getOwner() );
-      
+      ownerField.setText( design.getOwner() );      
       hullTypeField.setSelectedIndex( design.getHullType() );
+      massField.setText( ""+design.getMass() );
+      armourField.setText( ""+design.getArmour() );
+      shieldsField.setText( ""+design.getShields() );
+      moveField.setText( ""+(design.getSpeed4()/4) );
+      initiativeField.setText( ""+design.getInitiative() );
+      regenShieldsField.setSelected( design.isRegenShields() );
    }
    
    private void saveChanges()
@@ -257,9 +385,81 @@ public class ShipDesignEditorPanel extends JPanel
       design.setName( nameField.getText().trim() );
       design.setOwner( ownerField.getText().trim() );
       design.setHullType( hullTypeField.getSelectedIndex() );
+      design.setMass( Utils.safeParseInt(massField.getText(),0) );
+      design.setArmour( Utils.safeParseInt(armourField.getText(),0) );
+      design.setShields( Utils.safeParseInt(shieldsField.getText(),0) );
+      design.setInitiative( Utils.safeParseInt(initiativeField.getText(),0) );
+      design.setBattleSpeed( Utils.safeParseFloat(moveField.getText(),0)  );
+      design.setRegenShields( regenShieldsField.isSelected() );
       
       game.saveUserDefinedProperties();
       
       refreshList();
    }
+   
+   ShipDesign getCurrentDesign( boolean allowNull )
+   {
+      ShipDesign design;
+      
+      int index = designsList.getSelectedIndex();
+      
+      design = game.getShipDesign( index );
+
+      if ((design == null) && (allowNull == false))
+      {
+         design = new ShipDesign();
+      }
+
+      if ((design != null) &&(design.getWeaponSlots() == 0))
+      {
+         design.addWeapon( Weapon.X_RAY, 1 );
+         design.addWeapon( Weapon.X_RAY, 1 );
+      }
+      
+      return design;
+   }
+}
+
+class WeaponsTableModel extends AbstractTableModel
+{
+   private ShipDesignEditorPanel editor;
+
+   public WeaponsTableModel( ShipDesignEditorPanel editor )
+   {
+      this.editor = editor;
+   }
+   
+   /* (non-Javadoc)
+    * @see javax.swing.table.TableModel#getColumnCount()
+    */
+   public int getColumnCount()
+   {
+      return 2;
+   }
+
+   /* (non-Javadoc)
+    * @see javax.swing.table.TableModel#getRowCount()
+    */
+   public int getRowCount()
+   {
+      ShipDesign design = editor.getCurrentDesign(false);
+      return design.getWeaponSlots();
+   }
+
+   /* (non-Javadoc)
+    * @see javax.swing.table.TableModel#getValueAt(int, int)
+    */
+   public Object getValueAt(int row, int col)
+   {
+      switch (col)
+      {
+         case 0:
+            return editor.getCurrentDesign(false).getWeaponName(row);
+         case 1:
+            return new Integer( editor.getCurrentDesign(false).getWeaponCount(row) );
+         default:
+            return "";
+      }
+   }
+   
 }

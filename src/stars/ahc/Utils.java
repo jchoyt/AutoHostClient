@@ -448,5 +448,22 @@ public class Utils
       return result;
 
    }
+
+
+   /**
+    * @param text
+    * @return
+    */
+   public static double safeParseFloat(String text, double defaultValue)
+   {
+      try
+      {
+         return Float.parseFloat( text );
+      }
+      catch (Throwable t)
+      {
+         return defaultValue;         
+      }
+   }
 }
 

@@ -36,7 +36,7 @@ public class ShipDesign
    public static final int HULLTYPE_DREADNAUGHT = 7;
    public static final int HULLTYPE_NUBIAN = 8;
    
-   private static final int[] hullWeaponSlots = { 0, 1, 3, 3, 6, 9, 20, 0, 0 };
+   private static final int[] hullWeaponSlots = { 1, 1, 3, 3, 6, 9, 20, 0, 0 };
    
    private int hullType = HULLTYPE_UNKNOWN;
    private String name = "";
@@ -234,6 +234,13 @@ public class ShipDesign
       {
          properties.setProperty( base+".hull", getHullTypeNames()[hullType] );
       }
+      
+      properties.setProperty( base+".mass", ""+mass );
+      properties.setProperty( base+".armour", ""+armour );
+      properties.setProperty( base+".shields", ""+shields );
+      properties.setProperty( base+".speed4", ""+speed4 );
+      properties.setProperty( base+".initiative", ""+initiative );
+      properties.setProperty( base+".regenShields", ""+regenShields );
    }
    
    public void loadProperties(Properties properties, int index)
@@ -244,11 +251,23 @@ public class ShipDesign
       owner = properties.getProperty( base + ".owner" );
       
       hullType = Utils.safeParseInt( properties.getProperty( base + ".hullCode" ), 0 );
+      
+      setupWeaponSlots();
+      
+      mass = Utils.safeParseInt( properties.getProperty( base + ".mass" ), 0 );
+      armour = Utils.safeParseInt( properties.getProperty( base + ".armour" ), 0 );
+      shields = Utils.safeParseInt( properties.getProperty( base + ".shields" ), 0 );
+      initiative = Utils.safeParseInt( properties.getProperty( base + ".initiative" ), 0 );
+      speed4 = Utils.safeParseInt( properties.getProperty( base + ".speed4" ), 0 );
+      
+      String s = ""+properties.getProperty( base + ".regenShields" );
+      regenShields = s.equals("true");
    }
 
    public void setHullType(int typeCode)
    {
       this.hullType = typeCode;
+      setupWeaponSlots();
    }   
    public int getHullType()
    {
