@@ -2,6 +2,7 @@ plugin=stars.ahc.plugins.map.GamePanelViewMapButton
 plugin=stars.ahc.plugins.map.layers.BackgroundLayer
 plugin=stars.ahc.plugins.map.layers.TerritoryLayer
 plugin=stars.ahc.plugins.map.layers.GateRouteLayer
+plugin=stars.ahc.plugins.map.layers.FleetLayer
 plugin=stars.ahc.plugins.map.layers.PlanetLayer
 plugin=stars.ahc.plugins.map.layers.PlanetNamesLayer
 plugin=stars.ahc.plugins.map.layers.TitleLayer

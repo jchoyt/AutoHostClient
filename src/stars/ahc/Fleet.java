@@ -14,6 +14,8 @@
  */
 package stars.ahc;
 
+import java.awt.Point;
+
 /**
  *  Description of the Class
  *
@@ -250,6 +252,14 @@ public class Fleet implements MapObject
    public int getY()
    {
       return getIntValue(Y);
+   }
+
+
+   /**
+    */
+   public Point getPosition()
+   {
+      return new Point( getX(), getY() );
    }
 }
 
