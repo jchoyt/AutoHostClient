@@ -62,20 +62,14 @@ public class GameTest extends TestCase
     public void testToString()
     {
         String value = "Game=mover" +
-                lineEnding + "mover.player1.lastDownload=1039721561160" +
                 lineEnding + "mover.player1.lastUpload=1039721561160" +
                 lineEnding + "mover.player1.StarsPassword=" +
                 lineEnding + "mover.player1.UploadPassword=v0e4" +
                 lineEnding + "mover.player1.upload=true" +
-                lineEnding + "mover.player1.needsUpload=false" +
-                lineEnding + "mover.player1.needsDownload=false" +
-                lineEnding + "mover.player2.lastDownload=1039721561160" +
                 lineEnding + "mover.player2.lastUpload=1039721561160" +
                 lineEnding + "mover.player2.StarsPassword=" +
                 lineEnding + "mover.player2.UploadPassword=null" +
                 lineEnding + "mover.player2.upload=false" +
-                lineEnding + "mover.player2.needsUpload=false" +
-                lineEnding + "mover.player2.needsDownload=false" +
                 lineEnding + "mover.GameDir=D:/Jeff's~1/stars/mover" +
                 lineEnding + "mover.PlayerNumbers=1,2" + lineEnding;
         assertEquals( value, game.toString() );
@@ -87,20 +81,14 @@ public class GameTest extends TestCase
      */
     public void testWriteProperties()
     {
-        String value = "mover.player1.lastDownload=1039721561160" +
-                lineEnding + "mover.player1.lastUpload=1039721561160" +
+        String value = "mover.player1.lastUpload=1039721561160" +
                 lineEnding + "mover.player1.StarsPassword=" +
                 lineEnding + "mover.player1.UploadPassword=v0e4" +
                 lineEnding + "mover.player1.upload=true" +
-                lineEnding + "mover.player1.needsUpload=false" +
-                lineEnding + "mover.player1.needsDownload=false" +
-                lineEnding + "mover.player2.lastDownload=1039721561160" +
                 lineEnding + "mover.player2.lastUpload=1039721561160" +
                 lineEnding + "mover.player2.StarsPassword=" +
                 lineEnding + "mover.player2.UploadPassword=null" +
                 lineEnding + "mover.player2.upload=false" +
-                lineEnding + "mover.player2.needsUpload=false" +
-                lineEnding + "mover.player2.needsDownload=false" +
                 lineEnding + "mover.GameDir=D:/Jeff's~1/stars/mover" +
                 lineEnding + "mover.PlayerNumbers=1,2" + lineEnding;
         StringWriter out = new StringWriter();
@@ -125,7 +113,6 @@ public class GameTest extends TestCase
         Player[] players = new Player[2];
         Player player = new Player();
         player.setId( "1" );
-        player.setLastUpload( 1039721561160L );
         player.setLastDownload( 1039721561160L );
         player.setStarsPassword( "" );
         player.setUploadPassword( "v0e4" );
@@ -134,7 +121,6 @@ public class GameTest extends TestCase
         players[0] = player;
         player = new Player();
         player.setId( "2" );
-        player.setLastUpload( 1039721561160L );
         player.setLastDownload( 1039721561160L );
         player.setStarsPassword( "" );
         player.setGame( game );

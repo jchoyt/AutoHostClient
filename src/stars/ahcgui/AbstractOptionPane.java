@@ -219,11 +219,12 @@ public abstract class AbstractOptionPane extends JPanel implements ActionListene
     {
         c.gridy++;
         c.gridheight = 1;
+        //c.gridwidth = 1;
         c.gridwidth = c.REMAINDER;
-        c.fill = GridBagConstraints.NONE;
-        c.anchor = GridBagConstraints.WEST;
-        c.weightx = 1.0f;
-        c.insets = new Insets( 1, 0, 1, 0 );
+        c.gridx = 0;
+        c.weightx = 0.0f;
+        c.insets = new Insets( 1, 1, 1, 0 );
+        c.fill = GridBagConstraints.CENTER;
 
         gridbag.setConstraints( comp, c );
         add( comp );
@@ -254,6 +255,15 @@ public abstract class AbstractOptionPane extends JPanel implements ActionListene
             _save();
         }
     }
+
+    public void refresh()
+    {
+        if ( initialized )
+        {
+            _refresh();
+        }
+    }
+
 
 
     /**

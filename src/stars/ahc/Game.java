@@ -14,10 +14,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahc;
-
-import java.util.*;
+import java.awt.*;
 import java.awt.event.*;
-import java.awt.*;import java.io.*;
+import java.beans.*;
+import java.io.*;
+import java.util.*;
 
 import javax.swing.*;
 import stars.ahc.Player;
@@ -30,68 +31,36 @@ import stars.ahc.Player;
  */
 public class Game extends Object
 {
-    String currentYear = "";
+    Properties ahStatus;
     String directory;
     String name;
+    PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
     ArrayList players;
 
 
+    /**
+     *  Constructor for the Game object
+     */
     public Game()
     {
-        players = new ArrayList();
         name = "";
+        players = new ArrayList();
         directory = "";
-        currentYear="";
     }
 
+
     /**
-     *  Sets the currentYear attribute of the Game object
+     *  Constructor for the Game object
      *
-     *@param  currentYear  The new currentYear value
+     *@param  shortName  Description of the Parameter
+     *@param  directory  Description of the Parameter
      */
-    public void setCurrentYear( String currentYear )
+    public Game( String shortName, String directory )
     {
-        this.currentYear = currentYear;
-    }
-
-
-    public void poll()
-    {
-        try
-        {
-            for ( int i = 0; i < players.size(); i++ )
-            {
-                ((Player)players.get(i)).poll();
-            }
-        }
-        catch ( Exception e )
-        {
-            Log.log(Log.WARNING,this,e);
-        }
-    }
-
-    /**
-     *  Sets the currentYear attribute of the Game object
-     */
-    public void setCurrentYear()
-    {
-        try
-        {
-            String greatestYear = "2400";
-            for ( int i = 0; i < players.size(); i++ )
-            {
-                String year = ((Player)players.get(i)).getMFileYear();
-                if ( year.compareTo( greatestYear ) > 0 )
-                {
-                    greatestYear = year;
-                }
-            }
-            currentYear = greatestYear;
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
+        name = shortName.toString();
+        players = new ArrayList();
+        this.directory = directory;
+        loadProperties();
     }
 
 
@@ -124,9 +93,9 @@ public class Game extends Object
      */
     public void setPlayers( Player[] players )
     {
-        for( int i=0; i<players.length; i++)
+        for ( int i = 0; i < players.length; i++ )
         {
-        this.players.add(players[i]);
+            this.players.add( players[i] );
         }
     }
 
@@ -138,11 +107,7 @@ public class Game extends Object
      */
     public String getCurrentYear()
     {
-        if ( currentYear.equals( "" ) )
-        {
-            setCurrentYear();
-        }
-        return currentYear;
+        return ahStatus.getProperty( "game-year" );
     }
 
 
@@ -158,6 +123,32 @@ public class Game extends Object
 
 
     /**
+     *  Gets the gameYear attribute of the Game object
+     *
+     *@return    The gameYear value
+     */
+    public String getGameYear()
+    {
+        return ahStatus.getProperty( "game-year" );
+    }
+
+
+    /**
+     *  Gets the longName attribute of the Game object
+     *
+     *@return    The longName value
+     */
+    public String getLongName()
+    {
+        if ( ahStatus == null )
+        {
+            loadProperties();
+        }
+        return ahStatus.getProperty( "game-name" );
+    }
+
+
+    /**
      *  Gets the name attribute of the Game object
      *
      *@return    The name value
@@ -165,6 +156,63 @@ public class Game extends Object
     public String getName()
     {
         return name;
+    }
+
+
+    /**
+     *  Gets the nextGen attribute of the Game object
+     *
+     *@return    The nextGen value
+     */
+    public String getNextGen()
+    {
+        return ahStatus.getProperty( "next-gen-time" );
+    }
+
+
+    /**
+     *  Gets the playerRaceName attribute of the Game object
+     *
+     *@param  id  Description of the Parameter
+     *@return     The playerRaceName value
+     */
+    public String getPlayerRaceName( String id )
+    {
+        return ahStatus.getProperty( "player" + id + "-race" );
+    }
+
+
+    /**
+     *  Gets the playerStatus attribute of the Game object
+     *
+     *@param  id  Description of the Parameter
+     *@return     The playerStatus value
+     */
+    public String getPlayerStatus( String id )
+    {
+        String ret = ahStatus.getProperty( "player" + id + "-turn" );
+        if(ret==null)
+        {
+            Log.log(Log.NOTICE,this,"Player "+ id +" could not be found.  Couldn't pull a property with the key \"player" + id + "-turn\"");
+            throw new NullPointerException("Player "+ id +" could not be found.");
+        }
+        if ( ret.equals( "waiting" ) )
+        {
+            ret = " <font color=\"blue\">Turn not submitted</font>";
+        }
+        else if ( ret.equals( "inactive" ) )
+        {
+            ret = " <font color=\"gray\">Inactive";
+        }
+        else if ( ret.startsWith( "in" ) )
+        {
+            ret = " <font color=\"green\">Uploaded " + ret.substring( 3 ) + "</font>";
+        }
+        else if ( ret.startsWith( "dead" ) )
+        {
+            ret = " <font color=\"gray\">Dead or Banned</font>";
+        }
+        return ret;
     }
 
 
@@ -177,19 +225,136 @@ public class Game extends Object
     {
         Object[] playersArray = players.toArray();
         Player[] ar = new Player[playersArray.length];
-        for( int i=0; i<ar.length; i++)
+        for ( int i = 0; i < ar.length; i++ )
         {
-            ar[i] = (Player) playersArray[i];
+            ar[i] = ( Player ) playersArray[i];
         }
         return ar;
     }
 
 
-    public void addPlayer(Player p)
+    /**
+     *  Gets the stagingDirectoryPath attribute of the Game object
+     *
+     *@return    The stagingDirectoryPath value
+     */
+    public String getStagingDirectoryPath()
     {
-        p.setGame(this);
-        players.add(p);
+        return directory + "/staging";
     }
+
+
+    /**
+     *  Gets the status attribute of the Game object
+     *
+     *@return    The status value
+     */
+    public String getStatus()
+    {
+        return ahStatus.getProperty( "status" );
+    }
+
+
+    /**
+     *  Gets the statusFileName attribute of the Game object
+     *
+     *@return    The statusFileName value
+     */
+    public String getStatusFileName()
+    {
+        return getName() + ".status";
+    }
+
+
+    /**
+     *  Adds a feature to the Player attribute of the Game object
+     *
+     *@param  p  The feature to be added to the Player attribute
+     */
+    public void addPlayer( Player p )
+    {
+        p.setGame( this );
+        players.add( p );
+        pcs.firePropertyChange( "player added", null, p );
+    }
+
+
+    /**
+     *  Adds a feature to the PropertyChangeListener attribute of the Player
+     *  object
+     *
+     *@param  listener  The feature to be added to the PropertyChangeListener
+     *      attribute
+     */
+    public void addPropertyChangeListener( PropertyChangeListener listener )
+    {
+        pcs.addPropertyChangeListener( listener );
+    }
+
+
+    /**
+     *  Description of the Method
+     */
+    public void loadProperties()
+    {
+        ahStatus = new Properties();
+        try
+        {
+            File statusFile = new File( directory, getStatusFileName() );
+            if ( !statusFile.exists() )
+            {
+                poll();
+                //return;
+            }
+            InputStream in = new FileInputStream( statusFile );
+            ahStatus.load( in );
+            pcs.firePropertyChange( "gameStatus", 0, 1 );
+        }
+        catch ( Exception e )
+        {
+            Log.log( Log.ERROR, this, e );
+        }
+    }
+
+
+    /**
+     *  Description of the Method
+     *
+     *@return    Description of the Return Value
+     */
+    public boolean poll()
+    {
+        /*
+         *  get status file from AH
+         */
+        try
+        {
+            Utils.getFileFromAutohost( name, getStatusFileName(), directory );
+        }
+        catch ( Exception e )
+        {
+            Log.log( Log.ERROR, this, e );
+            return false;
+        }
+        /*
+         *  load new status into game  GUI should be updated by reloading ahStatus
+         */
+        loadProperties();
+        return true;
+    }
+
+
+    /**
+     *  Description of the Method
+     *
+     *@param  p  Description of the Parameter
+     */
+    public void removePlayer( Player p )
+    {
+        players.remove( p );
+        pcs.firePropertyChange( "player removed", 1, 0 );
+    }
+
 
     /**
      *  Description of the Method
@@ -228,12 +393,12 @@ public class Game extends Object
         String playerNumbers = "";
         for ( int i = 0; i < players.size(); i++ )
         {
-            playerNumbers += ((Player)players.get(i)).getId();
+            playerNumbers += ( ( Player ) players.get( i ) ).getId();
             if ( i < players.size() - 1 )
             {
                 playerNumbers += ",";
             }
-            ((Player)players.get(i)).writeProperties( out );
+            ( ( Player ) players.get( i ) ).writeProperties( out );
         }
         out.write( name + ".GameDir=" + directory + lineEnding );
         out.write( name + ".PlayerNumbers=" + playerNumbers + lineEnding );

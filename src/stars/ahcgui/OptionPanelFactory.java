@@ -98,7 +98,7 @@ public class OptionPanelFactory extends Object
  *@author     jchoyt
  *@created    January 15, 2003
  */
-class GameOptionPane extends AbstractOptionPane
+class GameOptionPane extends AbstractOptionPane implements PropertyChangeListener
 {
 
 
@@ -106,8 +106,8 @@ class GameOptionPane extends AbstractOptionPane
     JTextField gameFileLocation = new JTextField();
     JTextField gameName = new JTextField();
     String playerList;
-
-    ArrayList playerPanes = new ArrayList();
+    ArrayList playerPanesList = new ArrayList();
+    JPanel playerPanesPanel = new JPanel();
 
 
     /**
@@ -120,7 +120,7 @@ class GameOptionPane extends AbstractOptionPane
         super();
         this.game = game;
         init();
-        _refresh();
+        refresh();
     }
 
 
@@ -138,8 +138,13 @@ class GameOptionPane extends AbstractOptionPane
     /**
      *  Description of the Method
      */
-    public void _init()
+    protected void _init()
     {
+        //add the change listener to the associated game.
+        game.addPropertyChangeListener( this );
+        GamesProperties.addPropertyChangeListener(this);
+        //set layout of player pane to be vertical
+        playerPanesPanel.setLayout( new BoxLayout( playerPanesPanel, BoxLayout.Y_AXIS ) );
         //int height = ( int ) gameName.getSize().getHeight();
         gameName.setMinimumSize( new Dimension( 200, 5 ) );
         addComponent( "Game name: ", gameName );
@@ -150,62 +155,50 @@ class GameOptionPane extends AbstractOptionPane
         for ( int i = 0; i < players.length; i++ )
         {
             PlayerPane pane = new PlayerPane( players[i] );
-            playerPanes.add( pane );
-
-            c.gridy++;
-            c.gridheight = 1;
-            c.gridwidth = 3;
-            c.fill = GridBagConstraints.BOTH;
-            c.anchor = GridBagConstraints.CENTER;
-            c.weightx = 1.0f;
-            c.insets = new Insets( 1, 0, 1, 0 );
-            gridbag.setConstraints( pane, c );
-            add( pane );
+            addPlayerPane( pane );
         }
-        //addPlayerButton();
-        //addBlankSpace();
+        c.gridy++;
+        c.gridheight = 1;
+        c.gridwidth = 3;
+        c.fill = GridBagConstraints.BOTH;
+        c.anchor = GridBagConstraints.CENTER;
+        c.weightx = 1.0f;
+        c.insets = new Insets( 1, 0, 1, 0 );
+        gridbag.setConstraints( playerPanesPanel, c );
+        add( playerPanesPanel );
         addButtons();
     }
 
-    /**
-     *  Adds a feature to the Buttons attribute of the GamePanelFactory class
-     *
-     *@param  game  The feature to be added to the Buttons attribute
-     */
-    protected void addButtons( )
-    {
-        addBlankSpace();
-        JButton b1 = new JButton( "Add Player" );
-        b1.setMnemonic( KeyEvent.VK_P );
-        b1.addActionListener(
-            new ActionListener()
-            {
-                public void actionPerformed( ActionEvent e )
-                {
-                    OptionPanelFactory.addPlayer( game );
-                }
-            }
-                 );
-        c.gridx=0;
-        c.gridy++;
-        c.gridwidth=2;
-        c.anchor=GridBagConstraints.CENTER;
-        c.fill=GridBagConstraints.NONE;
-        gridbag.setConstraints( b1, c );
-        add( b1 );
-        addBlankSpace();
-        super.addButtons();
-    }
+
     /**
      *  Description of the Method
      */
-    public void _refresh()
+    protected void _refresh()
     {
-        gameFileLocation.setText( game.getDirectory() );
-        gameName.setText( game.getName() );
-        for ( int i = 0; i < playerPanes.size(); i++ )
+        String gameLoc = game.getDirectory();
+        if ( gameLoc.equals( "" ) )
         {
-            ( ( PlayerPane ) playerPanes.get( i ) )._refresh();
+            try
+            {
+                gameLoc = GamesProperties.getStarsExecutable();
+                File file = new File( gameLoc );
+                file = file.getParentFile();
+                gameLoc = file.getCanonicalPath();
+                gameFileLocation.setText( gameLoc.replace( '\\', '/' ) );
+            }
+            catch ( Exception e )
+            {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            gameFileLocation.setText( game.getDirectory() );
+        }
+        gameName.setText( game.getName() );
+        for ( int i = 0; i < playerPanesList.size(); i++ )
+        {
+            ( ( PlayerPane ) playerPanesList.get( i ) )._refresh();
         }
     }
 
@@ -213,19 +206,19 @@ class GameOptionPane extends AbstractOptionPane
     /**
      *  Description of the Method
      */
-    public void _save()
+    protected void _save()
     {
         game.setDirectory( gameFileLocation.getText() );
         game.setName( gameName.getText() );
-        for ( int i = 0; i < playerPanes.size(); i++ )
+        for ( int i = 0; i < playerPanesList.size(); i++ )
         {
-            ( ( PlayerPane ) playerPanes.get( i ) )._save();
+            ( ( PlayerPane ) playerPanesList.get( i ) )._save();
         }
         try
         {
             GamesProperties.writeProperties();
-            Log.log(Log.MESSAGE,this,"Game information saved.");
-            AhcGui.setStatus("Game information saved.");
+            Log.log( Log.MESSAGE, this, "Game information saved." );
+            AhcGui.setStatus( "Game information saved." );
         }
         catch ( Exception e )
         {
@@ -235,15 +228,36 @@ class GameOptionPane extends AbstractOptionPane
 
 
     /**
-     *  Adds a feature to the PlayerButton attribute of the GameOptionPane
-     *  object
+     *  Description of the Method
+     *
+     *@param  evt  Description of the Parameter
      */
-    protected void addPlayerButton()
+    public void propertyChange( PropertyChangeEvent evt )
     {
-        //TODO:  add "Add Player" button
-/*        c.gridy++;
+        if ( evt.getPropertyName().equals( "player added" ) )
+        {
+            Player p = ( Player ) evt.getNewValue();
+            PlayerPane pane = new PlayerPane( p );
+            addPlayerPane( pane );
+            pane.refresh();
+            validate();
+        }
+        else if(evt.getPropertyName().equals("game removed"))
+        {
+            setVisible(false);
+            AhcGui.getOptionSelector().removeItem(((Game)evt.getOldValue()).getName());
+        }
+    }
+
+
+    /**
+     *  Adds a feature to the Buttons attribute of the GamePanelFactory class
+     */
+    protected void addButtons()
+    {
+        addBlankSpace();
         JButton b1 = new JButton( "Add Player" );
-        b1.setMnemonic( KeyEvent.VK_P );
+        b1.setMnemonic( KeyEvent.VK_A );
         b1.addActionListener(
             new ActionListener()
             {
@@ -253,10 +267,28 @@ class GameOptionPane extends AbstractOptionPane
                 }
             }
                  );
-        addComponent( b1 );
-*/
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 2;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.NONE;
+        gridbag.setConstraints( b1, c );
+        add( b1 );
+        addBlankSpace();
+        super.addButtons();
     }
 
+
+    /**
+     *  Adds a feature to the PlayerPane attribute of the GameOptionPane object
+     *
+     *@param  pane  The feature to be added to the PlayerPane attribute
+     */
+    protected void addPlayerPane( PlayerPane pane )
+    {
+        playerPanesList.add( pane );
+        playerPanesPanel.add( pane );
+    }
 }
 
 /**
@@ -267,9 +299,11 @@ class GameOptionPane extends AbstractOptionPane
  */
 class PlayerPane extends AbstractOptionPane
 {
+
+
     Player player;
     JTextField playerNumber = new JTextField();
-    JButton removePlayer = new JButton();
+    JButton removePlayerButton = new JButton();
     JTextField starsPassword = new JTextField();
     JTextField uploadPassword = new JTextField();
     JCheckBox uploadTurn = new JCheckBox();
@@ -283,21 +317,30 @@ class PlayerPane extends AbstractOptionPane
     public PlayerPane( Player player )
     {
         this.player = player;
-        _init();
-        _refresh();
+        removePlayerButton.addActionListener(
+            new ActionListener()
+            {
+                public void actionPerformed( ActionEvent e )
+                {
+                    removePlayer();
+                }
+            }
+                 );
+        init();
+        refresh();
     }
 
 
     /**
      *  Description of the Method
      */
-    public void _init()
+    protected void _init()
     {
         addComponent( "Player Number: ", playerNumber );
         addComponent( "Stars Password: ", starsPassword );
         addComponent( "Upload Turn: ", uploadTurn );
         addComponent( "Upload Password: ", uploadPassword );
-        //addComponent( removePlayer );
+        addComponent( removePlayerButton );
         /*
          *  add border
          */
@@ -309,20 +352,20 @@ class PlayerPane extends AbstractOptionPane
     /**
      *  Description of the Method
      */
-    public void _refresh()
+    protected void _refresh()
     {
         playerNumber.setText( player.getId() );
         starsPassword.setText( player.getStarsPassword() );
         uploadPassword.setText( player.getUploadPassword() );
         uploadTurn.setSelected( player.getToUpload() == true );
-        removePlayer.setText( "Remove Player " + player.getId() );
+        removePlayerButton.setText( "Remove Player " + player.getId() );
     }
 
 
     /**
      *  Description of the Method
      */
-    public void _save()
+    protected void _save()
     {
         player.setId( playerNumber.getText() );
         player.setStarsPassword( starsPassword.getText() );
@@ -335,6 +378,25 @@ class PlayerPane extends AbstractOptionPane
         {
             player.setToUpload( false );
         }
+        Log.log( Log.NOTICE, this, player.toString() );
+    }
+
+
+    /**
+     *  Description of the Method
+     */
+    public void removePlayer()
+    {
+        final Game game = player.getGame();
+        /*
+         *  remove player from game object
+         */
+        game.removePlayer( player );
+        /*
+         *  remove player from GUI
+         */
+        GamesProperties.writeProperties();
+        setVisible( false );
     }
 
 }
@@ -361,14 +423,14 @@ class GlobalOptionPane extends AbstractOptionPane
     {
         super();
         init();
-        _refresh();
+        refresh();
     }
 
 
     /**
      *  Description of the Method
      */
-    public void _init()
+    protected void _init()
     {
         addComponent( "Location of stars.exe: ", starsLocation );
         addComponent( "Proxy Host (if needed): ", proxyHost );
@@ -385,11 +447,11 @@ class GlobalOptionPane extends AbstractOptionPane
                 }
             }
                  );
-        c.gridx=0;
+        c.gridx = 0;
         c.gridy++;
-        c.gridwidth=2;
-        c.anchor=GridBagConstraints.CENTER;
-        c.fill=GridBagConstraints.NONE;
+        c.gridwidth = 2;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.NONE;
         gridbag.setConstraints( b1, c );
         add( b1 );
         addBlankSpace();
@@ -400,7 +462,7 @@ class GlobalOptionPane extends AbstractOptionPane
     /**
      *  Description of the Method
      */
-    public void _refresh()
+    protected void _refresh()
     {
         starsLocation.setText( GamesProperties.getStarsExecutable() );
         proxyHost.setText( GamesProperties.getProxyHost() );
@@ -411,7 +473,7 @@ class GlobalOptionPane extends AbstractOptionPane
     /**
      *  Description of the Method
      */
-    public void _save()
+    protected void _save()
     {
         GamesProperties.setStarsExecutable( starsLocation.getText() );
         GamesProperties.setProxyHost( proxyHost.getText() );
@@ -538,6 +600,7 @@ class NewGamePane extends GameOptionPane
     {
         game.setDirectory( gameFileLocation.getText() );
         game.setName( gameName.getText() );
+        game.loadProperties();
         GamesProperties.addGame( game );
         AhcGui.getGameCards().add( GamePanelFactory.createPanel( game ), game.getName() );
         AhcGui.addOption( game.getName(), OptionPanelFactory.createPanel( game ) );
@@ -563,20 +626,24 @@ class NewGamePane extends GameOptionPane
  */
 class NewPlayerPane extends PlayerPane
 {
+
+
     /**
      *  Description of the Field
      */
     protected JDialog mainParent;
     Game game;
 
+
     /**
      *  Constructor for the NewGamePane object
      *
-     *@param  game  Description of the Parameter
+     *@param  player  Description of the Parameter
      */
     public NewPlayerPane( Player player )
     {
         super( player );
+        game = player.getGame();
         setPreferredSize( new Dimension( 600, 250 ) );
     }
 
@@ -591,21 +658,24 @@ class NewPlayerPane extends PlayerPane
     public static NewPlayerPane createPane( JDialog parent, Game game )
     {
         Player player = new Player();
-        game.addPlayer(player);
+        player.setGame( game );
         NewPlayerPane newPane = new NewPlayerPane( player );
         newPane.mainParent = parent;
         return newPane;
     }
 
-    public void _init()
+
+    /**
+     *  Description of the Method
+     */
+    protected void _init()
     {
         super._init();
+        removePlayerButton.setVisible( false );
         addButtons();
-        c.gridwidth = 2;
-        addComponent(new JLabel("Clicking the Add Player button WILL add a player, but to view it you must restart."));
-        addComponent(new JLabel("This will be fixed before the final version is released."));
-        c.gridwidth = 1;
     }
+
+
     /**
      *  Description of the Method
      *
@@ -616,7 +686,8 @@ class NewPlayerPane extends PlayerPane
         if ( evt.getActionCommand().equals( SAVE ) )
         {
             save();
-            addPlayer();
+            mainParent.dispose();
+            game.addPlayer( player );
             try
             {
                 GamesProperties.writeProperties();
@@ -624,12 +695,23 @@ class NewPlayerPane extends PlayerPane
             catch ( Exception e )
             {
                 Log.log( Log.WARNING, this, e );
+                return;
             }
         }
         else if ( evt.getActionCommand().equals( CANCEL ) )
         {
             cancel();
         }
+    }
+
+
+    /**
+     *  Description of the Method
+     */
+    public void updateGui()
+    {
+        //AhcGui.getMainFrame().repaint();
+        AhcGui.getGameOptionCards().getLayout().layoutContainer( AhcGui.getGameOptionCards() );
     }
 
 
@@ -662,22 +744,6 @@ class NewPlayerPane extends PlayerPane
         c.anchor = GridBagConstraints.WEST;
         gridbag.setConstraints( b1, c );
         add( b1 );
-    }
-
-
-    /**
-     *  Adds a feature to the Game attribute of the NewGamePane object
-     */
-    protected void addPlayer()
-    {
-        player.setId(playerNumber.getText() );
-        player.setStarsPassword(starsPassword.getText());
-        player.setUploadPassword(uploadPassword.getText());
-        player.setToUpload(uploadTurn.isSelected());
-        //GamesProperties.addGame( game );
-        //AhcGui.getGameCards().add( GamePanelFactory.createPanel( game ), game.getName() );
-        //AhcGui.addOption( game.getName(), OptionPanelFactory.createPanel( game ) );
-        mainParent.dispose();
     }
 
 

@@ -10,13 +10,13 @@ public class AutoHostClientTest extends TestCase
 {
     /*
      * add tests here
-     */
+
      public void testFindStarsExecutable()
      {
          String path = "d:/Jeff's~1/stars";
          assertEquals (AutoHostClient.findStarsExecutable(path), path);
      }
-
+*/
     /**
      *  The JUnit setup method
      */

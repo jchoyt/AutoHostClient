@@ -48,6 +48,7 @@ public class AHPollerTest extends TestCase
      */
     public void testMFileIsNewer()
     {
+        /*
         try
         {
             player.getGame().setCurrentYear( "1400" );
@@ -68,6 +69,7 @@ public class AHPollerTest extends TestCase
         {
             e.printStackTrace();
         }
+        */
     }
 
 

@@ -14,12 +14,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahc;
-
-import stars.ahc.Utils;
-import java.util.Date;import java.io.*;
+import java.io.*;
+import java.util.Date;
 import java.util.StringTokenizer;
 
 import javax.swing.text.*;
+
+import stars.ahc.Utils;
 
 /**
  *  This class provides methods for logging events. It has the same purpose as
@@ -34,15 +35,6 @@ import javax.swing.text.*;
  */
 public class Log
 {
-
-    // private members
-    private static Object LOCK = new Object();
-    private static int level;
-    private static String lineSep;
-    private static Document logDocument;
-    private static PrintStream realErr;
-    private static PrintStream realOut;
-    private static Writer stream;
 
     /**
      *  Debugging message urgency. Should be used for messages only useful when
@@ -88,16 +80,14 @@ public class Log
      */
     public final static int WARNING = 7;
 
-    static
-    {
-        level = MESSAGE;
-
-        realOut = System.out;
-        realErr = System.err;
-
-        logDocument = new PlainDocument();
-        lineSep = System.getProperty( "line.separator" );
-    }
+    // private members
+    private static Object LOCK = new Object();
+    private static int level;
+    private static String lineSep;
+    private static Document logDocument;
+    private static PrintStream realErr;
+    private static PrintStream realOut;
+    private static Writer stream;
 
 
     /**
@@ -126,6 +116,17 @@ public class Log
         }
 
         Log.stream = stream;
+    }
+
+
+    /**
+     *  Gets the level attribute of the Log class
+     *
+     *@return    The level value
+     */
+    public static int getLevel()
+    {
+        return level;
     }
 
 
@@ -412,6 +413,17 @@ public class Log
         }
 
         throw new IllegalArgumentException( "Invalid urgency: " + urgency );
+    }
+
+    static
+    {
+        level = MESSAGE;
+
+        realOut = System.out;
+        realErr = System.err;
+
+        logDocument = new PlainDocument();
+        lineSep = System.getProperty( "line.separator" );
     }
 }
 

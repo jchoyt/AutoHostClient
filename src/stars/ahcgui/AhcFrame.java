@@ -18,19 +18,20 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Container;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import java.net.URL;
-
 import java.util.HashMap;
 import java.util.Timer;
 import javax.swing.BoxLayout;
-
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
+import java.awt.event.ActionListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -88,9 +89,21 @@ public class AhcFrame extends javax.swing.JFrame
                 ret,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
-        //scrollPane.setPreferredSize( new Dimension( 200, 150 ) );
         scrollRet.setLayout( new BoxLayout( scrollRet, BoxLayout.Y_AXIS ) );
         scrollRet.add( scrollPane );
+        if ( Log.getLevel() == Log.DEBUG )
+        {
+            JButton but = new JButton( "Poll SAH" );
+            but.addActionListener(
+                new ActionListener()
+                {
+                    public void actionPerformed( ActionEvent e )
+                    {
+                        new AHPoller().run();
+                    }
+                } );
+            scrollRet.add(but);
+        }
         AhcGui.setGameCards( ret );
         return scrollRet;
     }
@@ -112,7 +125,6 @@ public class AhcFrame extends javax.swing.JFrame
                 logBox,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
-        //scrollPane.setPreferredSize( new Dimension( 200, 150 ) );
         ret.add( scrollPane, BorderLayout.CENTER );
         return ret;
     }
@@ -147,7 +159,7 @@ public class AhcFrame extends javax.swing.JFrame
                 {
                     CardLayout cl = ( CardLayout ) ( cards.getLayout() );
                     cl.show( cards, ( String ) evt.getItem() );
-                    ( ( AbstractOptionPane ) optionPanes.get( ( String ) evt.getItem() ) )._refresh();
+                    ( ( AbstractOptionPane ) optionPanes.get( ( String ) evt.getItem() ) ).refresh();
                 }
             } );
         selector.add( c );
@@ -167,7 +179,11 @@ public class AhcFrame extends javax.swing.JFrame
             cards.add( temp, games[i].getName() + " Options" );
             optionPanes.put( games[i].getName() + " Options", temp );
         }
-        ret.add( cards, BorderLayout.CENTER );
+        JScrollPane scrollPane = new JScrollPane(
+            cards,
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
+        ret.add( scrollPane, BorderLayout.CENTER );
         AhcGui.setGameOptionCards( cards );
         /*
          *  set up Player pages
@@ -200,22 +216,22 @@ public class AhcFrame extends javax.swing.JFrame
         tabbedPane.addTab( "Games", addGamesTab() );
         tabbedPane.addTab( "Options", addOptionTab() );
         tabbedPane.addTab( "Log", addLogTab() );
-
         if ( GamesProperties.getGames().length == 0 )
         {
             OptionPanelFactory.addNewGame();
         }
-
         contentPane.add( tabbedPane, BorderLayout.CENTER );
-        contentPane.add( status, BorderLayout.SOUTH );
+        contentPane.add( buildStatusPane(), BorderLayout.SOUTH );
         Log.log( Log.MESSAGE, this, "GUI built and ready." );
         AhcGui.setStatus( "GUI built and ready." );
         /*
          *  The line below sets how often AHC checks AH for updated files.
          *  DO NOT MODIFY THIS NUMBER.  Ron has graciously agreed to allow me to write this
          *  to make our lives a little easier.  If you abuse this, I will request that Ron
-         *  shut down access by this application.
+         *  shut down access by this application.  I will NOT be responsible for messing up
+         *  AutoHost.
          */
+        GamesProperties.UPTODATE = true;
         timer.schedule( new AHPoller(), 10 * 60 * 1000, 10 * 60 * 1000 );
     }
 
@@ -238,6 +254,20 @@ public class AhcFrame extends javax.swing.JFrame
         {
             return null;
         }
+    }
+
+
+    /**
+     *  Description of the Method
+     *
+     *@return    Description of the Return Value
+     */
+    protected JPanel buildStatusPane()
+    {
+        JPanel retPane = new JPanel();
+        retPane.add( status );
+        retPane.add( new JLabel( "<html>Thanks to AutoHost by Ron Miller - http://library.southern.edu/stars/stars.htm</html>" ) );
+        return retPane;
     }
 }
 

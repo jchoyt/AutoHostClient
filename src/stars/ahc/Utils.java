@@ -92,6 +92,7 @@ public class Utils
         }
         //go get the files
         URL url = new URL( GamesProperties.AUTOHOST + gameName + "/" + fileName );
+        Log.log(Log.DEBUG,Utils.class, "Going to get " + url.getFile());
         URLConnection connection = url.openConnection();
         InputStream stream = connection.getInputStream();
         BufferedInputStream in = new BufferedInputStream( stream );
@@ -107,7 +108,7 @@ public class Utils
         file.close();
         in.close();
         stream.close();
-        System.out.println( fileName + " downloaded." );
+        Log.log(Log.DEBUG,Utils.class, "Done - successfully retrieved " + url.getFile());
     }
 
 

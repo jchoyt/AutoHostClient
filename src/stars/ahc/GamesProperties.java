@@ -14,8 +14,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahc;
-
-import stars.ahcgui.AhcGui;
 import java.beans.*;
 import java.io.*;
 import java.io.File;
@@ -26,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Properties;
 import stars.ahc.Game;
 import stars.ahc.Player;
+
+import stars.ahcgui.AhcGui;
 
 /**
  *  Description of the Class
@@ -39,6 +39,7 @@ public class GamesProperties extends Object
      *  Description of the Field
      */
     public static String AUTOHOST = "ftp://library.southern.edu/starout/";
+    public static boolean UPTODATE = false;
     /**
      *  Description of the Field
      */
@@ -53,6 +54,7 @@ public class GamesProperties extends Object
     static String proxyHost;
     static String proxyPort;
     static String starsExecutable;
+    static PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
 
 
     /**
@@ -60,11 +62,21 @@ public class GamesProperties extends Object
      */
     public GamesProperties() { }
 
-
+    /**
+     *  Adds a feature to the PropertyChangeListener attribute of the Player
+     *  object
+     *
+     *@param  listener  The feature to be added to the PropertyChangeListener
+     *      attribute
+     */
+    public static void addPropertyChangeListener( PropertyChangeListener listener )
+    {
+        pcs.addPropertyChangeListener( listener );
+    }
     /**
      *  Sets the changeListener attribute of the GamesProperties class
      *
-     *@param  _currentGame     The new currentGame value
+     *@param  _currentGame  The new currentGame value
      */
     /*
      *  public static void setChangeListener( GamesPropsChangeListener _changeListener )
@@ -288,8 +300,15 @@ public class GamesProperties extends Object
     public static void addGame( Game newGame )
     {
         games.add( newGame );
+        writeProperties();
     }
 
+    public static void removeGame(Game game)
+    {
+        games.remove(game);
+        pcs.firePropertyChange("game removed", game, null);
+        writeProperties();
+    }
 
     /**
      *  Description of the Method
@@ -300,7 +319,7 @@ public class GamesProperties extends Object
     {
         StringBuffer ret = new StringBuffer();
         ret.append( "CurrentGame=" + currentGame + lineEnding );
-        ret.append( "initiated=" + initiated + lineEnding );
+        ret.append( "initialized=" + initiated + lineEnding );
         StringWriter out = new StringWriter();
         try
         {
@@ -388,9 +407,9 @@ public class GamesProperties extends Object
                 games = new ArrayList();
                 for ( int i = 0; i < gameNames.length; i++ )
                 {
-                    currentGame = new Game();
-                    currentGame.setName( gameNames[i] );
-                    currentGame.setDirectory( props.getProperty( gameNames[i] + ".GameDir" ) );
+                    String gameDirectory = props.getProperty( gameNames[i] + ".GameDir" );
+                    currentGame = new Game( gameNames[i], gameDirectory );
+                    currentGame.setDirectory( gameDirectory );
                     /*
                      *  for each game, set up the players
                      */
@@ -409,11 +428,7 @@ public class GamesProperties extends Object
                         newPlayer.setUploadPassword( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".UploadPassword" ) );
                         newPlayer.setId( playerNumbers[j] );
                         newPlayer.setToUpload( Boolean.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".upload" ) ).booleanValue() );
-                        newPlayer.setNeedsUpload( Boolean.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".needsUpload" ) ).booleanValue() );
-                        newPlayer.setNeedsDownload( Boolean.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".needsDownload" ) ).booleanValue() );
-                        newPlayer.setLastDownload( Long.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".lastDownload" ) ).longValue() );
                         newPlayer.setLastUpload( Long.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".lastUpload" ) ).longValue() );
-                        //newPlayer.addPropertyChangeListener( GamesProperties.getChangeListener() );
                         players[j] = newPlayer;
                     }
                     currentGame.setPlayers( players );
@@ -434,7 +449,6 @@ public class GamesProperties extends Object
 
     /**
      *  Saves the properties to disk
-     *
      */
     public static void writeProperties()
     {
@@ -476,7 +490,7 @@ public class GamesProperties extends Object
         /*
          *  write the properties for each game
          */
-        if ( games != null )
+        if ( games != null && games.size() > 0 )
         {
             String gameNames = "";
             for ( int i = 0; i < games.size(); i++ )

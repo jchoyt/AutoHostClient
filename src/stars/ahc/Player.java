@@ -297,6 +297,12 @@ public class Player extends Object
     }
 
 
+    public File getLocalMfile()
+    {
+        return new File(game.getDirectory(), game.getName() + ".m" + id);
+    }
+
+
     /**
      *  Gets the uploadPassword attribute of the Player object
      *
@@ -370,23 +376,6 @@ public class Player extends Object
     /**
      *  Description of the Method
      *
-     *@exception  IOException  Description of the Exception
-     */
-    public void poll()
-        throws IOException
-    {
-        Log.log(Log.MESSAGE,this,"Checking status for " + game.getName() + " Player" + getId());
-        AhcGui.setStatus( "Checking status for " + game.getName() + " Player" + getId() );
-        setNeedsUpload( AHPoller.xFileIsNewer( this ) );
-        setNeedsDownload( AHPoller.mFileIsNewer( this ) );
-        Log.log(Log.MESSAGE,this,game.getName() + " Player" + getId() + " updated.");
-        AhcGui.setStatus( game.getName() + " Player" + getId() + " updated." );
-    }
-
-
-    /**
-     *  Description of the Method
-     *
      *@return    Description of the Return Value
      */
     public String toString()
@@ -420,16 +409,28 @@ public class Player extends Object
     {
         String lineEnding = System.getProperty( "line.separator" );
         StringBuffer ret = new StringBuffer();
-        ret.append( game.getName() + ".player" + id + ".lastDownload=" + lastDownload + lineEnding );
         ret.append( game.getName() + ".player" + id + ".lastUpload=" + lastUpload + lineEnding );
         ret.append( game.getName() + ".player" + id + ".StarsPassword=" + starsPassword + lineEnding );
         ret.append( game.getName() + ".player" + id + ".UploadPassword=" + uploadPassword + lineEnding );
         ret.append( game.getName() + ".player" + id + ".upload=" + toUpload + lineEnding );
-        ret.append( game.getName() + ".player" + id + ".needsUpload=" + needsUpload + lineEnding );
-        ret.append( game.getName() + ".player" + id + ".needsDownload=" + needsDownload + lineEnding );
         out.write( ret.toString() );
     }
 
+
+    public String getAhStatus()
+    {
+        return game.getPlayerStatus(id);
+    }
+
+    public String getRaceName()
+    {
+        String name = game.getPlayerRaceName(id);
+        if(name==null)
+        {
+            name = "Player " + id;
+        }
+        return name;
+    }
 
     /**
      *  Gets the fileYear attribute of the Player object

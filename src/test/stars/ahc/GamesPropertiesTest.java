@@ -123,8 +123,6 @@ public class GamesPropertiesTest extends TestCase
         //set up Properties
         props = new Properties();
         props.setProperty( "StarsExecutable", "D:/jeff's~1/stars/stars.exe" );
-        props.setProperty( "ProxyHost", "gatekeeper.mitre.org" );
-        props.setProperty( "ProxyPort", "80" );
         props.setProperty( "Games", "buguni3" );
         props.setProperty( "buguni3.PlayerNumbers", "10,11" );
         props.setProperty( "buguni3.GameDir", "D:/Jeff's~1/stars/test" );

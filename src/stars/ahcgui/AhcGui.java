@@ -51,16 +51,6 @@ public class AhcGui extends java.lang.Object
     }
 
 
-    public static void setStatusBox(JLabel in)
-    {
-        statusBox = in;
-    }
-
-    public static void setStatus(String in)
-    {
-        statusBox.setText(Utils.getTime() + in);
-    }
-
 
     /**
      *  Sets the gameOptionCards attribute of the AhcGui object
@@ -96,6 +86,28 @@ public class AhcGui extends java.lang.Object
 
 
     /**
+     *  Sets the status attribute of the AhcGui class
+     *
+     *@param  in  The new status value
+     */
+    public static void setStatus( String in )
+    {
+        statusBox.setText( Utils.getTime() + in );
+    }
+
+
+    /**
+     *  Sets the statusBox attribute of the AhcGui class
+     *
+     *@param  in  The new statusBox value
+     */
+    public static void setStatusBox( JLabel in )
+    {
+        statusBox = in;
+    }
+
+
+    /**
      *  Gets the gameCards attribute of the AhcGui object
      *
      *@return    The gameCards value
@@ -125,6 +137,17 @@ public class AhcGui extends java.lang.Object
     public static AhcFrame getMainFrame()
     {
         return mainFrame;
+    }
+
+
+    /**
+     *  Gets the optionSelector attribute of the AhcGui class
+     *
+     *@return    The optionSelector value
+     */
+    public static JComboBox getOptionSelector()
+    {
+        return optionSelector;
     }
 
 

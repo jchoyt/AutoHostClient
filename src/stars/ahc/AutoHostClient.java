@@ -14,13 +14,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahc;
-//import java.awt.*;
-//import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-//import java.util.*;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-//import stars.ahc.*;
+
+import javax.swing.filechooser.FileFilter;
 import stars.ahcgui.*;
 
 /**
@@ -34,7 +33,7 @@ public class AutoHostClient extends java.lang.Object
     /**
      *  Description of the Field
      */
-    public static String VERSION = "v1.0";
+    public static final String VERSION = "v1.1pre2";
     static String propsFile = "ahclient.props";
 
 
@@ -51,85 +50,48 @@ public class AutoHostClient extends java.lang.Object
      */
     public static void main( String[] args )
     {
+        int logLevel = Log.NOTICE;
         //Log.init( true, Log.DEBUG );
-        Log.init( true, Log.NOTICE );
-        for ( int i = 0; i < args.length; i++ )
+        for ( int j = 0; j < args.length; j++ )
         {
-            if ( args[i].startsWith( "-pf" ) )
+            if ( args[j].startsWith( "-pf" ) )
             {
-                propsFile = args[i].substring( 3 );
+                propsFile = args[++j];
             }
-            else if ( args[i].equals( "-usage" ) )
+            else if ( args[j].equals( "-usage" ) )
             {
                 printUsage();
+                return;
+            }
+            else if ( args[j].equals( "-?" ) )
+            {
+                printUsage();
+                return;
+            }
+            if ( args[j].equals( "-d" ) )
+            {
+                downloadAll();
+                return;
+            }
+            if ( args[j].equals( "-testing" ) || args[j].equals( "-t" ) )
+            {
+                GamesProperties.AUTOHOST = "file:///D|/devel/autohostclient/";
+                logLevel=Log.DEBUG;
+                System.out.println( GamesProperties.AUTOHOST );
             }
         }
+        Log.init( true, logLevel );
         File file = new File( propsFile );
         if ( !file.exists() )
         {
-            /*
-             *  Set up the Stars! Executable - needed before we go on.
-             */
-            String executable = findStarsExecutable( null );
-            executable = JOptionPane.showInputDialog( null, "Please enter the location of your Stars! Executable file", executable );
-            File executableFile = new File( executable );
-            while ( !executableFile.exists() )
-            {
-                executable = JOptionPane.showInputDialog( null, "I can't seem to be able to find your Stars! Executable file", executable );
-                executableFile = new File( executable );
-            }
-            GamesProperties.setStarsExecutable( executable );
-            GamesProperties.setPropsFile( propsFile );
-            GamesProperties.writeProperties();
+            JOptionPane.showMessageDialog( null, "The AutoHost Client doesn't appear to be set up yet.  Click OK and we'll get the client and a game set up." );
+            setUpRoutine();
         }
 
         GamesProperties.init( propsFile );
         Log.log( Log.MESSAGE, AutoHostClient.class, "Properties file loaded and parsed" );
         showGui();
         new AHPoller().run();
-
-    }
-
-
-    /**
-     *  Description of the Method
-     *
-     *@param  path  Description of the Parameter
-     *@return       Description of the Return Value
-     */
-    public static String findStarsExecutable( String path )
-    {
-        if ( path == null )
-        {
-            path = System.getProperty( "user.dir" );
-            ;
-        }
-        int i = 30;
-        String oldPath = null;
-        while ( path != null && path != oldPath )
-        {
-            File file = new File( path, "stars.exe" );
-            System.out.println( file.getAbsolutePath() );
-            try
-            {
-                if ( file.exists() )
-                {
-                    return file.getCanonicalPath();
-                }
-            }
-            catch ( IOException e )
-            {
-                Log.log( Log.WARNING, AutoHostClient.class, "Couldn't return the path name:" + e.getMessage() );
-            }
-            oldPath = path;
-            path = file.getParentFile().getParent();
-            i--;
-            if ( i == 0 )
-            {
-                return null;
-            }
-        }
-        return null;
     }
 
 
@@ -139,7 +101,17 @@ public class AutoHostClient extends java.lang.Object
     public static void printUsage()
     {
         //TODO:  fill this out
-        Log.log( Log.MESSAGE, AutoHostClient.class, "Usage goes here." );
+        StringBuffer ret = new StringBuffer();
+        ret.append( "Usage: " );
+        ret.append( "\njava[w] -jar ahclient.jar [-usage | -? | -d] [-pf propsfile] [-testing | -t]" );
+        ret.append( "\n    -usage   prints out this message" );
+        ret.append( "\n    -?       prints out this message" );
+        ret.append( "\n    -d       downloads all files in the properties configuration file" );
+        ret.append( "\n    -pf loc  use the configuration file specified by \"loc\"" );
+        ret.append( "\n\nexamples:" );
+        ret.append( "\n    ahclient.jar -pf buguni3.props" );
+        ret.append( "\n    ahclient.jar -d -pf dtroubl1.props" );
+        System.out.println( ret.toString() );
     }
 
 
@@ -151,6 +123,112 @@ public class AutoHostClient extends java.lang.Object
         AhcFrame mainFrame = new AhcFrame();
         mainFrame.pack();
         mainFrame.setVisible( true );
+    }
+
+
+    /**
+     *  Constructor for the setUpRoutine object
+     */
+    protected static void setUpRoutine()
+    {
+        /*
+         *  Set up the Stars! Executable - needed before we go on.
+         */
+        JFileChooser chooser = new JFileChooser( System.getProperty( "user.dir" ) );
+        chooser.addChoosableFileFilter(
+            new FileFilter()
+            {
+                public String getDescription()
+                {
+                    return "*.exe";
+                }
+
+
+                public boolean accept( File f )
+                {
+                    if ( f.getName().endsWith( ".exe" ) || f.isDirectory() )
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            } );
+        chooser.setFileFilter(
+            new FileFilter()
+            {
+                public String getDescription()
+                {
+                    return "stars.exe";
+                }
+
+
+                public boolean accept( File f )
+                {
+                    if ( f.getName().equalsIgnoreCase( "stars.exe" ) || f.isDirectory() )
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            } );
+        int returnVal = chooser.showDialog( null, "Use this Stars! executable" );
+        File executableFile = null;
+        if ( returnVal == JFileChooser.APPROVE_OPTION )
+        {
+            executableFile = chooser.getSelectedFile();
+        }
+        try
+        {
+            String filename = executableFile.getAbsolutePath();
+            GamesProperties.setStarsExecutable( executableFile.getAbsolutePath().replace( '\\', '/' ) );
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
+        GamesProperties.setPropsFile( propsFile );
+        GamesProperties.writeProperties();
+    }
+
+
+    /**
+     *  Description of the Method
+     */
+    protected static void downloadAll()
+    {
+        GamesProperties.init( propsFile );
+        Game game = GamesProperties.getGames()[0];
+        String stage = game.getDirectory() + "/staging";
+        Player[] players = game.getPlayers();
+        try
+        {
+            for ( int i = 0; i < players.length; i++ )
+            {
+                Utils.getFileFromAutohost( game.getName(), players[i].getTurnFileName(), stage );
+                File stagedSrc = new File( stage, players[i].getTurnFileName() );
+                File playFile = new File( game.getDirectory(), players[i].getTurnFileName() );
+                Utils.fileCopy( stagedSrc, playFile );
+                players[i].setLastDownload( System.currentTimeMillis() );
+                players[i].setNeedsDownload( false );
+                Utils.genPxxFiles( game.getName(), players[i].getId(), players[i].getStarsPassword(), new File( game.getDirectory() ) );
+                System.out.println( "Player " + players[i].getId() + " m-file downloaded from AutoHost" );
+            }
+        }
+        catch ( IOException ioe )
+        {
+            ioe.printStackTrace();
+        }
+        catch ( Exception ex )
+        {
+            ex.printStackTrace();
+        }
+        return;
     }
 }
 

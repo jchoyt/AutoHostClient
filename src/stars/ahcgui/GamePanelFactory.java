@@ -47,7 +47,7 @@ public class GamePanelFactory extends java.lang.Object
      */
     public static JPanel createPanel( Game game )
     {
-        panel = new JPanel();
+        panel = new GamePanel( game );
         gridbag = new GridBagLayout();
         c = new GridBagConstraints();
         panel.setLayout( gridbag );
@@ -65,6 +65,10 @@ public class GamePanelFactory extends java.lang.Object
          */
         Border etched = BorderFactory.createEtchedBorder();
         panel.setBorder( etched );
+        /*
+         *  set up the property change listener
+         */
+        game.addPropertyChangeListener( new GamesPanelChangeListener( panel ) );
 
         return panel;
     }
@@ -104,25 +108,39 @@ public class GamePanelFactory extends java.lang.Object
         c.gridx++;
         gridbag.setConstraints( b1, c );
         panel.add( b1 );
+        /*
+         *  Add remove game button
+         */
+        b1 = new DeleteGameButton( game );
+        c.gridx++;
+        gridbag.setConstraints( b1, c );
+        panel.add( b1 );
     }
 
 
     /**
-     *  Constructor for the addGameData object
+     *  Adds the game information to the top of the game panel
      *
      *@param  game  The feature to be added to the GameData attribute
      */
     private static void addGameData( Game game )
     {
-        JLabel gameDiamond = new JLabel( "Game: " + game.getName(), JLabel.RIGHT );
+        JLabel gameDiamond = new JLabel( "<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i?</html>", JLabel.RIGHT );
         c.gridwidth = 2;
         gridbag.setConstraints( gameDiamond, c );
         panel.add( gameDiamond );
-
-        JLabel year = new JLabel( "Turn year: " + game.getCurrentYear() );
+        String label = game.getStatus();//GamesProperties.UPTODATE ? game.getStatus() : "Polling AutoHost - hold on a minute";
+        JLabel stat = new JLabel( label );
         c.gridy++;
-        gridbag.setConstraints( year, c );
-        panel.add( year );
+        gridbag.setConstraints( stat, c );
+        panel.add( stat );
+
+        label = "<html><font size=-2>" + game.getNextGen() + " GMT (AutoHost time)</font></html>";//GamesProperties.UPTODATE ? "<html><font size=-2>"+game.getNextGen() + " GMT (AutoHost time)</font></html>" : "";
+        JLabel nextGen = new JLabel( label );
+        c.gridy++;
+        gridbag.setConstraints( nextGen, c );
+        panel.add( nextGen );
+
     }
 
 
@@ -135,7 +153,7 @@ public class GamePanelFactory extends java.lang.Object
     private static void addPlayerList( Game game )
     {
         /*
-         *  Add player list  TODO: add diamonds for options
+         *  Add player list
          */
         Player[] players = game.getPlayers();
         PlayerJLabel playerLabel;
@@ -148,7 +166,6 @@ public class GamePanelFactory extends java.lang.Object
              *  add launch turn button
              */
             JButton b = new LaunchGameButton( players[i] );
-            //b.disable();
             c.gridx = 0;
             c.gridy++;
             gridbag.setConstraints( b, c );
@@ -164,8 +181,92 @@ public class GamePanelFactory extends java.lang.Object
         c.gridx = 0;
         c.gridwidth = oldGridwidth;
     }
+
 }
 
+/**
+ *  Description of the Class
+ *
+ *@author     JCHOYT
+ *@created    June 13, 2003
+ */
+class GamePanel extends JPanel implements PropertyChangeListener
+{
+
+
+    Game game;
+
+
+    /**
+     *  Constructor for the GamePanel object
+     *
+     *@param  game  Description of the Parameter
+     */
+    public GamePanel( Game game )
+    {
+        this.game = game;
+        GamesProperties.addPropertyChangeListener( this );
+    }
+
+
+    /**
+     *  Description of the Method
+     *
+     *@param  evt  Description of the Parameter
+     */
+    public void propertyChange( PropertyChangeEvent evt )
+    {
+        if ( evt.getPropertyName().equals( "game removed" ) )
+        {
+            Game p = ( Game ) evt.getOldValue();
+            if ( p == game )
+            {
+                setVisible( false );
+            }
+        }
+    }
+}
+/**
+ *  Description of the Class
+ *
+ *@author     JCHOYT
+ *@created    June 13, 2003
+ */
+class DeleteGameButton extends JButton implements ActionListener
+{
+
+
+    /**
+     *  Description of the Field
+     */
+    protected Game game;
+
+
+    /**
+     *  Constructor for the DownloadButton object
+     *
+     *@param  game  Description of the Parameter
+     */
+    public DeleteGameButton( Game game )
+    {
+        this.game = game;
+        setText( "Remove game" );
+        addActionListener( this );
+    }
+
+
+    /**
+     *  Retrieves turns from Autohost, copies them into the game directory and
+     *  backup directory. Sets the last download time and updates the properties
+     *  file on disk.
+     *
+     *@param  e  Description of the Parameter
+     */
+    public void actionPerformed( ActionEvent e )
+    {
+        GamesProperties.removeGame( game );
+    }
+}
 /**
  *  Description of the Class
  *
@@ -187,7 +288,6 @@ class DownloadButton extends JButton implements ActionListener
     public DownloadButton( Game game )
     {
         this.game = game;
-        setMnemonic( KeyEvent.VK_D );
         setText( "Download Turns" );
         addActionListener( this );
     }
@@ -218,17 +318,15 @@ class DownloadButton extends JButton implements ActionListener
                 players[i].setLastDownload( System.currentTimeMillis() );
                 players[i].setNeedsDownload( false );
                 Utils.genPxxFiles( game.getName(), players[i].getId(), players[i].getStarsPassword(), new File( game.getDirectory() ) );
-                Log.log(Log.MESSAGE,this,"Player " + players[i].getId() + " m-file downloaded from AutoHost");
+                Log.log( Log.MESSAGE, this, "Player " + players[i].getId() + " m-file downloaded from AutoHost" );
                 AhcGui.setStatus( "Player " + players[i].getId() + " m-file downloaded from AutoHost" );
             }
-            //this will force it to recalculate the current year
-            game.setCurrentYear();
             GamesProperties.writeProperties();
         }
         catch ( IOException ioe )
         {
             Log.log( Log.MESSAGE, this, "Couldn't get the file from AutoHost.  Are you connected to the internet?" );
-            AhcGui.setStatus("Couldn't get the file from AutoHost.  Are you connected to the internet?" );
+            AhcGui.setStatus( "Couldn't get the file from AutoHost.  Are you connected to the internet?" );
         }
         catch ( Exception ex )
         {
@@ -258,7 +356,6 @@ class UploadButton extends JButton implements ActionListener
     public UploadButton( Game game )
     {
         this.game = game;
-        setMnemonic( KeyEvent.VK_U );
         setText( "Upload Turns" );
         addActionListener( this );
     }
@@ -287,7 +384,7 @@ class UploadButton extends JButton implements ActionListener
             }
         }
         GamesProperties.writeProperties();
-        AhcGui.setStatus("All players for " + game.getName() + " have been uploaded");
+        AhcGui.setStatus( "All players for " + game.getName() + " have been uploaded" );
     }
 }
 /**
@@ -311,7 +408,6 @@ class LaunchGameButton extends JButton implements ActionListener
     public LaunchGameButton( Player player )
     {
         this.player = player;
-        //setMnemonic( KeyEvent.VK_U );
         setText( "Launch Stars!" );
         addActionListener( this );
     }
@@ -367,29 +463,6 @@ class PlayerJLabel extends JLabel implements PropertyChangeListener
 
 
     /**
-     *  Gets the attribute of the GamePanelFactory object
-     *
-     *@param  player  Description of the Parameter
-     *@return         The String value
-     */
-    private static String getStatusString( Player player )
-    {
-        if ( player.getNeedsDownload() )
-        {
-            return "new m-file is available";
-        }
-        else if ( player.getNeedsUpload() && player.getToUpload() )
-        {
-            return "x-file needs to be uploaded";
-        }
-        else
-        {
-            return "appears to be current";
-        }
-    }
-
-
-    /**
      *  Description of the Method
      *
      *@param  evt  Description of the Parameter
@@ -405,7 +478,56 @@ class PlayerJLabel extends JLabel implements PropertyChangeListener
      */
     private void setText()
     {
-        setText( "Player " + player.getId() + " " + getStatusString( player ) );
+        setText( "<html>" + player.getRaceName() + ": " + getStatusString( player ) + "</html>" );
+    }
+
+
+    /**
+     *  Gets the attribute of the GamePanelFactory object
+     *
+     *@param  player  Description of the Parameter
+     *@return         The String value
+     */
+    private String getStatusString( Player player )
+    {
+        return player.getAhStatus();
     }
 }
+
+/**
+ *  Description of the Class
+ *
+ *@author     JCHOYT
+ *@created    May 2, 2003
+ */
+class GamesPanelChangeListener extends Object implements PropertyChangeListener
+{
+
+
+    JPanel parentPanel;
+
+
+    /**
+     *  Constructor for the GamesPanelChangeListener object
+     *
+     *@param  p  Description of the Parameter
+     */
+    public GamesPanelChangeListener( JPanel p )
+    {
+        parentPanel = p;
+    }
+
+
+    /**
+     *  Description of the Method
+     *
+     *@param  evt  Description of the Parameter
+     */
+    public void propertyChange( PropertyChangeEvent evt )
+    {
+        Log.log( Log.DEBUG, this, "propertyChange received: " + evt.toString() );
+        parentPanel.getParent();
+    }
+}
+
 

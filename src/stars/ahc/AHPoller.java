@@ -55,18 +55,9 @@ public class AHPoller extends TimerTask
         throws IOException
     {
         String dateOnAh = "";
-        try
-        {
-            URL url = new URL( GamesProperties.AUTOHOST + player.getGame().getName() + "/" + player.getTurnFileName() );
-            URLConnection connection = url.openConnection();
-            dateOnAh = getYearOfFile( connection );
-            return ( dateOnAh.compareTo( player.getGame().getCurrentYear() ) > 0 );
-        }
-        catch ( MalformedURLException e )
-        {
-            e.printStackTrace();
-        }
-        return false;
+        File localMfile = player.getLocalMfile();
+        String localTurn = getYearOfFile( localMfile );
+        return ( localTurn.compareTo( player.getGame().getCurrentYear() ) < 0 );
     }
 
 
@@ -96,22 +87,22 @@ public class AHPoller extends TimerTask
     /**
      *  Uses an established connection to get the turn number off AH.
      *
-     *@param  conn  Description of the Parameter
-     *@return       The dateOfFile value
+     *@param  mFile  Description of the Parameter
+     *@return        The dateOfFile value
      */
-    protected static String getYearOfFile( URLConnection conn )
+    protected static String getYearOfFile( File mFile )
     {
         try
         {
-            InputStreamReader in = new InputStreamReader( conn.getInputStream() );
+            InputStreamReader in = new FileReader( mFile );
             String year = Utils.getTurnNumber( in );
             in.close();
             return year;
         }
-        catch ( java.net.UnknownHostException e )
+        catch ( FileNotFoundException e )
         {
-            Log.log( Log.MESSAGE, AHPoller.class, "Couldn't connect to the AutoHost server.  Are you connected to the internet?" );
-            AhcGui.setStatus( "Couldn't connect to the AutoHost server.  Are you connected to the internet?" );
+            Log.log( Log.MESSAGE, AHPoller.class, "Couldn't find fCile " + mFile.getAbsolutePath() );
+            AhcGui.setStatus( "Couldn't find file " + mFile.getAbsolutePath() );
         }
         catch ( Exception e )
         {
@@ -127,11 +118,22 @@ public class AHPoller extends TimerTask
     public void run()
     {
         Game[] games = GamesProperties.getGames();
+        boolean success = true;
+        AhcGui.setStatus("Polling AutoHost - wait for the update.");
         for ( int i = 0; i < games.length; i++ )
         {
-            games[i].poll();
+            success = success && games[i].poll();
         }
-        AhcGui.setStatus("All player stati updated.");
+        if ( success )
+        {
+            AhcGui.setStatus( "All player stati updated." );
+            GamesProperties.UPTODATE=true;
+            GamesProperties.writeProperties();
+        }
+        else
+        {
+            AhcGui.setStatus( "There was a problem checking the stati.  Please check the log and and report any errors to jchoyt@users.sourceforge.net." );
+        }
     }
 }
 
