@@ -12,6 +12,7 @@ public class Fleet
     private int hashCache = 0;
     protected String owner;
 
+
     /**
      *  Constructor for the Fleet object
      */
@@ -31,7 +32,7 @@ public class Fleet
         if ( values.length == 29 )
         {
             info = values;
-            owner = values[FLEET_NAME].split(" ")[0];
+            parse( values );
         }
         else
         {
@@ -51,11 +52,33 @@ public class Fleet
         if ( values.length == 29 )
         {
             info = values;
-            owner = values[FLEET_NAME].split(" ")[0];
+            parse( values );
         }
         else
         {
             throw new RuntimeException( "The passed string to this constructor must be 29 values separated by tabs" );
+        }
+    }
+
+
+    /**
+     *  Description of the Method
+     *
+     *@param  values  Description of the Parameter
+     */
+    protected void parse( String[] values )
+    {
+        /*
+         *  parse out the race name, accounting for race names that start with The
+         */
+        String[] parts = values[FLEET_NAME].split( " " );
+        if ( parts[0].equals( "The " ) )
+        {
+            owner = parts[0] + " " + parts[1];
+        }
+        else
+        {
+            owner = parts[0];
         }
     }
 
@@ -72,10 +95,16 @@ public class Fleet
     }
 
 
+    /**
+     *  Gets the owner attribute of the Fleet object
+     *
+     *@return    The owner value
+     */
     public String getOwner()
     {
         return owner;
     }
+
 
     /**
      *  Compares this object to another. Note hashCode is overwritten in the
