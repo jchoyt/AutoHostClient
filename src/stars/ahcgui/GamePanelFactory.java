@@ -14,15 +14,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahcgui;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import java.beans.*;
-import java.io.*;
-import java.io.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
 
 import java.net.*;
-import javax.swing.*;
+import java.util.Properties;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.border.Border;
 import stars.ahc.*;
 
@@ -57,9 +68,9 @@ class GamePanel extends JPanel implements PropertyChangeListener
 
 
     Game game;
+    JLabel statusLabel;
 
     JLabel titleYear;
-    JLabel statusLabel;
     private GridBagConstraints c;
     private GridBagLayout gridbag;
 
@@ -81,14 +92,15 @@ class GamePanel extends JPanel implements PropertyChangeListener
         addBlankSpace();
         addPlayerList( game );
         addBlankSpace();
-        c.anchor = GridBagConstraints.CENTER;
-        c.gridwidth = 1;
+        addAllStati( game );
+        addBlankSpace();
         addButtons( game );
         /*
          *  add border
          */
-        Border etched = BorderFactory.createEtchedBorder();
-        this.setBorder( etched );
+        Border nameBorder = BorderFactory.createTitledBorder( game.getLongName() + " ( year " + game.getGameYear()  + " )" );
+        Border spaceBorder = BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
+        this.setBorder(BorderFactory.createCompoundBorder(nameBorder, spaceBorder ));
         /*
          *  set up the property change listener
          */
@@ -112,8 +124,26 @@ class GamePanel extends JPanel implements PropertyChangeListener
                 setVisible( false );
             }
         }
-        statusLabel.setText("<html>" + game.getStatus() + "</html>");
-        titleYear.setText("<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i></html>");
+        statusLabel.setText( "<html>" + game.getStatus() + "</html>" );
+        titleYear.setText( "<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i></html>" );
+    }
+
+
+    /**
+     *  Adds a feature to the AllStati attribute of the GamePanel object
+     *
+     *@param  game  The feature to be added to the AllStati attribute
+     */
+    private void addAllStati( Game game )
+    {
+        int oldGridwidth = c.gridwidth;
+        c.gridwidth = 3;
+        c.anchor = GridBagConstraints.CENTER;
+        Properties playersByStatus = game.getPlayersByStatus();
+        addStatusLabel( "In", playersByStatus.getProperty( "in" ), "green" );
+        addStatusLabel( "Out", playersByStatus.getProperty( "out" ), "blue" );
+        addStatusLabel( "Dead or Inactive", playersByStatus.getProperty( "dead" ), "gray" );
+        c.gridwidth = oldGridwidth;
     }
 
 
@@ -124,8 +154,10 @@ class GamePanel extends JPanel implements PropertyChangeListener
     private void addBlankSpace()
     {
         Component blank = Box.createVerticalStrut( 20 );
+        c.gridwidth = 3;
+        c.gridx=0;
         c.gridy++;
-        gridbag.setConstraints( blank, c );
+        gridbag.setConstraints(blank, c);
         this.add( blank );
     }
 
@@ -137,6 +169,10 @@ class GamePanel extends JPanel implements PropertyChangeListener
      */
     private void addButtons( Game game )
     {
+        c.anchor = GridBagConstraints.WEST;
+        c.gridwidth = 1;
+        c.gridx = 0;
+
         /*
          *  Add download button
          */
@@ -168,10 +204,10 @@ class GamePanel extends JPanel implements PropertyChangeListener
      */
     private void addGameData( Game game )
     {
-        titleYear = new JLabel( "<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i></html>", JLabel.RIGHT );
-        c.gridwidth = 2;
+        c.gridwidth = 3;
+        /* titleYear = new JLabel( "<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i></html>", JLabel.RIGHT );
         gridbag.setConstraints( titleYear, c );
-        this.add( titleYear );
+        //this.add( titleYear ); */
         String label = "<html>" + game.getStatus() + "</html>";
         statusLabel = new JLabel( label );
         c.gridy++;
@@ -198,6 +234,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
          *  add launch turn button
          */
         JButton b = new LaunchGameButton( player );
+        c.gridwidth=1;
         c.gridx = 0;
         c.gridy++;
         gridbag.setConstraints( b, c );
@@ -205,6 +242,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
         /*
          *  add status JLabel
          */
+        c.gridwidth=2;
         PlayerJLabel playerLabel = new PlayerJLabel( player );
         c.gridx++;
         gridbag.setConstraints( playerLabel, c );
@@ -234,7 +272,46 @@ class GamePanel extends JPanel implements PropertyChangeListener
         c.gridx = 0;
         c.gridwidth = oldGridwidth;
     }
+
+
+    /**
+     *  Adds a feature to the StatusLabel attribute of the GamePanel object
+     *
+     *@param  status  The feature to be added to the StatusLabel attribute
+     *@param  list    The feature to be added to the StatusLabel attribute
+     *@param  color   The feature to be added to the StatusLabel attribute
+     */
+    private void addStatusLabel( String status, String list, String color )
+    {
+        /*
+         *  Check to see if there are any in the list, if not, return
+         */
+        if ( list.equals( "null" ) || list.length() == 0 )
+        {
+            return;
+        }
+        /*
+         *  add status label
+         */
+        StringBuffer ret = new StringBuffer();
+        ret.append("<html>");
+        ret.append( status );
+        ret.append( ":  " );
+        ret.append( "<font color=\"" );
+        ret.append( color );
+        ret.append( "\">" );
+        ret.append( list );
+        ret.append( "</font>" );
+        ret.append("</html>");
+
+        JLabel b = new JLabel( String.valueOf( ret ) );
+        c.gridx = 0;
+        c.gridy++;
+        gridbag.setConstraints( b, c );
+        this.add( b );
+    }
 }
+
 /**
  *  Description of the Class
  *
@@ -314,6 +391,7 @@ class DownloadButton extends JButton implements ActionListener
         String stage = game.getDirectory() + "/staging";
         String backup = game.getDirectory() + "/backup";
         Player[] players = game.getPlayers();
+        boolean success = true;
         try
         {
             for ( int i = 0; i < players.length; i++ )
@@ -334,13 +412,28 @@ class DownloadButton extends JButton implements ActionListener
         }
         catch ( IOException ioe )
         {
+            success = false;
             Log.log( Log.MESSAGE, this, "Couldn't get the file from AutoHost.  Are you connected to the internet?" );
-            AhcGui.setStatus( "Couldn't get the file from AutoHost.  Are you connected to the internet?" );
+            JOptionPane.showInternalMessageDialog(
+                    AhcGui.mainFrame.getContentPane(),
+                    "Couldn't get the file from AutoHost.  Are you connected to the internet?",
+                    "Connection Trouble",
+                    JOptionPane.INFORMATION_MESSAGE );
         }
         catch ( Exception ex )
         {
+            success = false;
             Log.log( Log.WARNING, this, ex );
         }
+        if ( success )
+        {
+            JOptionPane.showInternalMessageDialog(
+                    AhcGui.mainFrame.getContentPane(),
+                    "All turns from " + game.getName() + " downloaded",
+                    "M-files downloaded",
+                    JOptionPane.INFORMATION_MESSAGE );
+        }
+
     }
 }
 
@@ -380,12 +473,13 @@ class UploadButton extends JButton implements ActionListener
     {
         Player[] players = game.getPlayers();
         File playerXFile = null;
+        boolean success = true;
         for ( int i = 0; i < players.length; i++ )
         {
             if ( players[i].getToUpload() )
             {
                 playerXFile = new File( players[i].getGame().getDirectory(), players[i].getXFileName() );
-                EssaiPostURLConnection.upload(
+                success = success && EssaiPostURLConnection.upload(
                         playerXFile,
                         players[i].getUploadPassword() );
                 players[i].setLastUpload( playerXFile.lastModified() );
@@ -393,7 +487,15 @@ class UploadButton extends JButton implements ActionListener
             }
         }
         GamesProperties.writeProperties();
-        AhcGui.setStatus( "All players for " + game.getName() + " have been uploaded" );
+        if ( success )
+        {
+            AhcGui.setStatus( "All players for " + game.getName() + " have been uploaded" );
+            JOptionPane.showInternalMessageDialog(
+                    AhcGui.mainFrame.getContentPane(),
+                    "All players for " + game.getName() + " have been uploaded",
+                    "Upload Results",
+                    JOptionPane.INFORMATION_MESSAGE );
+        }
     }
 }
 /**
