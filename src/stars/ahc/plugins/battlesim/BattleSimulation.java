@@ -661,7 +661,8 @@ public class BattleSimulation
    /**
     * Calculates the number of ships killed
     * <p>
-    * Important - the target stack is updated (damage and shipcount) as a side effect 
+    * Important - the target stack is updated (damage and shipcount) as a side effect
+    * 
     */
    protected int applyArmourDamage(int armourDamage, ShipStack target, int maxKills)
    {
@@ -728,19 +729,15 @@ public class BattleSimulation
          return;
       }
    
-      // If the target stack has no ships left, don't fire
-      // TODO: remove this once fireBeamWeapon() and fireTorpedo() can pick an alternative target
-      if (stack.target.shipCount <= 0)
-      {
-         return;
-      }
-      
       switch (stack.design.getWeaponType(slot))
       {
          case Weapon.TYPE_BEAM:
-         case Weapon.TYPE_GATTLING:
          case Weapon.TYPE_SAPPER:
             fireBeamWeapon( stack, slot );
+         	break;
+
+         case Weapon.TYPE_GATTLING:
+            fireGattlingWeapon( stack, slot );
          	break;
          	
          case Weapon.TYPE_MISSILE:
@@ -750,112 +747,6 @@ public class BattleSimulation
       }
    }
 
-   /**
-    * Simulates firing beam weapons
-    * 
-    * @throws BattleSimulationError
-    * 
-    * @deprecated - see fireBeamWeapon()
-    */
-   private void fireBeamWeaponOld(ShipStack stack, int slot) throws BattleSimulationError
-   {
-      int shieldDamage = 0;		// initially there is no shield damage
-      int armourDamage = 0; 	// initially there is no armour damage
-      int kills = 0;			// initially there are no kills
-      
-      // TODO: excess damage should hit other tokens
-      // TODO: gattling weapons should hit all targets in range
-      
-      ShipDesign design = stack.design;		// for convenience      
-      ShipStack target = stack.target;
-   
-      int range = distanceBetween( stack, target );
-      
-      // Are we out of range ?
-      if (range > stack.design.getWeaponRange(slot))
-      {
-         target = pickTargetInRange( stack, slot );
-      }
-      
-      if (target == null)
-      {
-         // There is no valid target within range
-         return;
-      }
-      
-      if (design.getWeaponType(slot) == Weapon.TYPE_SAPPER)
-      {
-         if (target.shields == 0)
-         {
-            target = pickTargetInRange( stack, slot );
-         }
-      }
-      
-      if (target == null)
-      {
-         // pickTargetInRange() could not find any suitable target, so don't fire
-         return;
-      }
-      
-      // Calculate the total firepower of the salvo 
-      int power = design.getWeaponPower(slot) * design.getWeaponCount(slot) * stack.shipCount;
-   
-      // Reduce firepower if at more than minimal range
-      double rangeMultipliyer = getRangeMultiplier( range, stack.design.getWeaponRange(slot) );
-      
-      power *= rangeMultipliyer;
-      
-      // TODO: duplicate Stars! rounding errors using integer arithmatic
-      if (design.getCapacitors() > 0)
-      {
-         // TODO: handle HE flux capacitors with x1.2 adjustment
-         double capacitorAdjust = Math.pow( 1.1, design.getCapacitors() );
-         capacitorAdjust = Math.min( capacitorAdjust, 2.5 );
-         power *= capacitorAdjust;
-      }
-      if (target.design.getDeflectors() > 0)
-      {
-         double deflectorAdjust = Math.pow( 1.1, design.getDeflectors() );
-         power /= deflectorAdjust;
-      }
-      
-      if (power < target.shields)
-      {
-         // Shields can handle the shot, so just reduce them accordingly
-         
-         target.shields = target.shields - power;
-         shieldDamage = power;
-         
-         armourDamage = 0;
-      }
-      else
-      {
-         // The shields cannae take it cap'n
-         // The armour is going to get a beating
-         
-         shieldDamage = target.shields;
-         target.shields = 0;	// shields are gone
-         
-         // Armour takes whatever damage wasn't absorbed by the shields
-         armourDamage = power - shieldDamage;
-         
-         if (design.getWeaponType(slot) == Weapon.TYPE_SAPPER)
-         {
-            // Of course, if the weapons are sappers then they can't hurt the armour
-            armourDamage = 0;
-         }
-         
-         kills = applyArmourDamage(armourDamage, target, target.shipCount);
-      }
-      
-      if (target.shipCount == 0)
-      {         
-         pickTarget( stack );  // If we have killed all ships in the target stack, pick another
-      }
-
-      sendShotNotification(stack, slot, shieldDamage, armourDamage, kills, target);
-   }
-   
    /**
     * Finds the most attractive target that is within range of the specified weapon slot
     * <p>
@@ -931,6 +822,14 @@ public class BattleSimulation
       {
          return;
       }
+
+      // Is the target stack dead already ?
+      // TODO: pick another target if it is
+      if (stack.target.shipCount <= 0)
+      {
+         return;
+      }
+      
       int numShots = design.getWeaponCount(slot) * stack.shipCount;
       
       double accuracy = design.getWeaponAccuracy(slot);
@@ -981,85 +880,6 @@ public class BattleSimulation
       }
       
       sendShotNotification( stack, slot, shieldDamage, armourDamage, kills, target );
-   }
-
-   /**
-    * Moves the specified stack
-    * 
-    * The stack will attempt to move to a new square that is as close as possible
-    * to it's preferred distance from it's target.
-    * 
-    * @deprecated 
-    */
-   protected void moveStackOld(int index)
-   {
-      ShipStack mover = stacks[index];
-      ShipStack target = mover.target;
-   
-      Point originalPosition = new Point( mover.xpos, mover.ypos );
-      
-      int originalDistance = distanceBetween(mover,target); 
-   
-      // These two arrays specify where to move relative to current location
-      int[] yOffsets = { 0,  0, -1, -1, -1,  1, 1, 1 };
-      int[] xOffsets = { 1, -1, -1,  0,  1, -1, 0, 1 };
-      
-      int dd = Integer.MAX_VALUE;		// best range found so far 
-      int xOffset = 0;					// where to move for best range
-      int yOffset = 0;
-      
-      for (int n = 0; n < 8; n++)
-      {
-         // Can't move off edge of battle board
-         if (mover.xpos+xOffsets[n] < 1) continue;
-         if (mover.xpos+xOffsets[n] > 10) continue;
-         if (mover.ypos+yOffsets[n] < 1) continue;
-         if (mover.ypos+yOffsets[n] > 10) continue;
-         
-         // Get the range if we moved here
-         int dn = distanceBetween( mover, target, xOffsets[n], yOffsets[n] );
-         
-         // How far out is this from preferred range
-         int ddn = Math.abs( dn - mover.preferredRange );
-                  
-         if (ddn < dd)
-         {
-            // This is the best we have found so far
-            dd = ddn;
-            xOffset = xOffsets[n];
-            yOffset = yOffsets[n];
-         }
-      }
-   
-      // Move stack to new location
-      mover.xpos += xOffset;
-      mover.ypos += yOffset;
-      
-      if (mover.battleOrders == ShipStack.ORDERS_DISENGAGE)
-      {
-         // Count the move if we are trying to disengage
-         mover.movesMade++;
-      }
-   
-      // Have we moved towards or away from the target ?
-      int newDistance = distanceBetween(mover,target);
-      String directionStr = " ";
-      if (newDistance > originalDistance) 
-      {
-         directionStr = " away ";
-      }
-      else if (newDistance < originalDistance)
-      {
-         directionStr = " forward ";
-      }
-   
-      BattleSimulationNotification event = new BattleSimulationNotification();
-      event.eventType = BattleSimulationNotification.TYPE_MOVE;
-      event.message = stacks[index].toString() + " moves" + directionStr + "to " + mover.xpos + "," + mover.ypos + " (range " + distanceBetween(mover,target) + ")";
-      event.round = round;
-      event.activeStack = stacks[index];
-      event.movedFrom = originalPosition;
-      statusUpdate( event );
    }
    
    /**
@@ -1387,7 +1207,37 @@ public class BattleSimulation
    }
    
    /**
-    * Simulates firing beam weapons
+    * Simulates firing gattling beam weapons
+    * <p>
+    * These weapons hit all targets in range with each shot
+    * 
+    * @throws BattleSimulationError
+    */
+   private void fireGattlingWeapon( ShipStack stack, int slot ) throws BattleSimulationError
+   {
+      ShipDesign design = stack.design;
+      
+      // Get the base damage done by the weapon
+      int baseDamage = design.getWeaponPower(slot) * design.getWeaponCount(slot) * stack.shipCount;
+
+      for (int n = 0; n < stackCount; n++) // examine all stacks
+      {         
+         if (stacks[n].side != stack.side)	// don't fire on our own side
+         {
+            int distance = distanceBetween( stack, stacks[n] );
+            
+            if (distance < design.getWeaponRange(slot))	// are we in range ?
+            {
+               // This stack is an enemy and is in range, so apply the damage
+               
+               applyBeamDamage( stack, slot, baseDamage, stacks[n] );
+            }
+         }
+      }
+   }
+   
+   /**
+    * Simulates firing beam weapons (except Gattlings)
     */
    private void fireBeamWeapon( ShipStack stack, int slot ) throws BattleSimulationError
    {
@@ -1398,48 +1248,61 @@ public class BattleSimulation
 
       while (baseDamage > 0)	// while we have unallocated damage
       {
-         // "Spend" the remaining base damage 
-         
          ShipStack target = pickTargetInRange( stack, slot );
 
          if (target == null)
          {
-            return; // No more targets in range
+            break; // No more targets in range
          }
 
-         DamageRecord damageRecord = new DamageRecord();
-         
-         int range = distanceBetween( stack, target );
-
-         // Calculate effects of range, energy capacitors and beam deflectors
-         double rangeMultiplier = getRangeMultiplier( range, stack.design.getWeaponRange(slot) );
-         double capacitorMultiplier = getCapacitorMultiplier( stack.design );        
-         double deflectorMultiplier = getDeflectorMultiplier( target.design );
-      
-         double damageMultiplier = rangeMultiplier * deflectorMultiplier * capacitorMultiplier;
-
-         if (target.shields > baseDamage * damageMultiplier)
-         {
-            // Shields can take all the damage
-            damageRecord.shieldDamage = (int)(baseDamage * damageMultiplier);               
-            target.shields -= baseDamage * damageMultiplier;
-            baseDamage = 0;            
-         }
-         else
-         {
-            // Shields are blown away, so armour will take damage
-            damageRecord.shieldDamage = target.shields;
-      		baseDamage = (int)(baseDamage - target.shields / damageMultiplier);
-      		target.shields = 0;
-
-      		if (design.getWeaponType(slot) != Weapon.TYPE_SAPPER)
-      		{
-      		   baseDamage = applyArmourDamage( target, baseDamage, damageMultiplier, damageRecord );      		   
-      		}
-         }
-         
-         sendShotNotification(stack, slot, damageRecord, target);
+         // "Spend" the remaining base damage          
+         baseDamage = applyBeamDamage(stack, slot, baseDamage, target);
       }
+   }
+
+   /**
+    * Applies the damage from a salvo by a beam weapon
+    *  
+    * @throws BattleSimulationError
+    */
+   private int applyBeamDamage(ShipStack stack, int slot, int baseDamage, ShipStack target) throws BattleSimulationError
+   {
+      ShipDesign design = stack.design;
+      
+      DamageRecord damageRecord = new DamageRecord();
+      
+      int range = distanceBetween( stack, target );
+
+      // Calculate effects of range, energy capacitors and beam deflectors
+      double rangeMultiplier = getRangeMultiplier( range, stack.design.getWeaponRange(slot) );
+      double capacitorMultiplier = getCapacitorMultiplier( stack.design );        
+      double deflectorMultiplier = getDeflectorMultiplier( target.design );
+    
+      double damageMultiplier = rangeMultiplier * deflectorMultiplier * capacitorMultiplier;
+
+      if (target.shields > baseDamage * damageMultiplier)
+      {
+         // Shields can take all the damage
+         damageRecord.shieldDamage = (int)(baseDamage * damageMultiplier);               
+         target.shields -= baseDamage * damageMultiplier;
+         baseDamage = 0;            
+      }
+      else
+      {
+         // Shields are blown away, so armour will take damage
+         damageRecord.shieldDamage = target.shields;
+      	baseDamage = (int)(baseDamage - target.shields / damageMultiplier);
+      	target.shields = 0;
+
+      	if (design.getWeaponType(slot) != Weapon.TYPE_SAPPER)
+      	{
+      	   baseDamage = applyArmourDamage( target, baseDamage, damageMultiplier, damageRecord );      		   
+      	}
+      }
+      
+      sendShotNotification(stack, slot, damageRecord, target);
+      
+      return baseDamage;
    }
 
    /**
