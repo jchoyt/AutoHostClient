@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.1  (Win32)">
+	<META NAME="AUTHOR" CONTENT="Steve Leach">
+	<META NAME="CREATED" CONTENT="20041015;15474595">
+	<META NAME="CHANGEDBY" CONTENT="Steve Leach">
+	<META NAME="CHANGED" CONTENT="20041015;16005139">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<H1>Stars! AutoHost Client<BR>Plug-in Developers Guide</H1>
+<P>Steve Leach<BR>15 October 2004</P>
+<H2>Introduction</H2>
+<P>The Stars! Autohost client (AHC) can be extended in a number of
+ways using &quot;plug-ins&quot;.  A plug-in is a Java class (or
+classes) that implement specific interfaces and are packaged in a way
+that allows the client to find, load and initialize them.</P>
+<H2>Installing Plug-ins</H2>
+<P>To use a packaged plug-in, simply copy the JAR file into a
+&quot;plugins&quot; subdirectory of the directory that AHC is run
+from.  When AHC is next started, all plugins in the JAR file will be
+loaded automatically.</P>
+<H2>Types of Plug-in</H2>
+<H3>Game Panel Button</H3>
+<P>Game Panel Button plug-ins add a new button to the game
+information panel.</P>
+<H3>Map Layer</H3>
+<P>Map Layer plug-ins are used by the Map game panel button plug-in
+to draw the map details.</P>
+<H3>Analyzer Report</H3>
+<P>Report plug-ins are loaded by the Analyzer Report game panel
+button plug-in.</P>
+<H2>Writing a Plug-in</H2>
+<P>Developing a plug-in is mainly a matter of writing a class that
+implements one of the plug-in interfaces.  Some interfaces also have
+abstract classes defined that implement much of the functionality, in
+which case it may be easier to subclass the abstract class.</P>
+<H3>Report Plugins</H3>
+<P>Report plug-ins implement the interface
+<FONT FACE="Courier New, monospace">stars.ahc.plugins.analyzer.AnalyzerReport</FONT>
+or extend the abstract class 
+<FONT FACE="Courier New, monospace">stars.ahc.plugins.analyzer.AbstractAnalyzerReport</FONT><FONT FACE="Times New Roman, serif">.
+ The latter method is recommended as the abstract class provides a
+number of utility methods that make report development much easier.</FONT></P>
+</BODY>
+</HTML>

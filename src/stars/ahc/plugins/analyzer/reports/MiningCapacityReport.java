@@ -167,7 +167,7 @@ public class MiningCapacityReport extends AbstractAnalyzerReport implements Conf
          controls = new JPanel();
          controls.setBorder( new EtchedBorder() );
          
-         controls.add( new JLabel("Player:") );
+         controls.add( new JLabel("Race:") );
          
          Vector raceNames = new Vector();
          
