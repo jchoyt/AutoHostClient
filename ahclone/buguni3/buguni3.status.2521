@@ -1,0 +1,33 @@
+player1-race=The Slugs
+player1-turn=inactive
+player2-race=The Arminians
+player2-turn=in Jul. 23 '03  - 17:04
+player3-race=The Caterpillars
+player3-turn=in Jul. 23 '03  - 17:10
+player4-race=The Dung
+player4-turn=inactive
+player5-race=The Fleas
+player5-turn=inactive
+player6-race=The Grasshoppers
+player6-turn=dead/banned
+player7-race=The Cockroaches
+player7-turn=inactive
+player8-race=The Worms
+player8-turn=waiting
+player9-race=The Woodlice
+player9-turn=in Jul. 24 '03  - 15:39
+player10-race=The Stick Insects
+player10-turn=in Jul. 24 '03  - 8:42
+player11-race=The Snails
+player11-turn=waiting
+game-year=2521
+next-gen-time=Will generate at the latest: Jul. 30 '03 - 7:00
+schedule=<table><tr><td align=center colspan=7>Generate schedule:</td></tr><tr><td align=center>Sun<br>no-gen</td><td align=center>Mon<br>07:00</td><td align=center>Tue<br>no-gen</td><td align=center>Wed<br>07:00</td><td align=center>Thu<br>no-gen</td><td align=center>Fri<br>07:00</td><td align=center>Sat<br>no-gen</td></tr></table>
+strict=no
+status=<font color="#ff0000">** GAME ON HOLD **</font>
+last-gen=Jul. 23 '03  - 7:03
+game-created=Nov. 1 '01  - 22:26
+current-time=Jul. 29 '03  - 4:28
+game-name=Bug Universe 3
+short-game-name=buguni3
+hosted-by=Patrick
