@@ -419,10 +419,10 @@ class DownloadButton extends JButton implements ActionListener
         catch ( IOException ioe )
         {
             success = false;
-            Log.log( Log.MESSAGE, this, "Couldn't get the file from AutoHost.  Are you connected to the internet?" );
+            Log.log( Log.MESSAGE, this, ioe );
             JOptionPane.showInternalMessageDialog(
                     AhcGui.mainFrame.getContentPane(),
-                    "Couldn't get the file from AutoHost.  Are you connected to the internet?",
+                    "Couldn't complete download and report generation. See the log tab for details.",
                     "Connection Trouble",
                     JOptionPane.INFORMATION_MESSAGE );
         }
