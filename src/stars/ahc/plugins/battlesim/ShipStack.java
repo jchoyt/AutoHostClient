@@ -45,6 +45,7 @@ public class ShipStack
    /**
     * The total number of points of damage sustained by the target so far
     */
+   public int naturalOrder = 0;
    public int damage = 0;
    public int shields = 0;
    public int xpos = 0;
@@ -56,7 +57,7 @@ public class ShipStack
    public int preferredRange = 0;
    public int battleOrders = ORDERS_MAX_RATIO;
    public int movesMade = 0;
-   public int sortValue = 0;
+   //public int sortValue = 0;
    public int side = 0;
    public int originalShipCount = 0;
    public int firingOrderValue = 0;
@@ -110,6 +111,10 @@ public class ShipStack
       damage = 0;		// TODO: ships don't necesarily start undamaged
       shields = design.getShields() * shipCount;
       firingOrderValue = Utils.getRandomInt();
+      xpos = 0;
+      ypos = 0;
+      escaped = false;
+      movesMade = 0;
    }
    
    /**
@@ -189,6 +194,7 @@ public class ShipStack
       props.setProperty( base+".owner", owner );
       props.setProperty( base+".side", ""+side );
       props.setProperty( base+".orders", ""+battleOrders );
+      props.setProperty( base+".naturalOrder", ""+naturalOrder );
       
       design.storeProperties( props, index );      
    }
@@ -210,6 +216,7 @@ public class ShipStack
       
       init( design, count, side );
       
+      naturalOrder = Utils.safeParseInt( props.getProperty( base + ".naturalOrder" ) );
       battleOrders = Utils.safeParseInt( props.getProperty( base + ".orders" ) );
    }
 }

@@ -37,4 +37,5 @@ public class BattleSimulationNotification
    public ShipStack activeStack = null;
    public ShipStack targetStack = null;
    public Point movedFrom = null;
+   public boolean finished = false;
 }

@@ -22,6 +22,7 @@ import java.awt.Point;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -153,6 +154,7 @@ public class BattleSimulation
     */
    public void addStack( ShipStack stack )
    {
+      stack.naturalOrder = stackCount;
       stacks[stackCount++] = stack;
    }
    
@@ -165,7 +167,9 @@ public class BattleSimulation
     */
    public ShipStack addNewStack( ShipDesign design, int count )
    {
-      return addNewStack( design, count, stackCount+1 );
+      ShipStack stack = addNewStack( design, count, stackCount+1 ); 
+      stack.naturalOrder = stackCount;
+      return stack;
    }
    
    /**
@@ -202,6 +206,8 @@ public class BattleSimulation
     */
    public void simulate() throws BattleSimulationError
    {
+      statusUpdate( "Battle started" );
+      
       initialiseBattleBoard();
       
       pickTargets();
@@ -213,6 +219,7 @@ public class BattleSimulation
       
       // Show the results of the battle
       showStackDetails();
+      statusUpdate( "Battle finished" );
    }
 
    /**
@@ -255,6 +262,8 @@ public class BattleSimulation
       
       initializeRandomNumberGenerator();
       
+      naturalSortStacks();
+      
       for (int n = 0; n < stackCount; n++)
       {
          stacks[n].reset();
@@ -263,6 +272,32 @@ public class BattleSimulation
       setInitialPositions();
    }
       
+   /**
+    * Sort the stacks into their "natural" order
+    * <p>
+    * This is the order in which they were added to the simulation.  By doing this at the start
+    * we ensure that the simulation is repeatable if the same random seed is used. 
+    */
+   private void naturalSortStacks()
+   {
+      Arrays.sort( stacks, 0, stackCount, new Comparator() {
+         public int compare(Object arg0, Object arg1)
+         {
+            ShipStack stack0 = (ShipStack)arg0;
+            ShipStack stack1 = (ShipStack)arg1;
+            
+            if (stack0 == stack1) return 0;
+            
+            if (stack0.naturalOrder == stack1.naturalOrder) 
+            {
+               throw new InvalidParameterException("2 stacks with same natural order: " + stack0.naturalOrder);
+            }
+            return stack0.naturalOrder - stack1.naturalOrder;
+         }
+      });
+      
+   }
+   
    /**
     * Initialises the random number generator for use in the battle
     * <p> 
@@ -573,7 +608,7 @@ public class BattleSimulation
    protected float getRandomFloat()
    {
       float f = randomNumberGenerator.nextFloat(); 
-      System.out.println( "Next random: " + f );
+      //System.out.println( "Next random: " + f );
       return f;
    }
    
@@ -583,7 +618,7 @@ public class BattleSimulation
    protected int getRandomInt( int max )
    {
       int i = randomNumberGenerator.nextInt(max);
-      System.out.println( "Next random: " + i );
+      //System.out.println( "Next random: " + i );
       return i;
    }
 
@@ -592,6 +627,10 @@ public class BattleSimulation
     */
    protected void randomizeMass()
    {
+      // Sort the stacks into their natural order before giving them random mass values
+      // so that if we are using a specific random seed we will always get the same results. 
+      naturalSortStacks();
+      
       for (int n = 0; n < stackCount; n++)
       {
          // Get a random number between 0.85 and 1.15
@@ -888,6 +927,7 @@ public class BattleSimulation
     * Simulates firing torpedos and missiles 
     * 
     * @throws BattleSimulationError
+    * @deprecated - use fireTorpedoKotk() instead
     */
    private void fireTorpedo(ShipStack stack, int slot) throws BattleSimulationError
    {
@@ -1486,7 +1526,7 @@ public class BattleSimulation
     * Uses Kotk's (Vambola Kotkas) algorithm:
     * http://starsautohost.org/sahforum/index.php?t=tree&th=2065&mid=17793&rid=386&S=25d65ca246e6d7fb95dbe63d087bf5a7&rev=&reveal=
     */
-   public void fireTorpedoKotk( ShipStack stack, int slot ) throws BattleSimulationError
+   protected void fireTorpedoKotk( ShipStack stack, int slot ) throws BattleSimulationError
    {
       ShipDesign design = stack.design;
       
@@ -1540,6 +1580,8 @@ public class BattleSimulation
                   target = pickTargetInRange( stack, slot );
                   if (target == null) return;
                   
+                  armourDamage = 0;
+                  
                   damage = stack.design.getWeaponPower(slot);
                   if ((target.shields == 0) && (design.getWeaponType(slot) == Weapon.TYPE_MISSILE))
                   {
@@ -1588,7 +1630,9 @@ public class BattleSimulation
       
       accuracy = getFinalAccuracy( accuracy, stack.design, stack.target.design );
       
-      return getRandomFloat() <= accuracy;
+      float f = getRandomFloat();
+      
+      return f <= accuracy;
    }
    
    /**

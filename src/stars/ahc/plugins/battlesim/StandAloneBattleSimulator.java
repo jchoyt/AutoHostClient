@@ -20,6 +20,7 @@ package stars.ahc.plugins.battlesim;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
 import javax.swing.AbstractAction;
@@ -31,8 +32,10 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 
 import stars.ahc.Utils;
@@ -103,6 +106,7 @@ public class StandAloneBattleSimulator extends JFrame
             openFileGui();
          }
       };
+      openAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK) );
 
       saveAction = new AbstractAction("Save") {
          public void actionPerformed(ActionEvent event)
@@ -117,6 +121,7 @@ public class StandAloneBattleSimulator extends JFrame
             copyToClipboard();
          }
       };
+      copyAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK) );
       
       
       runSimAction = new AbstractAction("Run") {
@@ -126,13 +131,14 @@ public class StandAloneBattleSimulator extends JFrame
          }
       };
       runSimAction.setEnabled( false );
+      runSimAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0) );
       
       aboutAction = new AbstractAction("About") {
          public void actionPerformed(ActionEvent event)
          {
+            showAboutWindow();
          }
       };
-      aboutAction.setEnabled( false );
       
    }
    
@@ -201,13 +207,15 @@ public class StandAloneBattleSimulator extends JFrame
 
       chooser.setDialogTitle( "Open simulation" );
       chooser.addChoosableFileFilter( new SimFileFilter() );
-      chooser.setCurrentDirectory( new File(System.getProperty("java.io.tmpdir")) ); // FIXME: remove this
+      chooser.setCurrentDirectory( new File(System.getProperty("user.home")) ); 
       
       int rc = chooser.showOpenDialog( this );
       
       if (rc == JFileChooser.APPROVE_OPTION)
       {
          openSimulation( chooser.getSelectedFile().getAbsolutePath() );
+         
+         setStatus( "Simulation opened: " + chooser.getSelectedFile().getAbsolutePath() );
       }
    }
 
@@ -258,6 +266,17 @@ public class StandAloneBattleSimulator extends JFrame
       }
       resultsArea.copy();
       setStatus( resultsArea.getSelectedText().length() + " characters copied to clipboard" );
+   }
+   
+   private void showAboutWindow()
+   {
+      String title = "Stars! Battle Simulator";
+      String text = "An Open Source Project\n" + 
+      				"Lead developer: Steve Leach\n" +
+      				"Assistance from: LEit, Kotk, mazda, Ptolemy, Micha, et.al.\n\n" +
+      				"Visit the Academy forum at \n    http://starsautohost.org/sahforum/ \n\n" +
+      				"Copyright (c) 2004, Steve Leach";   
+      JOptionPane.showMessageDialog(this, text, title, JOptionPane.PLAIN_MESSAGE );
    }
 }
 
