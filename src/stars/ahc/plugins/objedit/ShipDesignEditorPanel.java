@@ -53,6 +53,7 @@ import stars.ahc.Game;
 import stars.ahc.ShipDesign;
 import stars.ahc.Utils;
 import stars.ahc.Weapon;
+import stars.ahc.plugins.battlesim.BattleSimulator;
 
 /**
  * @author Steve Leach
@@ -120,7 +121,9 @@ public class ShipDesignEditorPanel extends JPanel
       Action battleSimAction = new AbstractAction("Battle Sim") {
          public void actionPerformed(ActionEvent event)
          {
-            notImplemented();
+            BattleSimulator battleSim = new BattleSimulator();
+            battleSim.setGame( game );
+            battleSim.show();
          }
       };
 
