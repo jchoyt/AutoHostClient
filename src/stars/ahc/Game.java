@@ -46,6 +46,7 @@ public class Game extends Object
     ArrayList players;
     private PlanetList planets;
     private FleetList fleets;
+    private ShipDesignList shipDesigns;
     private ArrayList races = new ArrayList();
     private Properties userDefinedProperties = new Properties();
     protected String sahHosted = "true";
@@ -84,6 +85,7 @@ public class Game extends Object
         players = new ArrayList();
         planets = new PlanetList( this );
         fleets = new FleetList( this );
+        shipDesigns = new ShipDesignList( this );
         this.directory = directory;
         loadProperties();
         loadUserDefinedProperties();
@@ -928,8 +930,10 @@ public class Game extends Object
 
 
     /**
-     *  Loads user defined properties from the game's user properties file
-     *
+     * Loads user defined properties from the game's user properties file
+     * <p>
+     * Also sets up any ship designs that are included in the properties file.
+     * 
      *@author    Steve Leach
      */
     public void loadUserDefinedProperties()
@@ -955,10 +959,29 @@ public class Game extends Object
 
         }
 
+        setupShipDesigns( userDefinedProperties );
     }
 
 
     /**
+    * Adds any ship designs that are stored in the specified properties list
+    * 
+    * @author Steve Leach 
+    */
+   private void setupShipDesigns( Properties props )
+   {
+      int designCount = Utils.safeParseInt( props.getProperty("ShipDesigns.count"), 0 );
+      
+      for (int n = 0; n < designCount; n++)
+      {
+         ShipDesign design = new ShipDesign();
+         design.loadProperties( props, n+1 );
+         shipDesigns.addDesign( design );
+      }
+   }
+
+
+   /**
      *  Support function for use by Planet, Fleet and Race classes
      *
      *@param  propertyName  Description of the Parameter
@@ -989,6 +1012,8 @@ public class Game extends Object
      */
     public void saveUserDefinedProperties()
     {
+       getShipDesignProperties( userDefinedProperties );
+       
         File userPropertiesFile = getUserDefinedPropertiesFile();
 
         try
@@ -1009,6 +1034,20 @@ public class Game extends Object
 
 
     /**
+    */
+   private void getShipDesignProperties(Properties properties)
+   {
+      properties.setProperty( "ShipDesigns.count", ""+shipDesigns.getDesignCount() );
+      
+      for (int n = 0; n < shipDesigns.getDesignCount(); n++)
+      {
+         ShipDesign design = shipDesigns.getDesign(n);
+         design.storeProperties( properties, n+1 );
+      }
+   }
+
+
+   /**
      *  Returns details of the specified fleet in the specified year
      *
      *@param  year   Description of the Parameter
@@ -1119,6 +1158,21 @@ public class Game extends Object
     public void setSahHosted( String sahHosted )
     {
         this.sahHosted = sahHosted;
+    }
+    
+    public void addShipDesign( ShipDesign design )
+    {
+       shipDesigns.addDesign( design );
+    }
+    
+    public ShipDesign getShipDesign( int index )
+    {
+       return shipDesigns.getDesign( index );
+    }    
+    
+    public int getShipDesignCount()
+    {
+       return shipDesigns.getDesignCount();
     }
 }
 

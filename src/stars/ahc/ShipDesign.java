@@ -18,6 +18,8 @@
  */
 package stars.ahc;
 
+import java.util.Properties;
+
 /**
  * @author Steve Leach
  *
@@ -36,14 +38,9 @@ public class ShipDesign
    
    private static final int[] hullWeaponSlots = { 0, 1, 3, 3, 6, 9, 20, 0, 0 };
    
-   public static final int WPNTYPE_BEAM = 1;
-   public static final int WPNTYPE_TORPEDO = 2;
-   public static final int WPNTYPE_MISSILE = 3;
-   public static final int WPNTYPE_GATTLING = 4;
-   public static final int WPNTYPE_SAPPER = 5;
-   
    private int hullType = HULLTYPE_UNKNOWN;
-   private String name = null;
+   private String name = "";
+   private String owner = "";
    private int speed4 = 0;			// battle speed multiplied by 4
    private int mass = 0;
    private int initiative = 0;
@@ -73,6 +70,13 @@ public class ShipDesign
       setupWeaponSlots();
    }
    
+   /**
+    * 
+    */
+   public ShipDesign()
+   {
+   }
+
    private void setupWeaponSlots()
    {
       weaponsSlots = hullWeaponSlots[ hullType ];
@@ -162,7 +166,9 @@ public class ShipDesign
    {
       this.warmonger = warmonger;
    }
-   // Returns the design's battle speed multiplied by 4 (ie. speed 0.75 returns 3) 
+   /**
+    * Returns the design's battle speed multiplied by 4 (eg. speed 0.75 returns 3)
+    */  
    public int getSpeed4()
    {
       return speed4;
@@ -194,5 +200,58 @@ public class ShipDesign
    public int getWeaponRange(int slot)
    {
       return weaponRange[slot];
+   }
+   public String getOwner()
+   {
+      return owner;
+   }
+   public void setOwner(String owner)
+   {
+      this.owner = owner;
+   }
+
+   public static String[] getHullTypeNames()
+   {
+      String[] names = {
+            "Unknown",
+            "Scout", "Frigate", "Destroyer", "Cruiser", "BattleCruiser", "Battleship", "Dreadnaught", "Nubian"
+      };
+      return names;
+   }
+
+   /**
+    * Stores properties of the design
+    */
+   public void storeProperties(Properties properties, int index)
+   {
+      String base = "ShipDesigns." + index;
+      
+      properties.setProperty( base+".name", getName() );
+      properties.setProperty( base+".owner", getOwner() );
+      properties.setProperty( base+".hullCode", ""+hullType );
+      
+      if (hullType > HULLTYPE_UNKNOWN)
+      {
+         properties.setProperty( base+".hull", getHullTypeNames()[hullType] );
+      }
+   }
+   
+   public void loadProperties(Properties properties, int index)
+   {
+      String base = "ShipDesigns." + index;
+      
+      name = properties.getProperty( base + ".name" );
+      owner = properties.getProperty( base + ".owner" );
+      
+      hullType = Utils.safeParseInt( properties.getProperty( base + ".hullCode" ), 0 );
+   }
+
+   public void setHullType(int typeCode)
+   {
+      this.hullType = typeCode;
+   }   
+   public int getHullType()
+   {
+      return hullType;
    }
 }

@@ -23,6 +23,7 @@ import java.util.Comparator;
 
 import stars.ahc.ShipDesign;
 import stars.ahc.Utils;
+import stars.ahc.Weapon;
 
 /**
  * Simulates a battle between 2 stacks of ships (only)
@@ -268,7 +269,7 @@ public class OneOnOneBattle extends BattleSimulation
          
          armourDamage = power - shieldDamage;
          
-         if (design.getWeaponType(slot) == ShipDesign.WPNTYPE_SAPPER)
+         if (design.getWeaponType(slot) == Weapon.TYPE_SAPPER)
          {
             armourDamage = 0;
          }

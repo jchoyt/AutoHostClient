@@ -62,6 +62,7 @@ public class GameObjectEditor extends JFrame
       tabsPane.addTab( "Planets", new PlanetEditorPanel(game) );
       tabsPane.addTab( "Fleets", new JPanel() );
       tabsPane.addTab( "Races", new RaceEditorPanel(game) );
+      tabsPane.addTab( "Designs", new ShipDesignEditorPanel(game) );
       
       getContentPane().add( tabsPane );
    }

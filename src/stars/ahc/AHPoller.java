@@ -136,7 +136,16 @@ public class AHPoller extends TimerTask
       for (int n = 0; n < notificationListeners.size(); n++)
       {
          NotificationListener listener = (NotificationListener)notificationListeners.get(n);
-         listener.receiveNotification( source, severity, message );
+         
+         // Wrap call to listener in try/catch to prevent a buggy listener from killing the poll
+         try
+         {
+            listener.receiveNotification( source, severity, message );
+         }
+         catch (Throwable t)
+         {
+            Log.log( Log.ERROR, listener, message.toString() );
+         }
       }
    }
 

@@ -504,7 +504,16 @@ public class Player extends Object
      */
     public boolean needsDownload()
     {
-        return getMFileYear().compareTo( game.getCurrentYear() ) < 0;
+       // FIXME: what happens if one of these returns null ?
+       String mFileYear = getMFileYear();
+       String currentYear = game.getCurrentYear();
+       
+       if ((mFileYear == null) || (currentYear == null))
+       {
+          return true;
+       }
+       
+       return mFileYear.compareTo( currentYear ) < 0;
     }
 
 
