@@ -91,8 +91,7 @@ public class BackgroundLayer implements MapLayer
     */
    public void setEnabled(boolean enabled)
    {
-      // TODO Auto-generated method stub
-      
+      // Cannot disable the background layer
    }
 
    /* (non-Javadoc)

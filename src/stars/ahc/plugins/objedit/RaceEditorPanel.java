@@ -117,7 +117,7 @@ public class RaceEditorPanel extends JPanel implements ListSelectionListener, Ac
       
       raceList.getSelectionModel().addListSelectionListener( this );
 
-      raceList.setSelectedIndex( 0 );
+      selectFirstRace();
       
       JScrollPane scroller = new JScrollPane( raceList );
       
@@ -126,6 +126,17 @@ public class RaceEditorPanel extends JPanel implements ListSelectionListener, Ac
       return listPanel;
    }
    
+   /**
+    * 
+    */
+   private void selectFirstRace()
+   {
+      if (raceList.getModel().getSize() > 0)
+      {
+         raceList.setSelectedIndex( 0 );
+      }
+   }
+
    private JPanel setupEditPanel()
    {
       JPanel editPanel = new JPanel();

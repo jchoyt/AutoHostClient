@@ -205,6 +205,7 @@ public class BattleSimulation
       }
       else
       {
+         // TODO: handle more than 2 stacks
          throw new BattleSimulationError( "Cannot handle more than 2 stacks yet" );
       }
    }
@@ -919,6 +920,7 @@ public class BattleSimulation
     */
    protected void pickTarget(ShipStack stack)
    {
+      // TODO: add attractiveness calculation into targeting algorithm
       for (int n = 0; n < stackCount; n++)
       {
          if (stacks[n] != stack)	// don't target self

@@ -82,7 +82,7 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
    {
       Graphics2D g2D = (Graphics2D)g;
 
-      // TODO: fix this
+      // TODO: remove this nasty hack
       // Nasty hack to remove corruption when the UI wants to repaint just part of the map.
       // Currently we ignore the request but schedule a full repaint instead.
       // Eventually we want to handle partial redraws properly.

@@ -22,6 +22,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -404,5 +407,46 @@ public class PlugInManager
       }
       
       return result;
+   }
+
+   /**
+    * Sets up the plugin classloader.
+    * <p>
+    * This adds all the JAR files in the plugins directory to the class loader.
+    */
+   public static void setupClassLoader()
+   {
+      File pluginDir = new File("plugins");
+      if(!pluginDir.exists())
+      {
+          return;
+      }
+   
+      File[] plugins = pluginDir.listFiles();
+   
+      ArrayList urlList = new ArrayList();
+   
+      for (int n = 0; n < plugins.length; n++)
+      {
+         if (plugins[n].getName().toLowerCase().endsWith(".jar"))
+         {
+            try
+            {
+               URL url = plugins[n].toURL();
+               urlList.add( url );
+            }
+            catch (MalformedURLException e)
+            {
+               // This should never happen because we are using files from the file system
+               e.printStackTrace();
+            }
+         }
+      }
+   
+      URL[] urls = (URL[])urlList.toArray( new URL[0] );
+   
+      URLClassLoader loader = new URLClassLoader( urls );
+   
+      Thread.currentThread().setContextClassLoader( loader );
    }
 }

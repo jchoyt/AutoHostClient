@@ -16,10 +16,6 @@
 package stars.ahc;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -102,7 +98,7 @@ public class AutoHostClient extends java.lang.Object
             setUpRoutine();
         }
 
-        setupClassLoader();
+        PlugInManager.setupClassLoader();
 
         GamesProperties.init( propsFile );
         Log.log( Log.MESSAGE, AutoHostClient.class, "Properties file loaded and parsed" );
@@ -114,46 +110,6 @@ public class AutoHostClient extends java.lang.Object
 
 
     /**
-    *
-    */
-   private static void setupClassLoader()
-   {
-      File pluginDir = new File("plugins");
-      if(!pluginDir.exists())
-      {
-          return;
-      }
-
-      File[] plugins = pluginDir.listFiles();
-
-      ArrayList urlList = new ArrayList();
-
-      for (int n = 0; n < plugins.length; n++)
-      {
-         if (plugins[n].getName().toLowerCase().endsWith(".jar"))
-         {
-            try
-            {
-               URL url = plugins[n].toURL();
-               urlList.add( url );
-            }
-            catch (MalformedURLException e)
-            {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            }
-         }
-      }
-
-      URL[] urls = (URL[])urlList.toArray( new URL[0] );
-
-      URLClassLoader loader = new URLClassLoader( urls );
-
-      Thread.currentThread().setContextClassLoader( loader );
-   }
-
-
-   /**
     *
     */
    private static void startPoller()
@@ -215,7 +171,6 @@ public class AutoHostClient extends java.lang.Object
 
         mainFrame.setVisible( true );
     }
-
 
     /**
      *  Constructor for the setUpRoutine object

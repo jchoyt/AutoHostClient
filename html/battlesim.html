@@ -1,0 +1,68 @@
+<html>
+	<head>
+		<title>Stars! Autohost Client Battle Simulator</title>
+	</head>
+	<body background="bkgstar.gif" bgcolor="#000000" text="#FFFFFF" link="#FFFFFF" alink="#FF0000" vlink="#FFFFFF">
+		<h1>Stars! Autohost Client Battle Simulator</h1>
+		<p>
+			So you want to use the Battle Simulator do you ?
+		</p>
+		<p>
+			First, a quick disclaimer:-
+			<br/>
+			The Stars! battle engine is a complex system with several random elements, and it's behaviour
+			is not fully understood in several areas.  It is therefore impossible to create a simulator that
+			will 100% accurately reproduce the results of the battle engine.
+			<br/>
+			The AHC battle simulator is a &quot;best efforts&quot; implementation that manages to get quite close
+			to real battle engine results in a lot of cases.  However, there are no guarantees and you use
+			it entirely at your own risk.  If you lose your main warfleet because the battle didn't go the
+			way the simulator said it would, don't blame us.
+		</p>
+		<p>
+			Now that we've got that out of the way, here's how to use it.
+		</p>
+		<p>
+			Everything in the AutoHost Client starts with a game, and the battle simulator is no exception. You
+			can't use the simulator unless you have a game defined.
+		</p>
+		<p>
+			You also need to make sure that you have the correct plugins loaded.  You will need base.jar, 
+			battlesim.jar and objedit.jar at the very least. Make sure these are in your plugins directory.
+		</p>
+		<p>
+			If you have the plugins loaded then there will be a &quot;Data Editor&quot; button for each game.  Click this
+			button for the game you are working with to diplay the data editor.
+		</p>
+		<p>
+			The data editor has &quot;tabs&quot; across the top for planets, fleets, etc.  One of the tabs is
+			for &quot;Designs&quot; - click this.  You can now store details of the ship designs that you want to work
+			with.  These designs are stored in a file in your game directory, so you should only have to
+			enter the details of each design once, no matter how many times you use it in the battle engine.
+		</p>
+		<p>
+			For each design, enter the basic details of shields, armour, initiative, etc.  Once you have done
+			that, add details of the different weapons slots. For each weapons slot, specifiy the type of 
+			weapon and how many ther are.  Note that you should specify the weapons on a slot-by-slot basis; 
+			for example, a destroyer with 2 colloidal phasers should have two entries, each with one
+			colloidal phase rather than one entry with 2 phasers.  If you don't follow this rule you will
+			get the wrong results.
+		</p>
+		<p>
+			Once you have entered the ship designs you are after (and saved them), click the &quot;Battle 
+			Sim&quot; button.
+		</p>
+		<p>
+			Pick the ship designs you want, and specify how many of each there are.  Then click the &quot;Run
+			Simulation&quot; button.
+		</p>
+		<p>
+			The battle simulator will now run, and the results will be displayed in the report.
+		</p>
+		
+		<hr/>
+		<p>
+			<i>Copyright (c) 2004, Steve Leach, all rights reserved</i>
+		</p>
+	</body>
+</html>

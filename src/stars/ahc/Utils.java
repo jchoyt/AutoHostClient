@@ -274,6 +274,9 @@ public class Utils
      */
     public static void backupPxxFiles( Game game, String playerNumber )
     {
+       // TODO: check that NewReports=1, ie. it generated *.pnn rather than *.pla
+       checkForNewReports( game, playerNumber );
+       
         String gameDir = game.getDirectory();
         String backup = game.getDirectory() + "/backup";
         File fFile = new File( gameDir, game.getFFileName( playerNumber ) );
@@ -298,6 +301,26 @@ public class Utils
 
 
     /**
+    */
+   private static void checkForNewReports(Game game, String playerNumber)
+   {
+      String gameDir = game.getDirectory();
+      
+      File pFile = new File( gameDir, game.getPFileName( playerNumber ) );
+      
+      String oldReportName = game.getDirectory() + File.separator + game.getName() + ".PLA";
+      File oldReport = new File( oldReportName );
+      
+      if ((pFile.exists() == false) && (oldReport.exists()))
+      {
+         // User probably doesn't have NewReports = 1 in his Stars.ini
+         
+         // TODO: decide what to do here
+      }
+   }
+
+
+   /**
      *  Description of the Method
      *
      *@param  playerNumber  Description of the Parameter
