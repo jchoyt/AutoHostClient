@@ -22,6 +22,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
+import javax.swing.JComponent;
+
 import stars.ahc.Game;
 import stars.ahc.plugins.map.MapConfig;
 import stars.ahcgui.pluginmanager.MapLayer;
@@ -101,4 +103,9 @@ public class BackgroundLayer implements MapLayer
       return true;
    }
 
+   public JComponent getControls()
+   {
+      return null;
+   }
+   
 }

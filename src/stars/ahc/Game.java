@@ -14,6 +14,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahc;
+import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -635,22 +636,57 @@ public class Game extends Object
      *
      *@exception  ReportLoaderException  Description of the Exception
      */
-    public void loadMapFile()
-        throws ReportLoaderException
+    public void loadMapFile() throws ReportLoaderException
     {
-        String mapName = getDirectory() + "/" + getName() + ".map";
-
-        File mapFile = new File( mapName );
-
-        if ( mapFile.exists() )
-        {
-            planets.loadMapFile( mapFile );
-        }
-        else
-        {
-            throw new ReportLoaderException( "Map file not found: " + mapName, null );
-        }
-
+       File mapFile = getReportFile( REPORTTYPE_MAP, 0, 0 );       
+       
+       if (mapFile.exists())
+       {
+          planets.loadMapFile( mapFile );
+       }
+       else
+       {
+          throw new ReportLoaderException( "Map file not found", null  );
+       }       
     }
+    
+    public void loadReports() throws ReportLoaderException
+    {
+       loadMapFile();
+       
+       for (int n = 1; n <= 16; n++)
+       {
+          loadReportFile( REPORTTYPE_PLANET, n, getYear() );
+          loadReportFile( REPORTTYPE_FLEET, n, getYear() );
+       }
+    }
+
+
+   /**
+    */
+   private void loadReportFile(int reportType, int player, int year) throws ReportLoaderException
+   {
+      File reportFile = getReportFile( reportType, player, year );
+            
+      if ((reportFile != null) && reportFile.exists())
+      {
+         planets.loadPlanetReport( reportFile, year );
+      }
+   }
+   
+   public Color getPlayerColor( String playerName )
+   {
+      for (int n = 0; n < players.size(); n++)
+      {
+         Player player = (Player)players.get(n);
+         
+         if (player.getRaceName().equals(playerName))
+         {
+            return player.getColor();
+         }
+      }
+      
+      return Color.MAGENTA;		// TODO: throw an error here instead
+   }
 }
 

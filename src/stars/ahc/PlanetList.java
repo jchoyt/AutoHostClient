@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -112,8 +111,6 @@ public class PlanetList
    
    public void loadMapFile( File mapFile ) throws ReportLoaderException
    {
-      ArrayList planets = new ArrayList();
-      
       try
       {
          BufferedReader reader = new BufferedReader(new FileReader(mapFile));
@@ -145,12 +142,41 @@ public class PlanetList
          throw new ReportLoaderException( "Error reading file: " + mapFile.getName(), e );
       }      
    }
+
+   /**
+    * @param reportFile
+    * @throws ReportLoaderException
+    */
+   public void loadPlanetReport(File reportFile, int year) throws ReportLoaderException
+   {
+      try
+      {
+         BufferedReader reader = new BufferedReader(new FileReader(reportFile));
+         
+         String titles = reader.readLine();
+         
+         String line;
+         
+         while ((line = reader.readLine()) != null)
+         {
+            String[] tokens = line.split("\t");
+
+            String name = tokens[0];
+            
+            addPlanetData( name, year, tokens );
+         }
+         
+         reader.close();
+      }
+      catch (FileNotFoundException e)
+      {
+         throw new ReportLoaderException( "File not found: " + reportFile.getName(), e );
+      }
+      catch (IOException e)
+      {
+         throw new ReportLoaderException( "Error reading file: " + reportFile.getName(), e );
+      }      
+   }
    
 }
 
-class PlanetData
-{
-   public int year = 0;
-   public String name = null;
-   public String[] values;
-}

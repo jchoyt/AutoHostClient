@@ -28,6 +28,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
@@ -45,6 +46,7 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
    private MapConfig config = null;
    private boolean dragging = false;
    private Point prevMousePos = null;
+   private ArrayList layers = new ArrayList();
    
    public MapPanel( Game game, MapConfig config ) throws MapDisplayError
    {
@@ -63,11 +65,23 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
     */
    private void initializeLayers() throws MapDisplayError
    {
-      MapLayer[] layers = PlugInManager.getPluginManager().getMapLayers();
+      ArrayList plugins = PlugInManager.getPluginManager().getPlugins( MapLayer.class );
       
-      for (int n = 0; n < layers.length; n++)
+      for (int n = 0; n < plugins.size(); n++)
       {
-         layers[n].initialize( game, config );
+         try
+         {
+	         Class plugin = (Class)plugins.get(n);
+	         MapLayer layer = (MapLayer)plugin.newInstance();
+	         
+	         layer.initialize( game, config );
+	         
+	         layers.add( layer );
+         }
+         catch (Exception e)
+         {
+            throw new MapDisplayError( "Error creating layer", e  );
+         }
       }
    }
    
@@ -75,19 +89,19 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
    {
       Graphics2D g2D = (Graphics2D)g;
       
-      MapLayer[] layers = PlugInManager.getPluginManager().getMapLayers();
-      
       // Cycle through the layers
-      for (int n = 0; n < layers.length; n++)
+      for (int n = 0; n < layers.size(); n++)
       {
+         MapLayer layer = (MapLayer)layers.get(n);
+         
          // If the layer is enabled then draw it
-         if ( layers[n].isEnabled() )
+         if ( layer.isEnabled() )
          {
-            setupTransform( layers[n], g2D );
+            setupTransform( layer, g2D );
 
             if (g2D != null)
             {
-               layers[n].draw( g2D );
+               layer.draw( g2D );
             }
          }
       }

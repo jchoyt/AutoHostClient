@@ -31,6 +31,10 @@ public class Planet implements MapObject
    private int year;
    private Point position;
    
+   public static final int PLANET_NAME = 0;
+   public static final int PLANET_OWNER = 1;
+   public static final int PLANET_POPULATION = 4;
+   
    /**
     * @param data
     */
@@ -55,12 +59,26 @@ public class Planet implements MapObject
       return name;
    }
 
+   private String getValue( int index )
+   {
+      if (data == null) return null;
+      if (data.values == null) return null;
+      if (data.values.length < (index+1)) return null;
+      
+      return data.values[index];
+   }
+   
+   private int getIntValue( int index, int defaultValue )
+   {
+      return Utils.safeParseInt( getValue(index), defaultValue );
+   }
+   
    /* (non-Javadoc)
     * @see stars.ahc.MapObject#getOwner()
     */
    public String getOwner()
    {
-      return null;
+      return getValue(PLANET_OWNER);
    }
 
    /* (non-Javadoc)
@@ -77,5 +95,22 @@ public class Planet implements MapObject
    public int getY()
    {
       return position.y;
+   }
+   
+   public String toString()
+   {
+      return name;
+   }
+   
+   public boolean isUnoccupied()
+   {
+      return Utils.empty( getOwner() );
+   }
+
+   /**
+    */
+   public int getPopulation()
+   {
+      return getIntValue( PLANET_POPULATION, 0 );
    }
 }

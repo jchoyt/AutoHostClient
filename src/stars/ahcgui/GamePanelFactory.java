@@ -235,17 +235,34 @@ class GamePanel extends JPanel implements PropertyChangeListener
         //=====================
         // Add plug-in buttons
         //
-        GamePanelButtonPlugin[] pluginButtons = PlugInManager.getPluginManager().getGamePanelButtons();
+        ArrayList pluginButtons = PlugInManager.getPluginManager().getPlugins( GamePanelButtonPlugin.class );
 
-        for (int n = 0; n < pluginButtons.length; n++)
+        for (int n = 0; n < pluginButtons.size(); n++)
         {
-           pluginButtons[n].init( game );
+           
+	         try
+	         {
+	            Class pluginClass = (Class)pluginButtons.get(n); 
+	            GamePanelButtonPlugin plug;
+	            plug = (GamePanelButtonPlugin)pluginClass.newInstance();
+	            plug.init( game );
 
-           b1 = new PluginButton( pluginButtons[n] );
-           c.gridx++;
-           gridbag.setConstraints( b1, c );
+	            b1 = new PluginButton( plug );
+	            c.gridx++;
+	            gridbag.setConstraints( b1, c );
 
-           this.add( b1 );
+	            this.add( b1 );
+	         }
+	         catch (InstantiationException e)
+	         {
+	            // TODO Auto-generated catch block
+	            e.printStackTrace();
+	         }
+	         catch (IllegalAccessException e)
+	         {
+	            // TODO Auto-generated catch block
+	            e.printStackTrace();
+	         }
         }
         //=====================
     }

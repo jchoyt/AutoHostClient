@@ -11,6 +11,8 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Float;
 
+import javax.swing.JComponent;
+
 import stars.ahc.Game;
 import stars.ahc.plugins.map.MapConfig;
 import stars.ahc.plugins.map.MapDisplayError;
@@ -113,4 +115,9 @@ public class TitleLayer implements MapLayer
       return false;
    }
 
+   public JComponent getControls()
+   {
+      return null;
+   }
+   
 }

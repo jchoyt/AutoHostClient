@@ -14,21 +14,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahc;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import javax.swing.JOptionPane;
+
 import stars.ahcgui.AhcGui;
 
 /**
@@ -40,7 +43,7 @@ import stars.ahcgui.AhcGui;
 public class Utils
 {
     /**
-     *  Description of the Field
+     *  The path name of the Stars! executable file
      */
     public static File starsExecutable = null;
 
@@ -336,5 +339,33 @@ public class Utils
             throw newex;
         }
     }
+    
+    /**
+     * Returns true if the string is null, zero length or contains only whitespace
+     */
+    public static boolean empty( String str )
+    {
+       if (str == null) return true;
+       else if (str.trim().equals("")) return true;
+       else return false;
+    }
+
+
+   /**
+    * Converts a string to an integer.  If the string does not contain a valid
+    * integer then the default value is returned.
+    */
+   public static int safeParseInt(String value, int defaultValue)
+   {
+      try
+      {
+         return Integer.parseInt( value );
+      }
+      catch (Throwable t)
+      {
+         return defaultValue;
+      }
+   }
+    
 }
 

@@ -20,6 +20,8 @@ package stars.ahcgui.pluginmanager;
 
 import java.awt.Graphics2D;
 
+import javax.swing.JComponent;
+
 import stars.ahc.Game;
 import stars.ahc.plugins.map.MapConfig;
 import stars.ahc.plugins.map.MapDisplayError;
@@ -52,4 +54,10 @@ public interface MapLayer extends PlugIn
     * Draws the map layer details onto the supplied graphics device 
     */
    public void draw( Graphics2D g );
+   
+   /**
+    * Returns a component used to configure the map layer.  Generally this will
+    * be a JPanel with various controls inside it.  
+    */
+   public JComponent getControls();
 }

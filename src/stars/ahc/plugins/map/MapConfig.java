@@ -87,4 +87,11 @@ public class MapConfig
          listener.mapConfigChanged(this);
       }
    }
+
+   /**
+    */
+   public int getUniverseSize()
+   {
+      return Math.max( gameMaxX - gameMinX, gameMaxY - gameMinY );
+   }
 }

@@ -39,7 +39,6 @@ import javax.swing.table.AbstractTableModel;
 
 import stars.ahc.Game;
 import stars.ahcgui.pluginmanager.MapLayer;
-import stars.ahcgui.pluginmanager.PlugInManager;
 
 /**
  * Swing frame in which the game map is displayed
@@ -211,7 +210,7 @@ class LayerTableModel extends AbstractTableModel
     */
    private void initialize()
    {
-      layers = PlugInManager.getPluginManager().getMapLayers();      
+      layers = new MapLayer[0];      
    }
 
 

@@ -9,6 +9,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 
+import javax.swing.JComponent;
+
 import stars.ahc.Game;
 import stars.ahc.Planet;
 import stars.ahc.ReportLoaderException;
@@ -54,7 +56,7 @@ public class PlanetNamesLayer implements MapLayer
       {
          try
          {
-            game.loadMapFile();
+            game.loadReports();
          }
          catch (ReportLoaderException e)
          {
@@ -87,7 +89,12 @@ public class PlanetNamesLayer implements MapLayer
          
          Point screenPos = config.mapToScreen( planet.getPosition() );
          
-         g.drawString( planet.getName(), screenPos.x-20, screenPos.y+16 );
+         String text = planet.getName();
+
+         int width = g.getFontMetrics().stringWidth( text );
+         int height = g.getFontMetrics().getHeight();
+         
+         g.drawString( text, screenPos.x-width/2, screenPos.y+height+2 );
       }
    }
 
@@ -105,6 +112,11 @@ public class PlanetNamesLayer implements MapLayer
    public void setEnabled(boolean enabled)
    {
       this.enabled = enabled;
+   }
+
+   public JComponent getControls()
+   {
+      return null;
    }
 
 }

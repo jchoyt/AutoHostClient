@@ -14,6 +14,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahc;
+import java.awt.Color;
 import java.beans.*;
 
 import java.io.*;
@@ -40,6 +41,7 @@ public class Player extends Object
     String starsPassword;
     boolean toUpload;
     String uploadPassword;
+    private Color color = null;
 
 
     /**
@@ -539,5 +541,14 @@ public class Player extends Object
         return year;
     }
 
+    public Color getColor()
+    {
+       if (this.color == null)
+       {
+          this.color = Color.GREEN;
+       }
+       
+       return color;
+    }
 }
 

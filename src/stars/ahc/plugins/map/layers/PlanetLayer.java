@@ -25,28 +25,16 @@ import java.awt.Point;
 import stars.ahc.Game;
 import stars.ahc.Planet;
 import stars.ahc.ReportLoaderException;
+import stars.ahc.plugins.map.AbstractMapLayer;
 import stars.ahc.plugins.map.MapConfig;
 import stars.ahc.plugins.map.MapDisplayError;
-import stars.ahcgui.pluginmanager.MapLayer;
 
 /**
  * @author Steve
  *
  */
-public class PlanetLayer implements MapLayer
+public class PlanetLayer extends AbstractMapLayer
 { 
-   private boolean enabled = true;
-   private MapConfig mapConfig = null;
-   private Game game = null;
-      
-   /* (non-Javadoc)
-    * @see stars.ahcgui.map.MapLayer#isEnabled()
-    */
-   public boolean isEnabled()
-   {
-      return enabled;
-   }
-
    /* (non-Javadoc)
     * @see stars.ahcgui.map.MapLayer#getDescription()
     */
@@ -60,13 +48,20 @@ public class PlanetLayer implements MapLayer
     */
    public void draw(Graphics2D g)
    {
-      g.setColor( Color.WHITE );
-      
       for (int n = 1; n <= game.getPlanetCount(); n++)
       {
          Planet planet = game.getPlanet(n);
          
          Point screenPos = mapConfig.mapToScreen( planet.getPosition() );
+         
+         if (planet.isUnoccupied())
+         {
+            g.setColor( Color.WHITE );
+         }
+         else
+         {
+            g.setColor( game.getPlayerColor( planet.getOwner() ) );
+         }
          
          g.fillOval( screenPos.x, screenPos.y, 5, 5 );
       }
@@ -84,7 +79,7 @@ public class PlanetLayer implements MapLayer
       {
          try
          {
-            game.loadMapFile();
+            game.loadReports();
          }
          catch (ReportLoaderException e)
          {
@@ -101,22 +96,6 @@ public class PlanetLayer implements MapLayer
    public String getName()
    {      
       return "Planet layer";
-   }
-
-   /* (non-Javadoc)
-    * @see stars.ahcgui.pluginmanager.PlugIn#setEnabled(boolean)
-    */
-   public void setEnabled(boolean enabled)
-   {
-      this.enabled = enabled;
-   }
-
-   /* (non-Javadoc)
-    * @see stars.ahcgui.pluginmanager.MapLayer#isScaled()
-    */
-   public boolean isScaled()
-   {
-      return true;
    }
    
 }

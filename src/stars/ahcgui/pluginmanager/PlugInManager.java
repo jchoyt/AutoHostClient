@@ -68,6 +68,7 @@ public class PlugInManager
 
    private ArrayList directories = new ArrayList();
    private Vector loaders = new Vector();
+   private ArrayList plugins = new ArrayList();
    private ArrayList gamePanelButtons = new ArrayList();
    private ArrayList mapLayers = new ArrayList();
 
@@ -192,15 +193,17 @@ public class PlugInManager
       {
          Class pluginClass = loader.loadClass( className );
 
+         plugins.add( pluginClass );
+         
          PlugIn plugin = (PlugIn)pluginClass.newInstance();
 
          if (plugin instanceof GamePanelButtonPlugin)
          {
-            gamePanelButtons.add( plugin );
+            gamePanelButtons.add( pluginClass );
          }
          else if (plugin instanceof MapLayer)
          {
-            mapLayers.add( plugin );
+            mapLayers.add( pluginClass );
          }
       }
       catch (ClassNotFoundException e)
@@ -217,18 +220,24 @@ public class PlugInManager
       }
    }
 
-   public GamePanelButtonPlugin[] getGamePanelButtons()
+   /**
+    * Returns all the plugin classes of the specified type 
+    */
+   public ArrayList getPlugins( Class pluginType )
    {
-      return (GamePanelButtonPlugin[])gamePanelButtons.toArray( new GamePanelButtonPlugin[0] );
+      ArrayList matchingPlugins = new ArrayList();
+      
+      for (int n = 0; n < plugins.size(); n++)
+      {
+         Class pluginClass = (Class)plugins.get(n);
+         
+         if (pluginType.isAssignableFrom(pluginClass))
+         {
+            matchingPlugins.add( pluginClass );
+         }
+      }
+      
+      return matchingPlugins;
    }
-
-   public void addGamePanelButton( GamePanelButtonPlugin button )
-   {
-      gamePanelButtons.add( button );
-   }
-
-   public MapLayer[] getMapLayers()
-   {
-      return (MapLayer[])mapLayers.toArray( new MapLayer[0] );
-   }
+   
 }
