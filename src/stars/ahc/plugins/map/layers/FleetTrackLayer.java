@@ -44,8 +44,10 @@ public class FleetTrackLayer extends AbstractMapLayer
    private JComponent controls = null;
    private String selectedRace = null;
    private String selectedFleet = null;
+   private String selectedType = null;
    private JComboBox raceList;
    private JComboBox fleetList;
+   private JComboBox typeList;
    
    /* (non-Javadoc)
     * @see stars.ahcgui.pluginmanager.PlugIn#getDescription()
@@ -66,7 +68,7 @@ public class FleetTrackLayer extends AbstractMapLayer
       {
          Fleet fleet = game.getFleet( mapConfig.year, n );
 
-         if (raceTest(fleet) && fleetTest(fleet))
+         if (raceTest(fleet) && typeTest(fleet) && fleetTest(fleet))
          {
 	         g.setColor( game.getRaceColor( fleet.getOwner() ) );
 	         
@@ -92,6 +94,47 @@ public class FleetTrackLayer extends AbstractMapLayer
    private boolean raceTest( Fleet fleet )
    {
       return (selectedRace == null) || (selectedRace.equals(fleet.getOwner()));
+   }
+
+   private boolean typeTest( Fleet fleet )
+   {
+      if (selectedType == null)
+      {
+         return true;
+      }
+      
+      int fieldNum = getFleetTypeField();
+      
+      int shipCount = fleet.getIntValue( fieldNum, 0 );
+      
+      return (shipCount > 0);
+   }
+   
+   private int getFleetTypeField()
+   {
+      int fieldNum = 0;
+      
+      if (selectedType.equals("Scout"))
+      {
+         fieldNum = Fleet.SCOUT;
+      }
+      else if (selectedType.equals("Warship"))
+      {
+         fieldNum = Fleet.WARSHIP;
+      }
+      else if (selectedType.equals("Bomber"))
+      {
+         fieldNum = Fleet.BOMBER;
+      }
+      else if (selectedType.equals("Utility"))
+      {
+         fieldNum = Fleet.UTILITY;
+      }
+      else if (selectedType.equals("Unarmed"))
+      {
+         fieldNum = Fleet.UNARMED;
+      }
+      return fieldNum;
    }
 
    private boolean fleetTest( Fleet fleet )
@@ -151,6 +194,13 @@ public class FleetTrackLayer extends AbstractMapLayer
          
          controls.add( raceList );
         
+         String[] shipTypes = {"All types","Scout","Warship","Bomber","Utility","Unarmed"}; 
+         typeList = new JComboBox(shipTypes);
+         typeList.setSelectedIndex(0);
+         typeList.addActionListener( defaultActionListener );
+         
+         controls.add( typeList );
+         
          String[] fleets = new String[1];
          fleets[0] = "All fleets";
          fleetList = new JComboBox( fleets );
@@ -176,6 +226,20 @@ public class FleetTrackLayer extends AbstractMapLayer
          selectedRace = null;
       }
       
+      if (typeList.getSelectedItem() == null)
+      {
+         selectedType = null;
+      }
+      else
+      {
+         selectedType = typeList.getSelectedItem().toString();
+         
+         if (selectedType.startsWith("All"))
+         {
+            selectedType = null;
+         }
+      }
+      
       if (fleetList.getSelectedItem() == null)
       {
          selectedFleet = null;
@@ -193,7 +257,7 @@ public class FleetTrackLayer extends AbstractMapLayer
    
    private void updateControls( JComponent originator )
    {
-      if (originator == raceList)
+      if ((originator == raceList) || (originator == typeList))
       {
          rebuildFleetList();
       }
@@ -206,14 +270,7 @@ public class FleetTrackLayer extends AbstractMapLayer
    {
       fleetList.removeAllItems();
       
-      if (selectedRace == null)
-      {
-         fleetList.addItem( "All fleets" );
-      }
-      else
-      {
-         fleetList.addItem( "All fleets for " + selectedRace );
-      }
+      fleetList.addItem( "All fleets" );
       
       int fleetCount = game.getFleetCount( mapConfig.year );
       
@@ -221,7 +278,7 @@ public class FleetTrackLayer extends AbstractMapLayer
       {
          Fleet fleet = game.getFleet( mapConfig.year, n );
          
-         if (raceTest(fleet))
+         if (raceTest(fleet) && typeTest(fleet))
          {
             fleetList.addItem( fleet.getName() );
          }

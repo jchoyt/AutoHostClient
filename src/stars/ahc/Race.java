@@ -116,6 +116,7 @@ public class Race
     */
    public void setProperties(Properties props)
    {
+      if (Utils.empty(raceName)) return;	// don't save properties for empty race
        props.setProperty( propertiesBase() + ".color", Utils.getColorStr(color) );
    }
 

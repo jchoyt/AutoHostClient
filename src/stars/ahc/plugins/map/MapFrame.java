@@ -342,7 +342,10 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       layerTable.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
          public void valueChanged(ListSelectionEvent event)
          {
-            layerSelected();
+            if (event.getValueIsAdjusting() == false)
+            {
+               layerSelected();
+            }
          }
        });
       
