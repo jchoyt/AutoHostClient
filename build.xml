@@ -59,6 +59,10 @@
       <fileset dir="." includes="objedit.ahcplugin"/>
       <fileset dir="${build}" includes="**/plugins/objedit/**" />
     </jar>
+    <jar jarfile="plugins/raceassist.jar" description="rebuild the race design assistant plugin jarfile">
+      <fileset dir="plugin-descriptors" includes="raceassistant.ahcplugin"/>
+      <fileset dir="${build}" includes="**/plugins/utilities/racedesign/**" />
+    </jar>
   </target>
 
   <target name="test" depends="compile">

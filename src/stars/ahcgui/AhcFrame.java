@@ -35,6 +35,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -58,6 +59,7 @@ import stars.ahc.GamesProperties;
 import stars.ahc.Log;
 import stars.ahc.NotificationListener;
 import stars.ahcgui.pluginmanager.BasePlugIn;
+import stars.ahcgui.pluginmanager.GlobalUtilityPlugin;
 import stars.ahcgui.pluginmanager.PlugIn;
 import stars.ahcgui.pluginmanager.PlugInManager;
 import stars.ahcgui.pluginmanager.PluginLoadError;
@@ -80,6 +82,9 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
     HashMap optionPanes = new HashMap();
     Timer timer = new Timer( true );
     private JPanel toolbar;
+   private ArrayList globalUtilities = new ArrayList();
+   private JComboBox utilitySelector;
+   private JPanel utilityPanel;
 
 
     /**
@@ -294,7 +299,9 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab( "Games", addGamesTab() );
         tabbedPane.addTab( "Options", addOptionTab() );
+        tabbedPane.addTab( "Utilities", addUtilitiesTab() );
         tabbedPane.addTab( "Log", addLogTab() );
+        
         if ( GamesProperties.getGames().length == 0 )
         {
             OptionPanelFactory.addNewGame();
@@ -551,6 +558,69 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
             int index = toolbar.getComponentCount();
             toolbar.add( hideButton, index - 1 );
         }
+    }
+    
+    /**
+     * Create a tab panel for hosting any global utility plugins 
+     */
+    public JPanel addUtilitiesTab()
+    {
+       JPanel panel = new JPanel( new BorderLayout() );
+       
+       Box controls = Box.createHorizontalBox();
+       controls.setBorder( BorderFactory.createCompoundBorder( 
+             BorderFactory.createEtchedBorder(),
+             BorderFactory.createEmptyBorder(2,2,2,2)
+             ) );
+       
+       Vector utilityNames = new Vector();
+       utilityNames.add( "Select utility..." );
+       ArrayList utilityClasses = PlugInManager.getPluginManager().getPlugins( GlobalUtilityPlugin.class );
+       
+       for (int n = 0; n < utilityClasses.size(); n++)
+       {
+          GlobalUtilityPlugin util = (GlobalUtilityPlugin)PlugInManager.getPluginManager().newInstance( (Class)utilityClasses.get(n) );
+          globalUtilities.add( util );          
+          utilityNames.add( util.getDescription() );
+       }
+       
+       utilitySelector = new JComboBox( utilityNames );
+       
+       utilitySelector.addActionListener( new ActionListener() {
+         public void actionPerformed(ActionEvent event)
+         {
+            showSelectedUtility();
+         }
+       });
+       
+       controls.add( utilitySelector );
+       
+       controls.add( Box.createHorizontalGlue() );
+       
+       panel.add( controls, BorderLayout.NORTH );
+       
+       utilityPanel = new JPanel();
+       panel.add( utilityPanel, BorderLayout.CENTER );
+       
+       return panel;
+    }
+
+    /**
+     * Shows the global utility that has been selected in the utility selector combo box 
+     */
+    public void showSelectedUtility()
+    {
+       int index = utilitySelector.getSelectedIndex();
+       
+       utilityPanel.removeAll();
+
+       if (index > 0)
+       {
+          GlobalUtilityPlugin utility = (GlobalUtilityPlugin)globalUtilities.get(index-1);
+          utilityPanel.add( utility.getComponent() );
+       }
+       
+       utilityPanel.revalidate();
     }
 }
 

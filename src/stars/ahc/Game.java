@@ -1213,5 +1213,10 @@ public class Game extends Object
    {
       notifyUpdateListeners( updatedObject, null, null, null );
    }
+   
+   public Properties getUserDefinedProperties()
+   {
+      return userDefinedProperties;
+   }
 }
 

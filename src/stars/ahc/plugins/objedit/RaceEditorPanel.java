@@ -32,7 +32,6 @@ import java.util.Vector;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -49,6 +48,7 @@ import stars.ahc.NotificationListener;
 import stars.ahc.Race;
 import stars.ahc.ReportLoaderException;
 import stars.ahc.Utils;
+import stars.ahcgui.HabEditor;
 
 /**
  * Panel for editing race details
@@ -387,55 +387,3 @@ public class RaceEditorPanel extends JPanel implements ObjectEditorTab, ListSele
    }   
 }
 
-class HabEditor extends JPanel
-{
-   public JCheckBox immuneField;
-   public JTextField minField;
-   public JTextField maxField;
-
-   public HabEditor()
-   {
-      setLayout( new BoxLayout(this,BoxLayout.X_AXIS) );
-      
-      immuneField = new JCheckBox("Immune");
-      add( immuneField );
-      
-      minField = new JTextField(5);
-      add( minField );
-      
-      add( new JLabel( " to ") );
-      
-      maxField = new JTextField(5);
-      add( maxField );
-   }
-   
-   public String getMinText()
-   {
-      return minField.getText();
-   }
-   
-   public String getMaxText()
-   {
-      return maxField.getText();
-   }
-   
-   public boolean getImmune()
-   {
-      return immuneField.isSelected();
-   }
-   
-   public void setImmune( boolean isImmune )
-   {
-      immuneField.setSelected( isImmune );
-   }
-   
-   public void setMinText( String text )
-   {
-      minField.setText( text );
-   }
-   
-   public void setMaxText( String text )
-   {
-      maxField.setText( text );
-   }
-}
