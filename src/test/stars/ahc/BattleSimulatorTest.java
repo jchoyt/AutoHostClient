@@ -21,6 +21,7 @@ import stars.ahc.ShipDesign;
 import stars.ahc.Weapon;
 import stars.ahc.plugins.battlesim.BattleSimulation;
 import stars.ahc.plugins.battlesim.OneOnOneBattle;
+import stars.ahc.plugins.battlesim.StatusListener;
 import junit.framework.TestCase;
 
 /**
@@ -71,13 +72,13 @@ public class BattleSimulatorTest extends TestCase
       
       BattleSimulation battle = new OneOnOneBattle( design1, 10, design2, 14 );
       
-      battle.setVerbose(true);
-      
-      while (battle.stillFighting())
-      {
-         battle.simulateNextRound();
-      }
-      
-      battle.debugShowStacks();
+      battle.addStatusListener( new StatusListener() {
+         public void battleStatusUpdate(int round, String message)
+         {
+            System.out.println( "Round " + round + " : " + message );
+         }
+      });
+
+      battle.simulate();
    }
 }

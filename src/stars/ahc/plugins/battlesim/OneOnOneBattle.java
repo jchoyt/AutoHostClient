@@ -88,7 +88,7 @@ public class OneOnOneBattle extends BattleSimulation
                stacks[n].shields = originalShields;
             }
             
-            debug( stacks[n].toString() + " shields regenerate from " + beforeRegen + " to " + stacks[n].shields + " dp" );            
+            statusUpdate( stacks[n].toString() + " shields regenerate from " + beforeRegen + " to " + stacks[n].shields + " dp" );            
          }
       }
    }
@@ -164,7 +164,7 @@ public class OneOnOneBattle extends BattleSimulation
          me.xpos++;
       }            
       
-      debug( stacks[index].toString() + " moves to " + me.xpos + "," + me.ypos + " (range " + distanceBetween(me,you) + ")");      
+      statusUpdate( stacks[index].toString() + " moves to " + me.xpos + "," + me.ypos + " (range " + distanceBetween(me,you) + ")");      
    }
    
    private int distanceBetween( ShipStack stack1, ShipStack stack2 )
@@ -288,7 +288,9 @@ public class OneOnOneBattle extends BattleSimulation
          target.damage = damagePerShip * target.shipCount + damageRemainder;
       }
       
-      debug( stack.toString() + " fires " + stack.design.getWeaponName(slot) + " [" + (slot+1) + "] doing "
-            + shieldDamage + " damage to shields and " + armourDamage + " to armour (" + kills + " kills)" );      
+      String status = stack.toString() + " fires " + stack.design.getWeaponName(slot) 
+      				+ " [" + (slot+1) + "] doing " + shieldDamage + " damage to shields and " 
+      				+ armourDamage + " to armour (" + kills + " kills)";
+      statusUpdate( status );
    }
 }

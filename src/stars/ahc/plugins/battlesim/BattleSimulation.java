@@ -18,6 +18,8 @@
  */
 package stars.ahc.plugins.battlesim;
 
+import java.util.ArrayList;
+
 /**
  * @author Steve Leach
  */
@@ -29,6 +31,7 @@ public abstract class BattleSimulation
    protected int stackCount = 0;
    public static final int MAX_ROUNDS = 16;
    public static final int MAX_INITIATIVE = 40;
+   private ArrayList statusListers = new ArrayList();
 
    // From the Stars! help file - may be slightly inaccurate
    protected static int[][] movement = {
@@ -55,15 +58,20 @@ public abstract class BattleSimulation
       {
          simulateNextRound();
       }
+      
+      showStacks();
+   }
+   
+   public void showStacks()
+   {
+      for (int n = 0; n < stackCount; n++)
+      {
+         statusUpdate( stacks[n].toString() );
+      }
    }
    
    public abstract void simulateNextRound();
    
-   protected void debug(String message)
-   {
-      System.out.println( round + " : " + message );
-   }
-
    public void setVerbose(boolean verbose)
    {
       this.verbose = verbose;
@@ -94,12 +102,18 @@ public abstract class BattleSimulation
       
       return 1.0 - n;
    }
-
-   public void debugShowStacks()
+   
+   public void addStatusListener( StatusListener listener )
    {
-      for (int n = 0; n < stackCount; n++)
+      statusListers.add( listener );
+   }
+  
+   public void statusUpdate( String msg )
+   {
+      for (int n = 0; n < statusListers.size(); n++)
       {
-         debug( stacks[n].toString() );
+         StatusListener listener = (StatusListener)statusListers.get(n);
+         listener.battleStatusUpdate( round, msg );
       }
    }
 }
