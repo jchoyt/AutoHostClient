@@ -51,7 +51,7 @@ import stars.ahc.Utils;
  * @author Steve Leach
  *
  */
-public class PlanetEditorPanel extends JPanel implements ListSelectionListener, ActionListener, KeyListener
+public class PlanetEditorPanel extends JPanel implements ObjectEditorTab, ListSelectionListener, ActionListener, KeyListener
 {
    private Game game;
    private JList planetList;
@@ -65,6 +65,18 @@ public class PlanetEditorPanel extends JPanel implements ListSelectionListener, 
    private Map fieldPropertyMap = new HashMap();
    
    public PlanetEditorPanel( Game game )
+   {
+      initialize( game );
+   }
+   
+   public PlanetEditorPanel()
+   {
+   }
+   
+   /* (non-Javadoc)
+    * @see stars.ahc.plugins.objedit.ObjectEditorTab#initialize(stars.ahc.Game)
+    */
+   public void initialize(Game game)
    {
       this.game = game;
       
@@ -328,4 +340,5 @@ public class PlanetEditorPanel extends JPanel implements ListSelectionListener, 
       modified = newValue;
       saveButton.setEnabled( modified );
    }
+
 }

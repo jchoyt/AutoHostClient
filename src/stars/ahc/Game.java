@@ -96,7 +96,7 @@ public class Game extends Object
 
     private void initController()
    {
-      if ( sahHosted.equals( "true" ) )
+      if ( (sahHosted != null) && sahHosted.equals( "true" ) )
         {
             Log.log( Log.DEBUG, this, name + ": SahHosted game" );
             controller = new AutoHostGameController( this );

@@ -7,8 +7,8 @@ package stars.ahc.plugins.objedit;
 
 import java.util.HashMap;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import stars.ahc.Game;
@@ -22,6 +22,7 @@ public class GameObjectEditor extends JFrame
 {
    protected Game game;
    private static HashMap editors = new HashMap();
+   private JTabbedPane tabsPane;
 
    /**
     */
@@ -60,13 +61,36 @@ public class GameObjectEditor extends JFrame
       
       AhcFrame.setWindowIcon(this);
       
-      JTabbedPane tabsPane = new JTabbedPane();
-      
-      tabsPane.addTab( "Planets", new PlanetEditorPanel(game) );
-      tabsPane.addTab( "Fleets", new JPanel() );
-      tabsPane.addTab( "Races", new RaceEditorPanel(game) );
-      tabsPane.addTab( "Designs", new ShipDesignEditorPanel(game) );
+      tabsPane = new JTabbedPane();
+
+      addTabPane( "Planets", "stars.ahc.plugins.objedit.PlanetEditorPanel" );
+      addTabPane( "Races", "stars.ahc.plugins.objedit.RaceEditorPanel" );
+      addTabPane( "Designs", "stars.ahc.plugins.objedit.ShipDesignEditorPanel" );
       
       getContentPane().add( tabsPane );
    }
+
+   /**
+    * Adds a new tab pane to the editor window
+    * <p>
+    * If errors are thrown when creating a tab it is caught safely
+    */
+   private void addTabPane(String title, String editorClassName)
+   {
+      try
+      {
+         Class editorClass = this.getClass().getClassLoader().loadClass(editorClassName);
+         
+         ObjectEditorTab tab = (ObjectEditorTab)editorClass.newInstance();
+         
+         tab.initialize( game );
+         
+         tabsPane.add( title, (JComponent)tab );
+      }
+      catch (Throwable t)
+      {
+         t.printStackTrace();
+      }
+   }
+
 }

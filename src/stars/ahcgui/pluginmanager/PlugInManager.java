@@ -103,6 +103,8 @@ public class PlugInManager
     * List of all the specific instances of each plugin that have been created
     */
    private ArrayList instances = new ArrayList();
+
+   private static URLClassLoader loader;
    
    /**
     * Registers a new plugin directory
@@ -445,8 +447,13 @@ public class PlugInManager
    
       URL[] urls = (URL[])urlList.toArray( new URL[0] );
    
-      URLClassLoader loader = new URLClassLoader( urls );
+      loader = new URLClassLoader( urls );
    
       Thread.currentThread().setContextClassLoader( loader );
+   }
+   
+   public static ClassLoader getPluginClassLoader()
+   {
+      return loader;
    }
 }

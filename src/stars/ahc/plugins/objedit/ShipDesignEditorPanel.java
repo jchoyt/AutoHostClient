@@ -59,7 +59,7 @@ import stars.ahc.plugins.battlesim.BattleSimulator;
  * @author Steve Leach
  *
  */
-public class ShipDesignEditorPanel extends JPanel
+public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
 {
    private Game game;
    private Vector designNames;
@@ -80,16 +80,20 @@ public class ShipDesignEditorPanel extends JPanel
 
    public ShipDesignEditorPanel( Game game )
    {
-      this.game = game;
-      
-      init();
+      initialize( game );
    }
 
+   public ShipDesignEditorPanel()
+   {      
+   }
+   
    /**
     * 
     */
-   private void init()
+   public void initialize( Game game )   
    {
+      this.game = game;
+      
       setLayout( new BorderLayout() );
       
       add( createToolbar(), BorderLayout.NORTH ); 

@@ -55,7 +55,7 @@ import stars.ahc.Utils;
  * 
  * @author Steve Leach
  */
-public class RaceEditorPanel extends JPanel implements ListSelectionListener, ActionListener, NotificationListener
+public class RaceEditorPanel extends JPanel implements ObjectEditorTab, ListSelectionListener, ActionListener, NotificationListener
 {
    private Game game;
    private JList raceList;
@@ -70,6 +70,16 @@ public class RaceEditorPanel extends JPanel implements ListSelectionListener, Ac
    private HabEditor radEditor;
 
    public RaceEditorPanel( Game game )
+   {
+      initialize( game );
+   }
+   
+   public RaceEditorPanel()
+   {
+      
+   }
+   
+   public void initialize( Game game )
    {
       this.game = game;
       
