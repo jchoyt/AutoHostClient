@@ -809,10 +809,14 @@ public class Game extends Object
       return actionRequired;
    }
    
-   public void loadUserDefinedProperties()
+   private File getUserDefinedPropertiesFile()
    {
-      String userPropertiesFileName = directory + File.separator + name + ".userprops";
-      File userPropertiesFile = new File(userPropertiesFileName);
+      return new File(directory + File.separator + name + ".userprops");
+   }
+   
+   void loadUserDefinedProperties()
+   {
+      File userPropertiesFile = getUserDefinedPropertiesFile();
 
       if (userPropertiesFile.exists())
       {
@@ -838,12 +842,12 @@ public class Game extends Object
 
    /**
     */
-   public String getUserDefinedProperty(String propertyName)
+   String getUserDefinedProperty(String propertyName)
    {
       return userDefinedProperties.getProperty( propertyName );
    }
 
-   public void setUserDefinedProperty( String propertyName, String value )
+   void setUserDefinedProperty( String propertyName, String value )
    {
       userDefinedProperties.setProperty( propertyName, value );
    }
@@ -853,8 +857,7 @@ public class Game extends Object
     */
    public void saveUserDefinedProperties()
    {
-      String userPropertiesFileName = directory + File.separator + name + ".userprops";
-      File userPropertiesFile = new File(userPropertiesFileName);
+      File userPropertiesFile = getUserDefinedPropertiesFile();
       
       try
       {

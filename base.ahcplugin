@@ -1,1 +1,2 @@
 plugin=stars.ahc.plugins.base.TrayIconManager
+plugin=stars.ahc.plugins.objedit.ObjectEditorButton

@@ -215,7 +215,6 @@ public class PlugInManager
    }
 
    /**
-    * @throws MalformedURLException
     */
    private void processPlugIn(File pluginFile, String className, URLClassLoader loader) throws PluginLoadError
    {
