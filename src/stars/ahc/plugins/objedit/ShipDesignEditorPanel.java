@@ -152,7 +152,19 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       
       toolbar.add( new JButton(saveAction) );
       
-      toolbar.add( Box.createHorizontalGlue() );
+      Action deleteAction = new AbstractAction("Delete") 
+	  {
+        public void actionPerformed(ActionEvent event)
+        {
+        	removedesign();
+        }
+      };
+
+      toolbar.add( Box.createHorizontalStrut(2) );
+     
+      toolbar.add( new JButton(deleteAction) );
+	  
+	  toolbar.add( Box.createHorizontalGlue() );
       
       return toolbar;
    }
@@ -347,7 +359,7 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
    {
       Box weaponsBox = Box.createVerticalBox();
       
-      weaponsBox.setBorder( BorderFactory.createTitledBorder("Weapons") );
+      weaponsBox.setBorder( BorderFactory.createTitledBorder("Weapon Slots") );
 
       weaponsTable = new JTable( new WeaponsTableModel(this) );
       weaponsTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
@@ -473,11 +485,43 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       weaponsTable.repaint();
    }
    
+   /**
+    * @author Bryan Wiegand
+    */
+   void removedesign()
+	{
+   		if (getCurrentDesign(true) == null)
+   		{
+   			JOptionPane.showMessageDialog(this, "You Must Select a Design!");
+   		}	
+   		else
+   		{	
+   			game.removeShipDesign( getCurrentDesign( false ) );
+   			game.saveUserDefinedProperties();
+   			refreshList();
+   			refreshFields();
+   		}
+	}
+   
    void saveChanges()
    {
       int index = designsList.getSelectedIndex();
-      
+      /* designsList is the list in the GUI of designs
+       * getselectedIndex ?returns information about selected index?
+       * where index is the selected design
+       */
       ShipDesign design = game.getShipDesign( index );
+      
+      /*
+       * ShipDesign is a Class
+       * Design is a var of type ShipDesign
+       * Game is the Game being edited
+       * GetShipDesign returns desgn parameters of ship in ()
+       * index is the ship selected in the list
+       * 
+       * Therefore the above line saves the currently selected design into the Var design
+       * 
+       */
 
       design.setName( nameField.getText().trim() );
       design.setOwner( ownerField.getText().trim() );
@@ -497,9 +541,34 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       int nexus = Utils.safeParseInt(nexusField.getText());      
       design.setComputers( bc, bsc, nexus );
       
+      /* 
+       * The above lines save the various design specs into memory
+       * 
+       * design (What to perform action upon
+       * setName (What to do; here SetsThe Ship Name into this designs specs)
+       * design.setName( What name to set)
+       * nameField (Calls the nameField object)
+       * getText (Returns the Text in the NameField Object)
+       **** What is TRIM?
+       *
+       *The next few line have other call that perform other actions 
+       *to the values before they are input into thier respective design.x vars
+       *
+       */
+      
+      
+      
       game.saveUserDefinedProperties();
       
+      /* This calls the Game Class and tells it to run the function that saves
+       * the user props to file of the game selected in the <game> var.
+       */
+      
       refreshList();
+      /* refreshes the screen and all its feilds ** I wiil need this for the delete function)
+       * 
+       */
+      
    }
    
    /**
@@ -507,7 +576,7 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
     * <p>
     * If allowNull is false and there is no current design then a new empty design is returned.  
     */
-   public ShipDesign getCurrentDesign( boolean allowNull )
+   public ShipDesign getCurrentDesign( boolean allowNull)
    {
       ShipDesign design;
       

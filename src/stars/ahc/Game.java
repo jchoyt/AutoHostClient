@@ -918,14 +918,43 @@ public class Game extends Object
     public void saveUserDefinedProperties()
     {
         getShipDesignProperties( userDefinedProperties );
+        
+        /* Not sure yet
+         * Theory-- Causes the ShipDesigns to be saved into the userdefs...
+         * 
+         */
 
         File userPropertiesFile = getUserDefinedPropertiesFile();
+        
+        /* the var userPropertiesFile to the File type
+         * This will contain the file name the data will be put in
+         * 
+         *getUserDefinedPropertiesFile() function determines the file
+         *name that the game settings will be saved in.
+         *
+         *Therefore
+         *
+         *File <Var> "userProp..." = <value> (Function called -- "getUser...")
+         *
+         *This <Var> will be used for the FSObject
+         */
 
         try
         {
             FileOutputStream s = new FileOutputStream( userPropertiesFile );
+            
+            /* Opens a stream to the file
+             * 
+             */
 
             userDefinedProperties.store( s, "User defined properties for " + name );
+            
+            /* Stores all Settings into the file from the <var> userDefinedProperties
+             * The First line will be User defined properties for " + name 
+             * 's' is the Stream to Use
+             * store must be a FSO causing the data in the userDef... <var> to be saved in 's'
+             * 
+             */
         }
         catch ( FileNotFoundException e )
         {
@@ -1212,6 +1241,15 @@ public class Game extends Object
    public void notifyUpdateListeners( Object updatedObject )
    {
       notifyUpdateListeners( updatedObject, null, null, null );
+   }
+
+
+/**
+ * @param currentDesign
+ */
+   public void removeShipDesign(ShipDesign Design) 
+   {
+   	shipDesigns.removeShipDesign(Design);
    }
    
    public Properties getUserDefinedProperties()

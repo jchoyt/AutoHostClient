@@ -53,4 +53,12 @@ public class ShipDesignList
       if ((index >= designs.size()) || (index < 0)) return null;
       return (ShipDesign)designs.get(index);
    }
+
+/**
+ * @param design
+ */
+   public void removeShipDesign(ShipDesign design) 
+	{
+   	designs.remove ( design );
+	}
 }

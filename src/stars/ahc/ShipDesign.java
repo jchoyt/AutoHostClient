@@ -29,6 +29,10 @@ import java.util.Properties;
  */
 public class ShipDesign
 {
+	/* 
+	 * This is the function of the entire file shipdesign.java
+	 * Below are set the constants and variables to be used for the Function
+	 */
    public static final int HULLTYPE_UNKNOWN = 0;
    public static final int HULLTYPE_SCOUT = 1;
    public static final int HULLTYPE_FRIGATE = 2;
@@ -42,8 +46,10 @@ public class ShipDesign
    public static final int BATTLE_COMPUTER = 101;
    public static final int SUPER_COMPUTER = 102;
    public static final int BATTLE_NEXUS = 103;
+
+   private static final int MAX_WEAPON_SLOTS = 12;
    
-   private static final int[] hullWeaponSlots = { 1, 1, 3, 3, 6, 9, 20, 0, 0 };
+   private static final int[] hullWeaponSlots = { 1, 1, 3, 3, 6, 9, 20, 0, 12 };
    
    private int hullType = HULLTYPE_UNKNOWN;
    private String name = "";
@@ -56,7 +62,6 @@ public class ShipDesign
    private int cloak = 0;
    private int scan = 0;
    private int penscan = 0;
-   private int weaponsSlots = 0;
    private int weaponSlotsUsed = 0;
    private int[] weaponCount;
    private int[] weaponPower;
@@ -78,32 +83,29 @@ public class ShipDesign
    
    public ShipDesign( int hullType, String name )
    {
+   
       this.hullType = hullType;
       this.name = name;
       
       setupWeaponSlots();
    }
    
-   /**
-    * 
-    */
+
    public ShipDesign()
    {
    }
 
    private void setupWeaponSlots()
    {
-      weaponsSlots = hullWeaponSlots[ hullType ];
-      
-      if ((weaponCount == null) || (weaponCount.length != weaponsSlots))
+      if ((weaponCount == null) || (weaponCount.length != MAX_WEAPON_SLOTS))
       {
-	      weaponCount = new int[weaponsSlots];
-	      weaponPower = new int[weaponsSlots];
-	      weaponRange = new int[weaponsSlots];
-	      weaponCategory = new int[weaponsSlots];
-	      weaponAccuracy = new int[weaponsSlots];
-	      weaponInitiative = new int[weaponsSlots];
-	      weaponName = new String[weaponsSlots];
+	      weaponCount = new int[MAX_WEAPON_SLOTS];
+	      weaponPower = new int[MAX_WEAPON_SLOTS];
+	      weaponRange = new int[MAX_WEAPON_SLOTS];
+	      weaponCategory = new int[MAX_WEAPON_SLOTS];
+	      weaponAccuracy = new int[MAX_WEAPON_SLOTS];
+	      weaponInitiative = new int[MAX_WEAPON_SLOTS];
+	      weaponName = new String[MAX_WEAPON_SLOTS];
       }
    }
    
