@@ -465,5 +465,12 @@ public class Utils
       }
    }
    
+   /**
+    * Gets a floating point number from the start of the string 
+    */
+   public static double getLeadingFloat( String text, double defaultValue )
+   {
+      return safeParseFloat( text, defaultValue );
+   }
 }
 

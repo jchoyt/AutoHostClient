@@ -246,4 +246,54 @@ public class Planet implements MapObject
    {
       return getValue( PLANET_BASE );
    }
+
+   /**
+    * Returns true if the planet's base hab values are known
+    */
+   public boolean habValuesKnown()
+   {
+      return Utils.empty( getValue( PLANET_GRAV_BASE ) ) == false;
+   }
+
+   /**
+    * Returns -1 if the value is not known
+    */
+   public int getBaseGravClicks()
+   {
+      String baseGravStr = getValue( PLANET_GRAV_BASE );
+      
+      if (baseGravStr == null)
+      {
+         return -1;
+      }
+
+      double baseGrav = Utils.getLeadingFloat(baseGravStr,0);
+      return HabCalculator.gravToClicks( baseGrav );
+   }
+
+   public int getBaseTempClicks()
+   {
+      String baseTempStr = getValue( PLANET_TEMP_BASE );
+      
+      if (baseTempStr == null)
+      {
+         return -1;
+      }
+
+      int baseTemp = Utils.safeParseInt(baseTempStr,0);
+      return HabCalculator.tempToClicks( baseTemp );
+   }
+
+   public int getBaseRadClicks()
+   {
+      String baseRadStr = getValue( PLANET_RAD_BASE );
+      
+      if (baseRadStr == null)
+      {
+         return -1;
+      }
+
+      int baseRad = Utils.safeParseInt(baseRadStr,0);
+      return HabCalculator.radToClicks( baseRad );
+   }
 }

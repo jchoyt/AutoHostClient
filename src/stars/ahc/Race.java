@@ -31,11 +31,19 @@ import java.util.Random;
  */
 public class Race
 {
+   private Game game;
    private String playerName = null;
    private Color color = null;
    private String raceName = null;
    private String racePlural = null;
-   private Game game;
+   private String prt = "";
+   private String lrts = "";
+   private int grav_min_clicks = 0;
+   private int grav_max_clicks = 0;
+   private int temp_min_clicks = 0;
+   private int temp_max_clicks = 0;
+   private int rad_min_clicks = 0;
+   private int rad_max_clicks = 0;
    
    public Race( Game game )
    {
@@ -159,5 +167,89 @@ public class Race
    public void save()
    {
       GamesProperties.writeProperties();
+   }
+
+   /**
+    * Returns true if the hab range values for the race are known
+    */
+   public boolean habRangeKnown()
+   {
+      return true; // TODO: implement
+   }
+   
+   public void setGravRange( double min, double max )
+   {
+      grav_min_clicks = HabCalculator.gravToClicks( min );
+      grav_max_clicks = HabCalculator.gravToClicks( max );
+   }
+   
+   public int getMinGravClicks()
+   {
+      return grav_min_clicks;
+   }
+
+   public int getMaxGravClicks()
+   {
+      return grav_max_clicks;
+   }
+   
+   public void setTempRange( int min, int max )
+   {
+      temp_min_clicks = HabCalculator.tempToClicks(min);
+      temp_max_clicks = HabCalculator.tempToClicks(max);
+   }
+
+   public int getMinTempClicks()
+   {
+      return temp_min_clicks;
+   }
+
+   public int getMaxTempClicks()
+   {
+      return temp_max_clicks;
+   }
+
+   public void setRadRange( int min, int max )
+   {
+      rad_min_clicks = HabCalculator.radToClicks(min);
+      rad_max_clicks = HabCalculator.radToClicks(max);
+   }
+   
+   public int getMinRadClicks()
+   {
+      return rad_min_clicks;
+   }
+
+   public int getMaxRadClicks()
+   {
+      return rad_max_clicks;
+   }
+
+   public boolean gravImmune()
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   public boolean tempImmune()
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   public boolean radImmune()
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   /**
+    * Returns the maximum amount of terraforming that the race can perform.
+    * <p>
+    * This will be 30 for races with the Total Terraforming LRT, and 15 for others
+    */
+   public int getMaxTerraForm()
+   {
+      return (lrts.toUpperCase().indexOf("TT") >= 0) ? 30 : 15;
    }
 }
