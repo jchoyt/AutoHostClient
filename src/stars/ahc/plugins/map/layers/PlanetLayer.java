@@ -87,9 +87,12 @@ public class PlanetLayer extends AbstractMapLayer
          catch (ReportLoaderException e)
          {
             throw new MapDisplayError( "Error loading map file", e );
-         }
+         }      
+      }
       
-         mapConfig.calcUniverseSize( game );
+      if (mapConfig.getUniverseSize() == 0)
+      {
+         mapConfig.calcUniverseSize( game );         
       }
    }
 

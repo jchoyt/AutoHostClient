@@ -92,7 +92,7 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
          repaint();
          return;
       }
-      
+            
       // Cycle through the layers
       for (int n = 0; n < layers.size(); n++)
       {
@@ -130,8 +130,13 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
 
       int mapSize = config.gameMaxX - config.gameMinX;
       
+      // centre in screen
       xform.translate( this.getWidth() / 2, this.getHeight() / 2);
-      xform.scale( config.mapScale, config.mapScale );         
+
+      // apply scale
+      xform.scale( config.mapScale, config.mapScale );
+      
+      // translate
       xform.translate( config.mapXpos - config.gameMinX - mapSize/2, config.mapYpos - config.gameMinY - mapSize / 2 );
       
       return xform;

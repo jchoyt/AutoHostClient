@@ -92,7 +92,11 @@ public class PlanetNamesLayer implements MapLayer, ConfigurablePlugIn
             throw new MapDisplayError( "Error loading map file", e );
          }
       
-         config.calcUniverseSize( game );
+      }
+      
+      if (config.getUniverseSize() == 0)
+      {
+         config.calcUniverseSize( game );         
       }
       
    }

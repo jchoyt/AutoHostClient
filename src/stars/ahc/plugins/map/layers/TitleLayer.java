@@ -65,6 +65,8 @@ public class TitleLayer implements MapLayer
       {
          title = game.getName() + " - " + title;
       }
+
+      g.setFont( new Font("Arial", 0, 12) );
       
       //
       // Draw the background
@@ -73,12 +75,12 @@ public class TitleLayer implements MapLayer
       
       Rectangle2D.Float background = new Rectangle2D.Float();
       
-      int margin = 2;
+      int border = 2;
       
-      background.x = textBounds.x - margin + offset;
-      background.y = textBounds.y - margin + offset;
-      background.height = textBounds.height + margin * 2;
-      background.width = textBounds.width + margin * 2;
+      background.x = offset - border;
+      background.y = offset - textBounds.height;
+      background.height = textBounds.height + border * 2;
+      background.width = textBounds.width + border * 2;
       
       g.setColor( Color.BLACK );
       g.fill( background );
@@ -87,7 +89,6 @@ public class TitleLayer implements MapLayer
       // Draw the text
       //
       g.setColor( Color.WHITE );
-      g.setFont( new Font("Arial", 0, 12) );
       g.drawString( title, offset, offset );      
    }
 

@@ -319,6 +319,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       playerTable.getColumnModel().getColumn(0).setMaxWidth( 20 );
       playerTable.setShowGrid(false);
       playerTable.setSelectionMode( ListSelectionModel.SINGLE_SELECTION  );
+      playerTable.setBackground( controlPanel.getBackground() );
       
       playersPanel.add( playerTable );
       
@@ -336,6 +337,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       layerTable.getColumnModel().getColumn(0).setMaxWidth( 20 );
       layerTable.setShowGrid(false);
       layerTable.setSelectionMode( ListSelectionModel.SINGLE_SELECTION  );
+      layerTable.setBackground( controlPanel.getBackground() );
 
       layerTable.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
          public void valueChanged(ListSelectionEvent event)

@@ -79,11 +79,15 @@ public class FleetThreatReport extends AbstractAnalyzerReport
       
       // Define the report columns (title,width)
       defineColumn( "Threat", 8, PAD_LEFT );
-      defineColumn( "Fleet", 30 );
+      defineColumn( "Fleet", 32 );
+      defineColumn( "Location", 16 );
       defineColumn( "Mass", 8, PAD_LEFT );
       defineColumn( "Bomber", 8, PAD_LEFT );
       defineColumn( "Warship", 8, PAD_LEFT );
       defineColumn( "Scout", 8, PAD_LEFT );
+      defineColumn( "Utility", 8, PAD_LEFT );
+      defineColumn( "Unarmed", 8, PAD_LEFT );
+      defineColumn( "Task", 8, PAD_LEFT );
       
       // Add the header text
       reportText += getHeaderText();
@@ -109,11 +113,13 @@ public class FleetThreatReport extends AbstractAnalyzerReport
           	setColumnValue( "Threat", ""+threat );
             
             setColumnValue( "Fleet", fleet.getName() );
-            
+            setColumnValue( "Location", fleet.getNiceLocation() );            
             setColumnValue( "Mass", fleet.getIntValue(Fleet.MASS,0) );
             setColumnValue( "Warship", fleet.getIntValue(Fleet.WARSHIP,0) );
             setColumnValue( "Bomber", fleet.getIntValue(Fleet.BOMBER,0) );
             setColumnValue( "Scout", fleet.getIntValue(Fleet.SCOUT,0) );
+            setColumnValue( "Utility", fleet.getIntValue(Fleet.UTILITY,0) );
+            setColumnValue( "Unarmed", fleet.getIntValue(Fleet.UNARMED,0) );
          
             // Add the text of the report line to the array we made earlier
             reportLines.add( getReportLine() );
