@@ -6,17 +6,24 @@
 package stars.ahc.plugins.map.layers;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.JRadioButton;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EtchedBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import stars.ahc.Game;
 import stars.ahc.Planet;
@@ -34,9 +41,11 @@ public class PlanetNamesLayer implements MapLayer
    private boolean enabled = true;
    private Game game;
    private MapConfig config;
-   private JPanel controls;
+   private Box controls;
    private JRadioButton occupiedPlanetsButton;
    private JRadioButton allPlanetsButton;
+   private static final int DEFAULT_TEXT_SIZE = 8;
+   private JSpinner textSizeField;
 
    /* (non-Javadoc)
     * @see stars.ahcgui.pluginmanager.PlugIn#isEnabled()
@@ -110,7 +119,9 @@ public class PlanetNamesLayer implements MapLayer
 	         Point screenPos = config.mapToScreen( planet.getPosition() );
 	         
 	         String text = planet.getName();
-	
+
+	         setupFont( g );
+	         
 	         int width = g.getFontMetrics().stringWidth( text );
 	         int height = g.getFontMetrics().getHeight();
 	         
@@ -119,6 +130,20 @@ public class PlanetNamesLayer implements MapLayer
       }
    }
 
+   private void setupFont(Graphics2D g)
+   {
+      int textSize = DEFAULT_TEXT_SIZE;
+      
+      if (controls != null)
+      {
+         textSize = ((Integer)textSizeField.getModel().getValue()).intValue(); 
+      }
+      
+      Font font = new Font( "SansSerif", Font.PLAIN, textSize );
+      
+      g.setFont( font );
+   }
+   
    /* (non-Javadoc)
     * @see stars.ahcgui.pluginmanager.PlugIn#getName()
     */
@@ -139,12 +164,8 @@ public class PlanetNamesLayer implements MapLayer
    {
       if (controls == null)
       {
-         controls = new JPanel();
+         controls = Box.createVerticalBox();
          
-         controls.setLayout( new GridBagLayout() );
-         GridBagConstraints gbc = new GridBagConstraints();
-         gbc.anchor = GridBagConstraints.NORTHWEST;
-
          // Default button action listener just tells the map config to notify it's listeners
          // that something has changed.  This will cause the map to be redrawn, and the 
          // PlanetNamesLayer will use the new control values.
@@ -154,6 +175,9 @@ public class PlanetNamesLayer implements MapLayer
                config.notifyChangeListeners();
             }
          };
+         
+         Box whichPlanetsBox = Box.createVerticalBox();
+         whichPlanetsBox.setBorder( BorderFactory.createEtchedBorder() );
          
          allPlanetsButton = new JRadioButton("All planets");
          allPlanetsButton.addActionListener( defaultListener );
@@ -165,13 +189,34 @@ public class PlanetNamesLayer implements MapLayer
          bgroup.add( allPlanetsButton );
          bgroup.add( occupiedPlanetsButton );
          
-         gbc.gridx = 1;
-         gbc.gridy = 1;         
-         controls.add( allPlanetsButton, gbc );
+         whichPlanetsBox.add( allPlanetsButton );         
+         whichPlanetsBox.add( occupiedPlanetsButton );
+
+         controls.add( whichPlanetsBox );
          
-         gbc.gridx = 1;
-         gbc.gridy += 1;         
-         controls.add( occupiedPlanetsButton, gbc );
+         Box textSizePanel = Box.createHorizontalBox();
+         textSizePanel.setBorder( new EtchedBorder() );
+         textSizePanel.add( new JLabel("Text size:") );
+         
+         SpinnerModel textSizeFieldModel = new SpinnerNumberModel(DEFAULT_TEXT_SIZE,1,40,1);
+         textSizeField = new JSpinner(textSizeFieldModel);
+         
+         // FIXME: for some reason this isn't having any effect
+         textSizeField.setEditor( new JSpinner.NumberEditor(textSizeField,"#0") );
+         
+         textSizeField.getModel().addChangeListener( new ChangeListener() {
+            public void stateChanged(ChangeEvent event)
+            {
+               // Tell the map config to notify all listeners that something has changed.
+               // This will force a map redraw.
+               config.notifyChangeListeners();
+            }
+         } );
+         
+         textSizePanel.add( textSizeField );
+         textSizePanel.add( Box.createHorizontalGlue() );        
+         
+         controls.add( textSizePanel );
          
          allPlanetsButton.setSelected(true);
       }

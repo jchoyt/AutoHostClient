@@ -24,6 +24,16 @@ import java.awt.Point;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
+import javax.swing.Box;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EtchedBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import stars.ahc.Planet;
 import stars.ahc.Utils;
 import stars.ahc.plugins.map.AbstractCachedMapLayer;
@@ -34,7 +44,10 @@ import stars.ahc.plugins.map.AbstractCachedMapLayer;
  */
 public class TerritoryLayer extends AbstractCachedMapLayer
 {
-
+   private final int DEFAULT_SIZE_MULTIPLYER = 100;
+   private Box controls = null;
+   private JSpinner sizeMultiplyerField;
+   
    /* (non-Javadoc)
     * @see stars.ahcgui.pluginmanager.PlugIn#getDescription()
     */
@@ -76,6 +89,8 @@ public class TerritoryLayer extends AbstractCachedMapLayer
       double[] rootPop = new double[planetCount+1];
       Color[] baseColor = new Color[planetCount+1];
       
+      double sizeFactor = getSizeFactor();
+      
       for (int step = 1; step <= stepCount; step++)
       {
          int saturation = 140 - (stepCount-step)*(100/stepCount);
@@ -96,7 +111,7 @@ public class TerritoryLayer extends AbstractCachedMapLayer
                   baseColor[n] = game.getRaceColor( planet.getOwner() );
                }
                 
-               float r = (float)( (stepCount - step) * (200 + rootPop[n]) * 0.0025 );
+               float r = (float)( (stepCount - step) * (200 + rootPop[n]) * sizeFactor );
                
                Ellipse2D ellipse = new Ellipse2D.Float( screenPos[n].x-r, screenPos[n].y-r, r*2+1, r*2+1 );
                   
@@ -111,4 +126,72 @@ public class TerritoryLayer extends AbstractCachedMapLayer
       return img;
    }
    
+   
+   /**
+    * @return
+    */
+   private double getSizeFactor()
+   {
+      int multiplyer = DEFAULT_SIZE_MULTIPLYER;
+      
+      if (controls != null)
+      {
+         multiplyer = ((Integer)sizeMultiplyerField.getModel().getValue()).intValue(); 
+      }
+            
+      return 0.0025 * multiplyer / 100;
+   }
+
+   public JComponent getControls()
+   {
+      if (controls == null)
+      {
+         initControls();
+      }
+      
+      return controls;
+   }
+
+   /**
+    * 
+    */
+   private void initControls()
+   {
+      controls = Box.createVerticalBox();
+
+      Box sizePanel = Box.createHorizontalBox();
+      sizePanel.setBorder( new EtchedBorder() );
+      sizePanel.add( new JLabel("Size:") );
+      
+      SpinnerModel sizeFieldModel = new SpinnerNumberModel(DEFAULT_SIZE_MULTIPLYER,20,400,10);
+      sizeMultiplyerField = new JSpinner(sizeFieldModel);
+      
+      // FIXME: for some reason this isn't having any effect
+      sizeMultiplyerField.setEditor( new JSpinner.NumberEditor(sizeMultiplyerField,"#0") );
+      
+      sizeMultiplyerField.getModel().addChangeListener( new ChangeListener() {
+         public void stateChanged(ChangeEvent event)
+         {
+            // Tell the map config to notify all listeners that something has changed.
+            // This will force a map redraw.
+            mapConfig.notifyChangeListeners();
+         }
+      } );
+      
+      sizeMultiplyerField.getModel().addChangeListener( new ChangeListener() {
+         public void stateChanged(ChangeEvent event)
+         {
+            // Tell the map config to notify all listeners that something has changed.
+            // This will force a map redraw.
+            invalidateCurrentCache();
+            mapConfig.notifyChangeListeners();
+         }
+      } );
+            
+      sizePanel.add( sizeMultiplyerField );
+      sizePanel.add( Box.createHorizontalGlue() );        
+      
+      controls.add( sizePanel );
+      
+   }
 }

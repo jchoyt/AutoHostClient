@@ -95,6 +95,14 @@ public abstract class AbstractCachedMapLayer extends AbstractMapLayer
     * Individual implementations will override this as appropriate. 
     */
    protected abstract BufferedImage createLayerImage();
+   
+   public void invalidateCurrentCache()
+   {
+      synchronized (imageCache)
+      {
+         imageCache.invalidateCurrent();
+      }
+   }   
 }
 
 /**
@@ -119,6 +127,14 @@ class ImageCache
       }
    }
    
+   /**
+    * 
+    */
+   public void invalidateCurrent()
+   {
+      configs[currentImage].year = -9999;
+   }
+
    public BufferedImage getCurrentImage()
    {
       return images[currentImage];
@@ -172,4 +188,5 @@ class DrawingThread extends Thread
       
       owner.setNewImage( img, cfg );
    }
+   
 }
