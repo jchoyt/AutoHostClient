@@ -284,6 +284,7 @@ public class ShipDesignEditorPanel extends JPanel
 
       weaponsTable = new JTable( new WeaponsTableModel(this) );
       weaponsTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
+      weaponsTable.setRowHeight( 20 );
       
       JScrollPane scroller = new JScrollPane(weaponsTable);
       
@@ -293,21 +294,21 @@ public class ShipDesignEditorPanel extends JPanel
       
       Box weaponsControls = Box.createHorizontalBox();
       
-      weaponsCountField = new JTextField(2);
-      weaponsCountField.setText("1");
-      weaponsControls.add( weaponsCountField );
+//      weaponsCountField = new JTextField(2);
+//      weaponsCountField.setText("1");
+//      weaponsControls.add( weaponsCountField );
+//      
+//      Vector weaponsTypes = new Vector();
+//      weaponsTypes.add( "Colloidal" );
       
-      Vector weaponsTypes = new Vector();
-      weaponsTypes.add( "Colloidal" );
+//      weaponsTypeList = new JComboBox(weaponsTypes);
       
-      weaponsTypeList = new JComboBox(weaponsTypes);
-      
-      weaponsControls.add( weaponsTypeList );
+//      weaponsControls.add( weaponsTypeList );
       
       Action addWeaponAction = new AbstractAction("Add") {
          public void actionPerformed(ActionEvent event)
          {
-            
+            addWeapon();
          }
       };
       
@@ -320,6 +321,20 @@ public class ShipDesignEditorPanel extends JPanel
       weaponsBox.add( Box.createVerticalGlue() );
       
       return weaponsBox;
+   }
+
+
+   private void addWeapon()
+   {
+      ShipDesign design = getCurrentDesign(true);
+      
+      if (design == null) return;
+      
+      if (design.getWeaponSlots() < design.getMaxSlots())
+      {
+         design.addWeapon( Weapon.COLLOIDAL_PHASER, 1 );
+         weaponsTable.revalidate();
+      }
    }
    
    private void newDesign()
@@ -376,7 +391,7 @@ public class ShipDesignEditorPanel extends JPanel
       regenShieldsField.setSelected( design.isRegenShields() );
    }
    
-   private void saveChanges()
+   void saveChanges()
    {
       int index = designsList.getSelectedIndex();
       
@@ -397,7 +412,12 @@ public class ShipDesignEditorPanel extends JPanel
       refreshList();
    }
    
-   ShipDesign getCurrentDesign( boolean allowNull )
+   /**
+    * Returns the currently selected ship design.
+    * <p>
+    * If allowNull is false and there is no current design then a new empty design is returned.  
+    */
+   public ShipDesign getCurrentDesign( boolean allowNull )
    {
       ShipDesign design;
       
@@ -410,12 +430,6 @@ public class ShipDesignEditorPanel extends JPanel
          design = new ShipDesign();
       }
 
-      if ((design != null) &&(design.getWeaponSlots() == 0))
-      {
-         design.addWeapon( Weapon.X_RAY, 1 );
-         design.addWeapon( Weapon.X_RAY, 1 );
-      }
-      
       return design;
    }
 }
@@ -453,13 +467,42 @@ class WeaponsTableModel extends AbstractTableModel
    {
       switch (col)
       {
-         case 0:
-            return editor.getCurrentDesign(false).getWeaponName(row);
-         case 1:
-            return new Integer( editor.getCurrentDesign(false).getWeaponCount(row) );
-         default:
-            return "";
+         case 0:	return editor.getCurrentDesign(false).getWeaponName(row);
+         case 1:	return new Integer( editor.getCurrentDesign(false).getWeaponCount(row) );
+         default:	return "";
       }
    }
    
+   public Class getColumnClass(int col)
+   {
+      switch (col)
+      {
+         case 0: 	return String.class;
+         case 1: 	return Integer.class;
+         default: 	return null;
+      }
+   }
+   
+   public boolean isCellEditable(int row, int col)
+   {
+      return (col == 1);
+   }
+   
+   
+   public void setValueAt(Object value, int row, int col)
+   {
+      ShipDesign design = editor.getCurrentDesign(true);
+      if (design == null)
+      {
+         return;
+      }
+      
+      switch (col)
+      {
+         case 1:
+            int newCount = ((Integer)value).intValue();
+            design.setWeaponCount(row,newCount);
+            break;
+      }
+   }
 }

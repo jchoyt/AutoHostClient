@@ -80,4 +80,18 @@ public class Weapon
       this.initiative = initiative;
       this.accuracy = accuracy;
    }   
+   
+   public static Weapon getWeaponByName( String name )
+   {
+      if (name == null) return null;
+      
+      for (int n = 0; n < WEAPONS.length; n++)
+      {
+         if (WEAPONS[n].name.equalsIgnoreCase(name))
+         {
+            return WEAPONS[n];
+         }
+      }
+      return null;
+   }
 }

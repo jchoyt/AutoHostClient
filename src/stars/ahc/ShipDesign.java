@@ -80,24 +80,38 @@ public class ShipDesign
    private void setupWeaponSlots()
    {
       weaponsSlots = hullWeaponSlots[ hullType ];
-      weaponCount = new int[weaponsSlots];
-      weaponPower = new int[weaponsSlots];
-      weaponRange = new int[weaponsSlots];
-      weaponCategory = new int[weaponsSlots];
-      weaponAccuracy = new int[weaponsSlots];
-      weaponInitiative = new int[weaponsSlots];
-      weaponName = new String[weaponsSlots];
+      
+      if ((weaponCount == null) || (weaponCount.length != weaponsSlots))
+      {
+	      weaponCount = new int[weaponsSlots];
+	      weaponPower = new int[weaponsSlots];
+	      weaponRange = new int[weaponsSlots];
+	      weaponCategory = new int[weaponsSlots];
+	      weaponAccuracy = new int[weaponsSlots];
+	      weaponInitiative = new int[weaponsSlots];
+	      weaponName = new String[weaponsSlots];
+      }
+   }
+   
+   public void setWeapon( int slot, int count, int category, int power, int range, int initiative, int accuracy, String name )
+   {
+      weaponCount[slot] = count;
+      weaponCategory[slot] = category;
+      weaponPower[slot] = power;
+      weaponRange[slot] = range;
+      weaponInitiative[slot] = initiative;
+      weaponAccuracy[slot] = accuracy;
+      weaponName[slot] = name;
+   }
+   
+   public void setWeapon( int slot, int count, Weapon wpn )
+   {
+      setWeapon( slot, count, wpn.category, wpn.power, wpn.range, wpn.initiative, wpn.accuracy, wpn.name );
    }
    
    public void addWeapon( int count, int category, int power, int range, int initiative, int accuracy, String name )
    {
-      weaponCount[weaponSlotsUsed] = count;
-      weaponCategory[weaponSlotsUsed] = category;
-      weaponPower[weaponSlotsUsed] = power;
-      weaponRange[weaponSlotsUsed] = range;
-      weaponInitiative[weaponSlotsUsed] = initiative;
-      weaponAccuracy[weaponSlotsUsed] = accuracy;
-      weaponName[weaponSlotsUsed] = name;
+      setWeapon( weaponSlotsUsed, count, category, power, range, initiative, accuracy, name );
       weaponSlotsUsed++;
    }
    
@@ -241,6 +255,14 @@ public class ShipDesign
       properties.setProperty( base+".speed4", ""+speed4 );
       properties.setProperty( base+".initiative", ""+initiative );
       properties.setProperty( base+".regenShields", ""+regenShields );
+      
+      properties.setProperty( base+".weaponSlots.count", ""+getWeaponSlots() );
+      
+      for (int n = 0; n < getWeaponSlots(); n++)
+      {
+         properties.setProperty( base+".weaponSlots." + (n+1) + ".name", ""+getWeaponName(n) );
+         properties.setProperty( base+".weaponSlots." + (n+1) + ".count", ""+getWeaponCount(n) );
+      }
    }
    
    public void loadProperties(Properties properties, int index)
@@ -262,6 +284,21 @@ public class ShipDesign
       
       String s = ""+properties.getProperty( base + ".regenShields" );
       regenShields = s.equals("true");
+      
+      weaponSlotsUsed = Utils.safeParseInt( properties.getProperty(base+".weaponSlots.count"), 0 );
+      
+      for (int n = 0; n < weaponSlotsUsed; n++)
+      {
+         String name = properties.getProperty( base+".weaponSlots." + (n+1) + ".name" );
+         Weapon wpn = Weapon.getWeaponByName(name);
+         
+         int count = Utils.safeParseInt( properties.getProperty( base+".weaponSlots." + (n+1) + ".count" ), 0 );
+         
+         if (wpn != null)
+         {
+            setWeapon( n, count, wpn );
+         }
+      }
    }
 
    public void setHullType(int typeCode)
@@ -272,5 +309,15 @@ public class ShipDesign
    public int getHullType()
    {
       return hullType;
+   }
+
+   public void setWeaponCount(int slot, int newCount)
+   {
+      weaponCount[slot] = newCount;
+   }
+
+   public int getMaxSlots()
+   {
+      return hullWeaponSlots[ hullType ];
    }
 }
