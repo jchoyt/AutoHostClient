@@ -24,16 +24,23 @@ import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Box;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.filechooser.FileFilter;
+
+import stars.ahc.Utils;
 
 
 /**
+ * A stand-alone GUI for the BattleSimulation class
+ * 
  * @author Steve Leach
  */
 public class StandAloneBattleSimulator extends JFrame
@@ -45,28 +52,19 @@ public class StandAloneBattleSimulator extends JFrame
    private AbstractAction aboutAction;
    private JTextArea resultsArea;
    private BattleSimulation sim;
+   private AbstractAction copyAction;
+   private JLabel statusLabel;
 
    public static void main( String[] args ) throws Exception
-   {
-      if (args.length == 1)
+   {      
+      StandAloneBattleSimulator simWin = new StandAloneBattleSimulator();         
+      
+      if (args.length > 0)
       {
-         BattleSimulation sim = new BattleSimulation(args[0]);
-
-         sim.addStatusListener( new ConsoleStatusListener() );
-         
-         sim.simulate();
+         simWin.openSimulation( args[0] );
       }
-      else
-      {
-         // Create and show the GUI on the Swing event-dispatch thread
-         javax.swing.SwingUtilities.invokeLater(new Runnable() 
-         {
-            public void run() 
-            {
-               StandAloneBattleSimulator simWin = new StandAloneBattleSimulator();         
-            }
-         });         
-      }
+      
+      simWin.setVisible( true );
    }
    
    public StandAloneBattleSimulator()
@@ -75,10 +73,9 @@ public class StandAloneBattleSimulator extends JFrame
       setupActions();
       setupMenu();
       setupResultsPanel();
-      
-      setVisible( true );
+      setupStatusBar();
    }
-
+   
    private void setupWindow()
    {
       JFrame.setDefaultLookAndFeelDecorated(true);
@@ -112,6 +109,15 @@ public class StandAloneBattleSimulator extends JFrame
          {
          }
       };
+      saveAction.setEnabled(false);
+      
+      copyAction = new AbstractAction("Copy") {
+         public void actionPerformed(ActionEvent event)
+         {
+            copyToClipboard();
+         }
+      };
+      
       
       runSimAction = new AbstractAction("Run") {
          public void actionPerformed(ActionEvent event)
@@ -119,12 +125,14 @@ public class StandAloneBattleSimulator extends JFrame
             runSimulation();
          }
       };
+      runSimAction.setEnabled( false );
       
       aboutAction = new AbstractAction("About") {
          public void actionPerformed(ActionEvent event)
          {
          }
       };
+      aboutAction.setEnabled( false );
       
    }
    
@@ -139,6 +147,11 @@ public class StandAloneBattleSimulator extends JFrame
       fileMenu.add( new JMenuItem(saveAction) );
       fileMenu.addSeparator();
       fileMenu.add( new JMenuItem(exitAction) );
+
+      JMenu editMenu = new JMenu("Edit");
+      mainMenu.add( editMenu );
+      
+      editMenu.add( new JMenuItem(copyAction) );
       
       JMenu simMenu = new JMenu("Simulation");
       mainMenu.add( simMenu );
@@ -160,6 +173,23 @@ public class StandAloneBattleSimulator extends JFrame
       getContentPane().add( new JScrollPane(resultsArea), BorderLayout.CENTER );
    }
    
+   private void setupStatusBar()
+   {
+      Box statusBar = Box.createHorizontalBox();
+      
+      statusLabel = new JLabel("Ready");
+      
+      statusBar.add( statusLabel );
+      statusBar.add( Box.createHorizontalGlue() );
+      
+      getContentPane().add( statusBar, BorderLayout.SOUTH );
+   }
+   
+   public void setStatus( String statusText )
+   {
+      statusLabel.setText( statusText );
+   }
+   
    private void exit()
    {
       this.dispose();
@@ -168,21 +198,31 @@ public class StandAloneBattleSimulator extends JFrame
    private void openFileGui()
    {
       JFileChooser chooser = new JFileChooser();
-      
-      chooser.setCurrentDirectory( new File(System.getProperty("java.io.tmpdir")) ); 
+
+      chooser.setDialogTitle( "Open simulation" );
+      chooser.addChoosableFileFilter( new SimFileFilter() );
+      chooser.setCurrentDirectory( new File(System.getProperty("java.io.tmpdir")) ); // FIXME: remove this
       
       int rc = chooser.showOpenDialog( this );
       
       if (rc == JFileChooser.APPROVE_OPTION)
       {
-         try
-         {
-            sim = new BattleSimulation( chooser.getSelectedFile().getAbsolutePath() );
-         }
-         catch (Throwable t)
-         {
-            t.printStackTrace();
-         }         
+         openSimulation( chooser.getSelectedFile().getAbsolutePath() );
+      }
+   }
+
+   public void openSimulation( String fileName )
+   {
+      try
+      {
+         sim = new BattleSimulation( fileName );
+         sim.addStatusListener( new TextAreaStatusListener(resultsArea) );
+         runSimAction.setEnabled( true );
+      }
+      catch (Throwable t)
+      {
+         t.printStackTrace();
+         sim = null;
       }
    }
    
@@ -190,14 +230,34 @@ public class StandAloneBattleSimulator extends JFrame
    {
       try
       {
+         setStatus( "Running simulation..." );
          resultsArea.setText("");
-         sim.addStatusListener( new TextAreaStatusListener(resultsArea) );
+         
          sim.simulate();
+         
+         setStatus( "Simulation complete" );
       }
       catch (Throwable t)
       {
          t.printStackTrace();
       }
+   }
+   
+   private void copyToClipboard()
+   {
+      if (Utils.empty(resultsArea.getText()))
+      {
+         setStatus( "Nothing to copy" );
+         return;
+      }
+      
+      if (Utils.empty(resultsArea.getSelectedText()))
+      {
+         resultsArea.setSelectionStart(0);
+         resultsArea.setSelectionEnd( resultsArea.getText().length() );
+      }
+      resultsArea.copy();
+      setStatus( resultsArea.getSelectedText().length() + " characters copied to clipboard" );
    }
 }
 
@@ -230,7 +290,27 @@ class TextAreaStatusListener implements BattleSimulationListener
     */
    public void handleNotification(BattleSimulationNotification notification)
    {
-      textArea.setText( textArea.getText() + "\n" + notification.message );
+      textArea.setText( textArea.getText() + "\nRound " + notification.round + " : " + notification.message );
+   }
+   
+}
+
+class SimFileFilter extends FileFilter
+{
+   /* (non-Javadoc)
+    * @see javax.swing.filechooser.FileFilter#accept(java.io.File)
+    */
+   public boolean accept(File file)
+   {
+      return file.getName().toLowerCase().endsWith(".sim");
+   }
+
+   /* (non-Javadoc)
+    * @see javax.swing.filechooser.FileFilter#getDescription()
+    */
+   public String getDescription()
+   {
+      return "Sim files";
    }
    
 }

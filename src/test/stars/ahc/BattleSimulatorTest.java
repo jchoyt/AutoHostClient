@@ -34,7 +34,7 @@ import stars.ahc.plugins.battlesim.ShipStack;
  */
 public class BattleSimulatorTest extends TestCase
 {
-   private ShipDesign rabidDog, ccc, armBB, chaff;
+   private ShipDesign blueColloidalBC, redColloidalCC, armBB, chaff;
    private ShipDesign cynicDD;
    private ShipDesign interceptor2;
    private ShipDesign armBB_2;
@@ -55,33 +55,34 @@ public class BattleSimulatorTest extends TestCase
    
    protected void setUp() throws Exception
    {
-      rabidDog = new ShipDesign( ShipDesign.HULLTYPE_BATTLECRUISER, "Rabid Dog" );
-      rabidDog.setOwner( "EDog" );
-      rabidDog.setMass( 174 );
-      rabidDog.setArmour( 1000 );
-      rabidDog.setShields( 240 );
-      rabidDog.setBattleSpeed( 2.25 );
-      rabidDog.setInitiative( 5 );
-      rabidDog.addWeapon( Weapon.COLLOIDAL_PHASER, 3 );
-      rabidDog.addWeapon( Weapon.PULSED_SAPPER, 3 );
-      rabidDog.addWeapon( Weapon.COLLOIDAL_PHASER, 3 );
+      blueColloidalBC = new ShipDesign( ShipDesign.HULLTYPE_BATTLECRUISER, "Colloidal BCC" );
+      blueColloidalBC.setOwner( "Blue" );
+      blueColloidalBC.setMass( 174 );
+      blueColloidalBC.setArmour( 1000 );
+      blueColloidalBC.setShields( 240 );
+      blueColloidalBC.setBattleSpeed( 2.25 );
+      blueColloidalBC.setInitiative( 5 );
+      blueColloidalBC.addWeapon( Weapon.COLLOIDAL_PHASER, 3 );
+      blueColloidalBC.addWeapon( Weapon.PULSED_SAPPER, 3 );
+      blueColloidalBC.addWeapon( Weapon.COLLOIDAL_PHASER, 3 );
       
-      ccc = new ShipDesign( ShipDesign.HULLTYPE_CRUISER, "CCC" );
-      ccc.setOwner( "Staz" );
-      ccc.setMass( 130 );
-      ccc.setArmour( 700 );
-      ccc.setShields( 560 );
-      ccc.setRegenShields(true);
-      ccc.setBattleSpeed( 1.25 );
-      ccc.setInitiative( 5 );
-      ccc.setBoraniumCost( 35 );
-      ccc.setResourceCost( 100 );
-      ccc.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
-      ccc.addWeapon( Weapon.PULSED_SAPPER, 2 );
-      ccc.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
+      redColloidalCC = new ShipDesign( ShipDesign.HULLTYPE_CRUISER, "Colloidal CC" );
+      redColloidalCC.setOwner( "Red" );
+      redColloidalCC.setMass( 130 );
+      redColloidalCC.setArmour( 700 );
+      redColloidalCC.setShields( 560 );
+      redColloidalCC.setRegenShields(true);
+      redColloidalCC.setBattleSpeed( 1.25 );
+      redColloidalCC.setInitiative( 5 );
+      redColloidalCC.setBoraniumCost( 35 );
+      redColloidalCC.setResourceCost( 100 );
+      redColloidalCC.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
+      redColloidalCC.addWeapon( Weapon.PULSED_SAPPER, 2 );
+      redColloidalCC.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
       
       // BB, 4 x TDG, 4 x syncro sappers (wings), 16 x arms, 4 x BSC, 3 x jammer 20, no armour
       armBB = new ShipDesign( ShipDesign.HULLTYPE_BATTLESHIP, "ArmBB" );
+      armBB.setOwner( "Green" );
       armBB.setMass(901);
       armBB.setArmour(2000);
       armBB.setShields(1400);
@@ -147,8 +148,8 @@ public class BattleSimulatorTest extends TestCase
    
    protected void tearDown() throws Exception
    {
-      rabidDog = null;
-      ccc = null;
+      blueColloidalBC = null;
+      redColloidalCC = null;
    }
    
    public void testWeaponRangeMultiplier()
@@ -174,8 +175,8 @@ public class BattleSimulatorTest extends TestCase
       
       BattleSimulation battle = new BattleSimulation();
       
-      battle.addNewStack( rabidDog, 12 );
-      battle.addNewStack( ccc, 14 );
+      battle.addNewStack( blueColloidalBC, 12 );
+      battle.addNewStack( redColloidalCC, 14 );
       
       //battle.addStatusListener( consoleStatusListener );
       
@@ -185,15 +186,15 @@ public class BattleSimulatorTest extends TestCase
       // Test that we got the expected battle outcome
       //
       
-      // CCC stack is wiped out
-      assertEquals( 0, battle.getStack("CCC").shipCount );
+      // CC stack is wiped out
+      assertEquals( 0, battle.getStack("Colloidal CC").shipCount );
       
-      // Rabid Dog stack suffers no ship losses
-      assertEquals( 12, battle.getStack("Rabid Dog").shipCount );
+      // BCC stack suffers no ship losses
+      assertEquals( 12, battle.getStack("Colloidal BCC").shipCount );
       
       // Damage won't always be exactly the same, but should be in the same region
-      assertTrue( "Rabid Dogs about 50% damaged", battle.getStack("Rabid Dog").getDamagePercent() > 40 );
-      assertTrue( "Rabid Dogs about 50% damaged", battle.getStack("Rabid Dog").getDamagePercent() < 60 );
+      assertTrue( "BCCs about 50% damaged", battle.getStack("Colloidal BCC").getDamagePercent() > 40 );
+      assertTrue( "BCCs about 50% damaged", battle.getStack("Colloidal BCC").getDamagePercent() < 60 );
    }
 
    /**
@@ -202,8 +203,8 @@ public class BattleSimulatorTest extends TestCase
    {
       BattleSimulation battle = new BattleSimulation();
       
-      battle.addNewStack( rabidDog, 7 );
-      battle.addNewStack( ccc, 14 );
+      ShipStack bccStack = battle.addNewStack( blueColloidalBC, 7 );
+      ShipStack ccStack = battle.addNewStack( redColloidalCC, 14 );
 
       //battle.addStatusListener( consoleStatusListener );
       battle.showStacksFull();
@@ -215,11 +216,11 @@ public class BattleSimulatorTest extends TestCase
       //
       
       // CCC stack is undamaged
-      assertEquals( 14, battle.getStack("CCC").shipCount );
-      assertTrue( "CCC stack undamaged or lightly damaged", battle.getStack("CCC").getDamagePercent() < 5 );
+      assertEquals( 14, ccStack.shipCount );
+      assertTrue( "CCC stack undamaged or lightly damaged", ccStack.getDamagePercent() < 5 );
       
       // Rabid Dog stack is wiped out
-      assertEquals( 0, battle.getStack("Rabid Dog").shipCount );
+      assertEquals( 0, bccStack.shipCount );
       
    }
    
@@ -280,10 +281,10 @@ public class BattleSimulatorTest extends TestCase
    {
       BattleSimulation battle = new BattleSimulation();
 
-      battle.addNewStack( rabidDog, 50 );
+      battle.addNewStack( blueColloidalBC, 50 );
       battle.addNewStack( armBB, 4 );
       
-      //battle.addStatusListener( consoleStatusListener );
+      battle.addStatusListener( consoleStatusListener );
       
       battle.simulate();
       
@@ -372,7 +373,7 @@ public class BattleSimulatorTest extends TestCase
    {
       ShipStack armBBstack = new ShipStack(armBB_2,1);
       ShipStack chaffStack = new ShipStack(chaff,1);
-      ShipStack cccStack = new ShipStack(ccc,1);
+      ShipStack cccStack = new ShipStack(redColloidalCC,1);
       
       double armBB_to_armBB = BattleSimulation.getAttractiveness( armBBstack, 0, armBBstack);
       double chaff_to_ArmBB = BattleSimulation.getAttractiveness( armBBstack, 0, chaffStack);
@@ -383,7 +384,7 @@ public class BattleSimulatorTest extends TestCase
       assertTrue( "Chaff more attractive than Arm BB to beamer", chaff_to_CCC > armBB_to_CCC );
    }
    
-   public void _testBattleFour() throws Exception
+   public void testBattleFour() throws Exception
    {
       // Based on a battle in the duel "Shorts"
       ShipDesign borderPatrol = new ShipDesign(ShipDesign.HULLTYPE_DESTROYER,"Border Patrol");
@@ -491,7 +492,7 @@ public class BattleSimulatorTest extends TestCase
       String simFile = System.getProperty("java.io.tmpdir") + File.separator +  "test.sim";
       BattleSimulation sim = new BattleSimulation( simFile );
       
-      sim.addStatusListener( consoleStatusListener );
+      //sim.addStatusListener( consoleStatusListener );
       
       sim.simulate();
    }

@@ -386,20 +386,7 @@ public class Utils
     */
    public static int safeParseInt(String value, int defaultValue)
    {
-   	  int numberInt;
-      try
-      {
-        // Converts to double then to Int. This is good in case the stringed number was in decimal format.
-        // Theorectially should wor keven if the number WAS NOT in decimal for to begin with.
-        // I.E. it was already int
-      	double numberDouble = Double.valueOf(value.trim()).doubleValue();
-      	return numberInt = (int)numberDouble; 
-      	//return Integer.parseInt( numberInt );
-      }
-      catch (Throwable t)
-      {
-         return defaultValue;
-      }
+      return (int)safeParseLong(value,defaultValue);
    }
    
    /**
@@ -410,9 +397,27 @@ public class Utils
     */
    public static int safeParseInt(String value)
    {
-      return safeParseInt(value,0);
+      return (int)safeParseLong(value,0);
    }
 
+   public static long safeParseLong(String value)
+   {
+      return safeParseLong(value,0);
+   }
+
+   public static long safeParseLong(String value, long defaultValue)
+   {
+      try
+      {
+        // Converts to double then to long. This is good in case the stringed number was in decimal format.
+      	return (long)Double.valueOf(value.trim()).doubleValue(); 
+      }
+      catch (Throwable t)
+      {
+         return defaultValue;
+      }      
+   }
+   
    /**
     * Returns a pseudo-random floating point value between 0 and 1.
     *

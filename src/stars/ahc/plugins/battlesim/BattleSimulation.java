@@ -93,7 +93,7 @@ public class BattleSimulation
     * every time the simulation is run.  If a non-zero value is used then the simulation should
     * procede exactly the same every time, assuming initial starting conditions remain the same. 
     */
-   public long randomSeed = 0;
+   public long randomSeed = 0L;
    
    /**
     * The random number generator for the simulation.
@@ -114,6 +114,11 @@ public class BattleSimulation
          { 3,	2,	2,	2,	3,	2,	2,	2 },		// 2.25
          { 3,	2,	3,	2,	3,	2,	3,	2 }			// 2.5
    };
+   
+   /**
+    * Damage is applied in units of totalArmour/500
+    */
+   private static final int DAMAGE_UNIT = 500;
    
    //protected static int[][] distanceTable = null;
    
@@ -241,6 +246,7 @@ public class BattleSimulation
 
    /**
     * Sets up the starting state of the battle  
+    * 
     * @throws BattleSimulationError
     */
    protected void initialiseBattleBoard() throws BattleSimulationError
@@ -257,16 +263,31 @@ public class BattleSimulation
       setInitialPositions();
    }
       
+   /**
+    * Initialises the random number generator for use in the battle
+    * <p> 
+    * If a random seed has been specified then it will be used so that the battle
+    * can be reproduced.  Otherwise a new random seed will be picked (based on the
+    * current system time in millisecond) which will cause the battle to have a
+    * different result each time.
+    */
    private void initializeRandomNumberGenerator()
    {
-      if (randomSeed == 0)
+      long seed;
+      
+      if (randomSeed != 0L)
       {
-         randomNumberGenerator = new Random();
+         seed = randomSeed;
       }
       else
       {
-         randomNumberGenerator = new Random(randomSeed);
+         // Use a 24 bit value to make it easier for people to make a note of it and re-use it
+         seed = System.currentTimeMillis() & 0x00FFFFFFL;          
       }
+            
+      randomNumberGenerator = new Random(seed);
+      
+      statusUpdate( "Random number generator initialised using seed: " + seed );
    }
 
    /**
@@ -551,7 +572,9 @@ public class BattleSimulation
     */
    protected float getRandomFloat()
    {
-      return randomNumberGenerator.nextFloat();
+      float f = randomNumberGenerator.nextFloat(); 
+      System.out.println( "Next random: " + f );
+      return f;
    }
    
    /**
@@ -559,7 +582,9 @@ public class BattleSimulation
     */
    protected int getRandomInt( int max )
    {
-      return randomNumberGenerator.nextInt( max );
+      int i = randomNumberGenerator.nextInt(max);
+      System.out.println( "Next random: " + i );
+      return i;
    }
 
    /**
@@ -722,7 +747,7 @@ public class BattleSimulation
    {
       int kills;
       
-      // TODO: armour damage should be handled in units of 1/512 of the total for the stack
+      // TODO: armour damage should be handled in units of 1/500 of the total for the stack
       
       // How much damage has each ship sustained so far ?
       int damagePerShip = target.damage / target.shipCount;            
@@ -796,7 +821,7 @@ public class BattleSimulation
          	
          case Weapon.TYPE_MISSILE:
          case Weapon.TYPE_TORPEDO:
-            fireTorpedo( stack, slot );
+            fireTorpedoKotk( stack, slot );
           	break;
       }
    }
@@ -1234,7 +1259,7 @@ public class BattleSimulation
     */
    private boolean validSquare( int x, int y )
    {
-      return ((x >= BBOARD_MIN_X) || (x <= BBOARD_MAX_X) || (y >= BBOARD_MIN_Y) || (y >= BBOARD_MAX_Y));
+      return ((x >= BBOARD_MIN_X) && (x <= BBOARD_MAX_X) && (y >= BBOARD_MIN_Y) && (y <= BBOARD_MAX_Y));
    }
    
    /**
@@ -1252,7 +1277,7 @@ public class BattleSimulation
       int y = getRandomInt(3) - 1;
       
       // Don't allow movement off the battle board, or no movement at all
-      while ( ( validSquare(oldx+x,oldy+y) == false ) || ((x == oldx) && (y == oldy)))
+      while ( ( validSquare(oldx+x,oldy+y) == false ) || ((x == 0) && (y == 0)))
       {
          x = getRandomInt(3) - 1;
          y = getRandomInt(3) - 1;         
@@ -1433,12 +1458,12 @@ public class BattleSimulation
 
       if (target.shipCount > 0)
       {
-         int damageUnits = Math.max( target.design.getArmour() / 512, 1 );
+         int damageUnits = Math.max( target.design.getArmour() / DAMAGE_UNIT, 1 );
 
          // Get the basic damage
          int damage = (int)(baseDamage * damageMultiplier);
          
-         // Round up to units of 1/512
+         // Round up to units of 1/500
          int damage2 = (int)(Math.ceil(1.0 * damage / damageUnits) * damageUnits);
       
          int newDamagePerShip = damage2 / target.shipCount;
@@ -1455,6 +1480,116 @@ public class BattleSimulation
       return baseDamage;
    }
 
+   /**
+    * Simulates firing a missile or torpedo
+    * <p>
+    * Uses Kotk's (Vambola Kotkas) algorithm:
+    * http://starsautohost.org/sahforum/index.php?t=tree&th=2065&mid=17793&rid=386&S=25d65ca246e6d7fb95dbe63d087bf5a7&rev=&reveal=
+    */
+   public void fireTorpedoKotk( ShipStack stack, int slot ) throws BattleSimulationError
+   {
+      ShipDesign design = stack.design;
+      
+      ShipStack target = pickTargetInRange( stack, slot );
+      if (target == null) return;
+      
+      int damage = stack.design.getWeaponPower(slot);
+      if ((target.shields == 0) && (design.getWeaponType(slot) == Weapon.TYPE_MISSILE))
+      {
+         damage *= 2;
+      }
+      
+      boolean first_hit = true;
+      int armourDamage = 0;
+      int shieldDamage = 0;      
+
+      DamageRecord damageRec = new DamageRecord();
+      
+      int weaponCount = design.getWeaponCount(slot);
+      
+      for (int n = 0; n < weaponCount; n++)
+      {
+         if (missileHits(stack,slot))
+         {
+            shieldDamage = Math.min( target.shields, damage / 2 );
+            target.shields -= shieldDamage;
+            damageRec.shieldDamage += shieldDamage;
+            armourDamage += damage - shieldDamage;
+
+            int damagePerShip = target.damage / target.shipCount;            
+            int remainingArmourPerShip = target.design.getArmour() - damagePerShip;
+            
+            if (armourDamage >= remainingArmourPerShip)
+            {
+               target.shields -= target.shields / target.shipCount;
+               armourDamage -= remainingArmourPerShip;
+               target.shipCount -= 1;
+               damageRec.kills++;
+               damageRec.armourDamage += remainingArmourPerShip;
+               
+               if (first_hit)
+               {
+                  armourDamage = 0;
+               }
+               
+               if (target.shipCount == 0)
+               {
+                  sendShotNotification( stack, slot, damageRec, target );
+                  damageRec = new DamageRecord();
+                  
+                  target = pickTargetInRange( stack, slot );
+                  if (target == null) return;
+                  
+                  damage = stack.design.getWeaponPower(slot);
+                  if ((target.shields == 0) && (design.getWeaponType(slot) == Weapon.TYPE_MISSILE))
+                  {
+                     damage *= 2;
+                  }
+                  
+                  first_hit = true;
+               }
+            }
+            else //damage does not kill ships
+            {
+               first_hit = false;
+            }
+         }
+         else // it did not hit
+         {
+            int dmg = Math.min( target.shields, damage / 8 );
+            target.shields -= dmg;
+            damageRec.shieldDamage += dmg;
+         }
+      }
+
+      // apply any remaining armour damage after all missiles have fired
+      if (armourDamage > 0)
+      {
+         // TODO: make sure target has at least damage_units armour left
+         int damage_units = Math.max( target.design.getArmour() * target.shipCount / DAMAGE_UNIT, target.shipCount );
+         int dmg = Math.max( armourDamage / damage_units, 1 ) * damage_units;
+         target.damage += dmg;         
+         damageRec.armourDamage += dmg;         
+      }
+      
+      sendShotNotification( stack, slot, damageRec, target );      
+   }
+
+   /**
+    * Tests whether a missile or torpedo hits it's target
+    * <p>
+    * The missile's accuracy is calculated, taking into account computers and jammers.  A 
+    * random value is then generated and compared to the accuracy level to determine whether
+    * the shot is a hit or a miss.
+    */
+   private boolean missileHits( ShipStack stack, int slot )
+   {
+      double accuracy = stack.design.getWeaponAccuracy(slot);
+      
+      accuracy = getFinalAccuracy( accuracy, stack.design, stack.target.design );
+      
+      return getRandomFloat() <= accuracy;
+   }
    
    /**
     * Saves all the details of the battle set-up to the specified file 
@@ -1466,7 +1601,7 @@ public class BattleSimulation
       Properties props = new Properties();
       
       props.setProperty( "StackCount", ""+stackCount );
-      props.setProperty( "RandomSeed", ""+randomSeed );
+      props.setProperty( "RandomSeed", Long.toString(randomSeed) );
       
       for (int n = 0; n < stackCount; n++)
       {
@@ -1494,7 +1629,7 @@ public class BattleSimulation
       stackCount = Utils.safeParseInt( props.getProperty( "StackCount" ) );
       initStacks(stackCount);
       
-      randomSeed = Utils.safeParseInt( props.getProperty( "RandomSeed" ) );
+      randomSeed = Utils.safeParseLong( props.getProperty( "RandomSeed" ) );
       
       for (int n = 0; n < stackCount; n++)
       {
