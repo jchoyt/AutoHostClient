@@ -284,7 +284,7 @@ public class Utils
             cmds[3] = "-p";
             cmds[4] = password;
             Process proc = Runtime.getRuntime().exec( cmds, null, workingDir );
-            String line;
+            /* String line;
             BufferedReader input =
                     new BufferedReader( new InputStreamReader( proc.getInputStream() ) );
             StringBuffer ret = new StringBuffer();
@@ -294,7 +294,9 @@ public class Utils
             }
             proc.waitFor();
             input.close();
-            return ret.toString();
+            return ret.toString(); */
+            proc.waitFor();
+            return "";
         }
         catch ( Exception e )
         {
