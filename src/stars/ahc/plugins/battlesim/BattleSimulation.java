@@ -19,11 +19,16 @@
 package stars.ahc.plugins.battlesim;
 
 import java.awt.Point;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Random;
 
 import stars.ahc.ShipDesign;
 import stars.ahc.Utils;
@@ -81,6 +86,20 @@ public class BattleSimulation
    public static final int BBOARD_MIN_Y = 1;
    public static final int BBOARD_MAX_Y = 10;
    
+   /**
+    * The seed for the random number generator.
+    * <p>
+    * If set to 0 (the default) a random seed will be used and the results will be different
+    * every time the simulation is run.  If a non-zero value is used then the simulation should
+    * procede exactly the same every time, assuming initial starting conditions remain the same. 
+    */
+   public long randomSeed = 0;
+   
+   /**
+    * The random number generator for the simulation.
+    */
+   private Random randomNumberGenerator;
+   
    private ArrayList statusListers = new ArrayList();
 
    // From the Stars! help file - may be slightly inaccurate
@@ -109,6 +128,11 @@ public class BattleSimulation
    public BattleSimulation( int maxStacks )
    {
       initStacks( maxStacks );
+   }
+   
+   public BattleSimulation( String fileName ) throws IOException
+   {
+      loadFrom( fileName );
    }
    
    /**
@@ -223,6 +247,8 @@ public class BattleSimulation
    {
       round = 0;
       
+      initializeRandomNumberGenerator();
+      
       for (int n = 0; n < stackCount; n++)
       {
          stacks[n].reset();
@@ -231,6 +257,18 @@ public class BattleSimulation
       setInitialPositions();
    }
       
+   private void initializeRandomNumberGenerator()
+   {
+      if (randomSeed == 0)
+      {
+         randomNumberGenerator = new Random();
+      }
+      else
+      {
+         randomNumberGenerator = new Random(randomSeed);
+      }
+   }
+
    /**
     * Sets the initial position of the stacks 
     */
@@ -507,6 +545,22 @@ public class BattleSimulation
          calculatePreferredRange( stacks[n] );
       }         
    }
+   
+   /**
+    * Returns a pseudo-random number 0.0 <= x < 1.0 
+    */
+   protected float getRandomFloat()
+   {
+      return randomNumberGenerator.nextFloat();
+   }
+   
+   /**
+    * Returns a pseudo-random number 0 <= x < max 
+    */
+   protected int getRandomInt( int max )
+   {
+      return randomNumberGenerator.nextInt( max );
+   }
 
    /**
     * To give heavier ships a slight chance to move last, randomly adjust ship mass slightly (up to 15%). 
@@ -516,7 +570,7 @@ public class BattleSimulation
       for (int n = 0; n < stackCount; n++)
       {
          // Get a random number between 0.85 and 1.15
-         float random = Utils.getRandomFloat() * 0.3f + 0.85f;
+         float random = getRandomFloat() * 0.3f + 0.85f;
          
          // Mass for movement order is design mass times this random number
          stacks[n].randomMass = (int)( random * stacks[n].design.getMass() );
@@ -840,7 +894,7 @@ public class BattleSimulation
       int numHits = 0;
       for (int n = 0; n < numShots; n++)
       {
-         if (Utils.getRandomFloat() < accuracy)
+         if (getRandomFloat() < accuracy)
          {
             numHits++;
          }
@@ -1038,9 +1092,15 @@ public class BattleSimulation
     */
    public static double getAttractiveness( ShipStack attacker, int weaponSlot, ShipStack target ) throws BattleSimulationError
    {
+      if (attacker.design.getWeaponSlots() == 0)
+      {
+         return 1.0;
+      }
+      
       // TODO: verify attractiveness algorithm
       
       double cost = target.design.getBoraniumCost() + target.design.getResourceCost();
+      cost = (cost == 0) ? 1.0 : cost;
       
       double attackPowerNeeded;
       
@@ -1096,7 +1156,7 @@ public class BattleSimulation
       }
       else
       {
-         return (shields * 2 / accuracy) + (armour+shields) / (accuracy * typeModifier);
+         return (shields * 2 / accuracy) + (armour-shields) / (accuracy * typeModifier);
       }
    }
    
@@ -1144,7 +1204,7 @@ public class BattleSimulation
       // pick an option at random
       int optionCount = options.size();
       
-      int optionChosen = (int)(Utils.getRandomFloat() * optionCount);	      
+      int optionChosen = getRandomInt(optionCount);	      
       Point offset = (Point)options.get(optionChosen);
       
       // and move the stack
@@ -1188,14 +1248,14 @@ public class BattleSimulation
       int oldx = stack.xpos;
       int oldy = stack.ypos;
       
-      int x = (int)(Utils.getRandomFloat() * 3 - 1);
-      int y = (int)(Utils.getRandomFloat() * 3 - 1);
+      int x = getRandomInt(3) - 1;
+      int y = getRandomInt(3) - 1;
       
       // Don't allow movement off the battle board, or no movement at all
       while ( ( validSquare(oldx+x,oldy+y) == false ) || ((x == oldx) && (y == oldy)))
       {
-         x = (int)(Utils.getRandomFloat() * 3 - 1);
-         y = (int)(Utils.getRandomFloat() * 3 - 1);         
+         x = getRandomInt(3) - 1;
+         y = getRandomInt(3) - 1;         
       }
       
       stack.xpos += x;
@@ -1393,5 +1453,52 @@ public class BattleSimulation
       }
   		   
       return baseDamage;
+   }
+
+   
+   /**
+    * Saves all the details of the battle set-up to the specified file 
+    * 
+    * @throws IOException
+    */
+   public void saveTo( String fileName ) throws IOException
+   {
+      Properties props = new Properties();
+      
+      props.setProperty( "StackCount", ""+stackCount );
+      props.setProperty( "RandomSeed", ""+randomSeed );
+      
+      for (int n = 0; n < stackCount; n++)
+      {
+         stacks[n].storeProperties( props, n );
+      }
+      
+      FileOutputStream s = new FileOutputStream(fileName);
+      props.store( s, "Battle simulation" );
+      s.close();
+   }
+   
+   /**
+    * Loads details of the battle simulation setup from the specified file 
+    * 
+    * @throws IOException
+    */
+   public void loadFrom( String fileName ) throws IOException
+   {
+      Properties props = new Properties();
+      
+      FileInputStream s = new FileInputStream(fileName);
+      props.load( s );
+      s.close();
+      
+      stackCount = Utils.safeParseInt( props.getProperty( "StackCount" ) );
+      initStacks(stackCount);
+      
+      randomSeed = Utils.safeParseInt( props.getProperty( "RandomSeed" ) );
+      
+      for (int n = 0; n < stackCount; n++)
+      {
+         stacks[n] = new ShipStack( props, n );         
+      }
    }
 }

@@ -51,9 +51,16 @@
       <fileset dir="." includes="base.ahcplugin"/>
       <fileset dir="${build}" includes="**/plugins/base/**" />
     </jar>
-    <jar jarfile="plugins/battlesim.jar" description="rebuild the base plugin jarfile">
+    <jar jarfile="plugins/battlesim.jar" description="rebuild the battle simulator jarfile">
       <fileset dir="." includes="battlesim.ahcplugin"/>
       <fileset dir="${build}" includes="**/plugins/battlesim/**" />
+      <fileset dir="${build}" includes="**/Utils.class"/>
+      <fileset dir="${build}" includes="**/AutoHostError.class"/>
+      <fileset dir="${build}" includes="**/ShipDesign.class"/>
+      <fileset dir="${build}" includes="**/Weapon.class"/>
+   	  <manifest>
+	  		<attribute name="Main-Class" value="stars.ahc.plugins.battlesim.StandAloneBattleSimulator"/>
+	  </manifest>
     </jar>
     <jar jarfile="plugins/objedit.jar" description="rebuild the objedit plugin jarfile">
       <fileset dir="." includes="objedit.ahcplugin"/>
@@ -91,6 +98,7 @@
     <mkdir dir="${doc}" />
     <javadoc packagenames="*" sourcepath="src" destdir="${doc}" author="true" version="true" windowtitle="Stars! TurnMover" />
   </target>
+	
 </project>
 
 

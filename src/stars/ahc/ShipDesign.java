@@ -279,6 +279,8 @@ public class ShipDesign
       properties.setProperty( base+".initiative", ""+initiative );
       properties.setProperty( base+".regenShields", ""+regenShields );
       properties.setProperty( base+".jamming", ""+jamming );
+      properties.setProperty( base+".resourceCost", ""+resourceCost );
+      properties.setProperty( base+".boraniumCost", ""+boraniumCost );
       
       properties.setProperty( base+".weaponSlots.count", ""+getWeaponSlots() );
       
@@ -306,6 +308,8 @@ public class ShipDesign
       initiative = Utils.safeParseInt( properties.getProperty( base + ".initiative" ), 0 );
       speed4 = Utils.safeParseInt( properties.getProperty( base + ".speed4" ), 0 );
       jamming = Utils.safeParseInt( properties.getProperty( base + ".jamming" ), 0 );
+      resourceCost = Utils.safeParseInt( properties.getProperty( base + ".resourceCost" ), 0 );
+      boraniumCost = Utils.safeParseInt( properties.getProperty( base + ".boraniumCost" ), 0 );
       
       String s = ""+properties.getProperty( base + ".regenShields" );
       regenShields = s.equals("true");

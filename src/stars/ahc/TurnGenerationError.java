@@ -28,4 +28,9 @@ public class TurnGenerationError extends Exception
    {
       super( message );
    }
+
+   public TurnGenerationError( String message, Throwable cause )
+   {
+      super( message, cause );
+   }
 }

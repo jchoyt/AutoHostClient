@@ -300,8 +300,15 @@ public class LocalGameController implements GameController, GameTurnGenerator
       Player[] players = game.getPlayers();
 
       for (int n = 0; n < players.length; n++)
-      {
-         Utils.genPxxFiles( game, players[n].id, players[n].getStarsPassword(), gameDirectory );
+      {         
+         try
+         {
+            Utils.genPxxFiles( game, players[n].id, players[n].getStarsPassword(), gameDirectory );
+         }
+         catch (IOException e)
+         {
+            throw new TurnGenerationError( "Error generating report files", e );
+         }
       }
 
       game.loadProperties();

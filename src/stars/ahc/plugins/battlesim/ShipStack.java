@@ -18,6 +18,8 @@
  */
 package stars.ahc.plugins.battlesim;
 
+import java.util.Properties;
+
 import stars.ahc.ShipDesign;
 import stars.ahc.Utils;
 
@@ -73,6 +75,16 @@ public class ShipStack
    public ShipStack( ShipDesign design, int count, int side )
    {
       init( design, count, side );
+   }
+   
+   /**
+    * Creates a new ShipStack with details taken from the specified properties object
+    * 
+    * @param index is the number of the stack within the properties object 
+    */
+   public ShipStack( Properties props, int index )
+   {
+      loadProperties( props, index );
    }
    
    public void init( ShipDesign design, int count, int side )
@@ -163,5 +175,41 @@ public class ShipStack
    {
       int average = cumulativeSurvivors / cumulativeSimulations;
       return "Over "+ cumulativeSimulations + " runs: " + minimumSurvivors + ", " + average + ", " + maximumSurvivors + " survived";
+   }
+   
+   /**
+    * Stores details of this ship stack, and the underlying ship design, into the properties object  
+    * @param index is the number of the stack within the properties object 
+    */
+   public void storeProperties( Properties props, int index )
+   {
+      String base = "Stacks." + index;
+
+      props.setProperty( base+".shipCount", ""+shipCount );
+      props.setProperty( base+".owner", owner );
+      props.setProperty( base+".side", ""+side );
+      props.setProperty( base+".orders", ""+battleOrders );
+      
+      design.storeProperties( props, index );      
+   }
+   
+   /**
+    * Loads details of the ship stack from the specified properties object 
+    * @param index is the number of the stack within the properties object 
+    */
+   public void loadProperties( Properties props, int index )
+   {
+      String base = "Stacks." + index;
+      
+      int count = Utils.safeParseInt( props.getProperty( base + ".shipCount" ) );
+      String owner = props.getProperty( base+".owner" );
+      int side = Utils.safeParseInt( props.getProperty( base + ".side" ) );
+      
+      ShipDesign design = new ShipDesign();
+      design.loadProperties( props, index );
+      
+      init( design, count, side );
+      
+      battleOrders = Utils.safeParseInt( props.getProperty( base + ".orders" ) );
    }
 }

@@ -17,6 +17,8 @@
  */
 package test.stars.ahc;
 
+import java.io.File;
+
 import junit.framework.TestCase;
 import stars.ahc.ShipDesign;
 import stars.ahc.Weapon;
@@ -175,7 +177,7 @@ public class BattleSimulatorTest extends TestCase
       battle.addNewStack( rabidDog, 12 );
       battle.addNewStack( ccc, 14 );
       
-      battle.addStatusListener( consoleStatusListener );
+      //battle.addStatusListener( consoleStatusListener );
       
       battle.simulate();
       
@@ -310,8 +312,10 @@ public class BattleSimulatorTest extends TestCase
    {
       BattleSimulation battle = new BattleSimulation();
       
-      ShipStack s1 = new ShipStack(null,1);
-      ShipStack s2 = new ShipStack(null,2);
+      ShipDesign design = new ShipDesign();
+      
+      ShipStack s1 = new ShipStack(design,1);
+      ShipStack s2 = new ShipStack(design,2);
 
       s1.setPos( 3, 4 );
       s2.setPos( 3, 4 );      
@@ -440,11 +444,55 @@ public class BattleSimulatorTest extends TestCase
       sim.simulateRepeatedly( iterations );
       
       long duration = System.currentTimeMillis() - start;
-      System.out.println( "" + iterations + " simulations in " + (duration/1000.0) + "s" );
+//      System.out.println( "" + iterations + " simulations in " + (duration/1000.0) + "s" );
+//      
+//      System.out.println( armBBstack.design.getName() + "... " + armBBstack.getCumulativeResults() );
+//      System.out.println( chaffStack.design.getName() + "... " + chaffStack.getCumulativeResults() );
+//      System.out.println( cccStack.design.getName() + "... " + cccStack.getCumulativeResults() );
+   }
+
+   /**
+    * Test that shield damage is applied correctly when ships are killed
+    * <p>
+    * We are looking for: Shields = StartingShields / StartingShips * RemainingShips - ShieldDamage
+    * as shown to be the case using BattleSim.
+    */
+   public void testShieldDamageCalculationOrder() throws Exception
+   {
+      ShipDesign epsilonBB = new ShipDesign( ShipDesign.HULLTYPE_BATTLESHIP, "Epsilon BB" );
+      epsilonBB.setOwner( "Human" );
+      epsilonBB.setArmour( 2000 );
+      epsilonBB.setShields( 0 );
+      epsilonBB.setBattleSpeed( 1 );
+      epsilonBB.setComputers( 0, 0, 7 );
+      epsilonBB.addWeapon( Weapon.EPSILON, 1 );
       
-      System.out.println( armBBstack.design.getName() + "... " + armBBstack.getCumulativeResults() );
-      System.out.println( chaffStack.design.getName() + "... " + chaffStack.getCumulativeResults() );
-      System.out.println( cccStack.design.getName() + "... " + cccStack.getCumulativeResults() );
+      ShipDesign shieldScout = new ShipDesign( ShipDesign.HULLTYPE_SCOUT, "Shield Scout" );
+      shieldScout.setOwner( "Alien" );
+      shieldScout.setArmour( 20 );
+      shieldScout.setShields( 500 );
+      shieldScout.setBattleSpeed( 1 );
+      
+      BattleSimulation sim = new BattleSimulation();
+      sim.addNewStack( epsilonBB, 1 );
+      sim.addNewStack( shieldScout, 10 );
+      
+      sim.randomSeed = 543634;
+      
+      sim.saveTo( System.getProperty("java.io.tmpdir") + File.separator +  "test.sim" );
+      
+      //sim.addStatusListener( consoleStatusListener );
+      
+      sim.simulate();
    }
    
+   public void testLoadSimFromFile() throws Exception
+   {
+      String simFile = System.getProperty("java.io.tmpdir") + File.separator +  "test.sim";
+      BattleSimulation sim = new BattleSimulation( simFile );
+      
+      sim.addStatusListener( consoleStatusListener );
+      
+      sim.simulate();
+   }
 }

@@ -33,9 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
-import javax.swing.JOptionPane;
-
-import stars.ahcgui.AhcGui;
+//import stars.ahcgui.AhcGui;
 
 /**
  *  Description of the Class
@@ -272,7 +270,7 @@ public class Utils
      *@param  game          Description of the Parameter
      *@param  playerNumber  Description of the Parameter
      */
-    public static void backupPxxFiles( Game game, String playerNumber )
+    public static void backupPxxFiles( Game game, String playerNumber ) throws IOException
     {
        // TODO: check that NewReports=1, ie. it generated *.pnn rather than *.pla
        checkForNewReports( game, playerNumber );
@@ -283,20 +281,24 @@ public class Utils
         File pFile = new File( gameDir, game.getPFileName( playerNumber ) );
         File backupFDest = new File( backup, createBackupFileName( fFile, game.getCurrentYear() ) );
         File backupPDest = new File( backup, createBackupFileName( pFile, game.getCurrentYear() ) );
-        try
-        {
+        
+        // Removed GUI code from this utility routine
+        // Steve Leach, 22 Nov 2004
+        
+//        try
+//        {
             Utils.fileCopy( fFile, backupFDest );
             Utils.fileCopy( pFile, backupPDest );
-        }
-        catch ( IOException e )
-        {
-            JOptionPane.showInternalMessageDialog(
-                    AhcGui.mainFrame.getContentPane(),
-                    "Couldn't backup .Pxx and .Fxx files",
-                    "File backup problem",
-                    JOptionPane.INFORMATION_MESSAGE );
-            return;
-        }
+//        }
+//        catch ( IOException e )
+//        {
+//            JOptionPane.showInternalMessageDialog(
+//                    AhcGui.mainFrame.getContentPane(),
+//                    "Couldn't backup .Pxx and .Fxx files",
+//                    "File backup problem",
+//                    JOptionPane.INFORMATION_MESSAGE );
+//            return;
+//        }
     }
 
 
@@ -329,10 +331,10 @@ public class Utils
      *@param  game          Description of the Parameter
      *@return               String containing any output from the process
      */
-    public static String genPxxFiles( Game game, String playerNumber, String password, File workingDir )
+    public static String genPxxFiles( Game game, String playerNumber, String password, File workingDir ) throws IOException
     {
-        try
-        {
+//        try
+//        {
             String[] cmds = new String[5];
             cmds[0] = starsExecutable.getCanonicalPath();
             cmds[1] = "-dpfm";
@@ -340,30 +342,27 @@ public class Utils
             cmds[3] = "-p";
             cmds[4] = password;
             Process proc = Runtime.getRuntime().exec( cmds, null, workingDir );
-            /*
-             *  String line;
-             *  BufferedReader input =
-             *  new BufferedReader( new InputStreamReader( proc.getInputStream() ) );
-             *  StringBuffer ret = new StringBuffer();
-             *  while ( ( line = input.readLine() ) != null )
-             *  {
-             *  ret.append( line );
-             *  }
-             *  proc.waitFor();
-             *  input.close();
-             *  return ret.toString();
-             */
-            proc.waitFor();
+
+            try
+            {
+               proc.waitFor();
+            }
+            catch (InterruptedException e)
+            {
+               // ignore
+            }
+            
             backupPxxFiles( game, playerNumber );
             return "";
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-            RuntimeException newex = new RuntimeException( e.getMessage() );
-            newex.fillInStackTrace();
-            throw newex;
-        }
+            
+//        }
+//        catch ( Exception e )
+//        {
+//            e.printStackTrace();
+//            RuntimeException newex = new RuntimeException( e.getMessage() );
+//            newex.fillInStackTrace();
+//            throw newex;
+//        }
     }
 
     /**
