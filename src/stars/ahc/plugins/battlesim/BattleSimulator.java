@@ -212,4 +212,5 @@ public class BattleSimulator extends JFrame implements PlugIn, StatusListener
    {
       results.setText( results.getText() + "Round " + round + " : " + message + "\n"); 
    }
+   
 }

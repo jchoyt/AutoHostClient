@@ -21,8 +21,11 @@ package stars.ahc.plugins.battlesim;
 import stars.ahc.ShipDesign;
 
 /**
+ * Represents a stack of ships on the battle board.
+ * <p>
+ * A stack constists of one or more ships of the same design that are part of the same fleet.
+ * 
  * @author Steve Leach
- *
  */
 public class ShipStack
 {
@@ -38,6 +41,7 @@ public class ShipStack
    public boolean escaped = false;
    public int randomMass = 0;
    public ShipStack target = null;
+   public int preferredRange = 0;
    
    public ShipStack( ShipDesign design, int count )
    {
@@ -45,6 +49,9 @@ public class ShipStack
       this.shipCount = count;
    }
    
+   /**
+    * Returns true if the stack is still fighting (has not been killed and hasn't escaped) 
+    */
    public boolean stillFighting()
    {
       return (shipCount > 0) && (escaped == false);
@@ -54,8 +61,12 @@ public class ShipStack
    {
       if (shipCount == 0) return design.getName() + " [dead]";
       
+      return design.getName() + " [" + shipCount + "@" + getDamagePercent() + "%,"+shields+"]";
+   }
+   
+   public int getDamagePercent()
+   {
       int damagePerShip = (shipCount == 0) ? 0 : damage / shipCount;
-      int damagePct = 100 * damagePerShip / design.getArmour();
-      return design.getName() + " [" + shipCount + "@" + damagePct + "%,"+shields+"]";
+      return 100 * damagePerShip / design.getArmour();
    }
 }

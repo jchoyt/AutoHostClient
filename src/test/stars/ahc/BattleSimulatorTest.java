@@ -30,6 +30,45 @@ import junit.framework.TestCase;
  */
 public class BattleSimulatorTest extends TestCase
 {
+   private ShipDesign rabidDog, ccc;
+   
+   private StatusListener consoleStatusListener = new StatusListener() {
+      public void battleStatusUpdate(int round, String message)
+      {
+         System.out.println( "Round " + round + " : " + message );
+      }
+   };
+   
+   protected void setUp() throws Exception
+   {
+      rabidDog = new ShipDesign( ShipDesign.HULLTYPE_BATTLECRUISER, "Rabid Dog" );
+      rabidDog.setMass( 174 );
+      rabidDog.setArmour( 1000 );
+      rabidDog.setShields( 240 );
+      rabidDog.setBattleSpeed( 2.25 );
+      rabidDog.setInitiative( 5 );
+      rabidDog.addWeapon( Weapon.COLLOIDAL_PHASER, 3 );
+      rabidDog.addWeapon( Weapon.PULSED_SAPPER, 3 );
+      rabidDog.addWeapon( Weapon.COLLOIDAL_PHASER, 3 );
+      
+      ccc = new ShipDesign( ShipDesign.HULLTYPE_CRUISER, "CCC" );
+      ccc.setMass( 130 );
+      ccc.setArmour( 700 );
+      ccc.setShields( 560 );
+      ccc.setRegenShields(true);
+      ccc.setBattleSpeed( 1.25 );
+      ccc.setInitiative( 5 );
+      ccc.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
+      ccc.addWeapon( Weapon.PULSED_SAPPER, 2 );
+      ccc.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );      
+   }
+   
+   protected void tearDown() throws Exception
+   {
+      rabidDog = null;
+      ccc = null;
+   }
+   
    public void testWeaponRangeMultiplier()
    {
       assertEquals( 1.000, BattleSimulation.getRangeMultiplier( 0, 3 ), 0.01 );
@@ -47,38 +86,49 @@ public class BattleSimulatorTest extends TestCase
       assertEquals( 1.000, BattleSimulation.getRangeMultiplier( 0, 0 ), 0.01 );
    }
    
-   public void testOneOnOne() throws Exception
+   public void testBattleOne() throws Exception
    {
-      ShipDesign design1 = new ShipDesign( ShipDesign.HULLTYPE_BATTLECRUISER, "Rabid Dog" );
-      design1.setMass( 174 );
-      design1.setArmour( 1000 );
-      design1.setShields( 240 );
-      design1.setBattleSpeed( 1.75 );
-      design1.setInitiative( 5 );
-      design1.addWeapon( Weapon.COLLOIDAL_PHASER, 3 );
-      design1.addWeapon( Weapon.PULSED_SAPPER, 3 );
-      design1.addWeapon( Weapon.COLLOIDAL_PHASER, 3 );
+      BattleSimulation battle = new OneOnOneBattle( rabidDog, 12, ccc, 14 );
       
-      ShipDesign design2 = new ShipDesign( ShipDesign.HULLTYPE_CRUISER, "CCC" );
-      design2.setMass( 130 );
-      design2.setArmour( 700 );
-      design2.setShields( 560 );
-      design2.setRegenShields(true);
-      design2.setBattleSpeed( 1.25 );
-      design2.setInitiative( 5 );
-      design2.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
-      design2.addWeapon( Weapon.PULSED_SAPPER, 2 );
-      design2.addWeapon( Weapon.COLLOIDAL_PHASER, 2 );
-      
-      BattleSimulation battle = new OneOnOneBattle( design1, 10, design2, 14 );
-      
-      battle.addStatusListener( new StatusListener() {
-         public void battleStatusUpdate(int round, String message)
-         {
-            System.out.println( "Round " + round + " : " + message );
-         }
-      });
+      battle.addStatusListener( consoleStatusListener );
 
       battle.simulate();
+      
+      //
+      // Test that we got the expected battle outcome
+      //
+      
+      // CCC stack is wiped out
+      assertEquals( 0, battle.getStack("CCC").shipCount );
+      
+      // Rabid Dog stack suffers no ship losses
+      assertEquals( 12, battle.getStack("Rabid Dog").shipCount );
+      
+      // Damage won't always be exactly the same, but should be in the same region
+      assertTrue( "Rabid Dogs about 50% damaged", battle.getStack("Rabid Dog").getDamagePercent() > 40 );
+      assertTrue( "Rabid Dogs about 50% damaged", battle.getStack("Rabid Dog").getDamagePercent() < 60 );
+   }
+
+   /**
+    */
+   public void testBattleTwo() throws Exception
+   {
+      BattleSimulation battle = new OneOnOneBattle( rabidDog, 7, ccc, 14 );
+      
+      battle.addStatusListener( consoleStatusListener );
+
+      battle.simulate();
+      
+      //
+      // Test that we got the expected battle outcome
+      //
+      
+      // CCC stack is undamaged
+      assertEquals( 14, battle.getStack("CCC").shipCount );
+      assertEquals( 0, battle.getStack("CCC").getDamagePercent() );
+      
+      // Rabid Dog stack is wiped out
+      assertEquals( 0, battle.getStack("Rabid Dog").shipCount );
+      
    }
 }

@@ -21,8 +21,11 @@ package stars.ahc;
 import java.util.Properties;
 
 /**
+ * Represents a ship design from a Stars! game.
+ * <p>
+ * Each player may have up to 16 ship designs at any one time.
+ * 
  * @author Steve Leach
- *
  */
 public class ShipDesign
 {

@@ -21,16 +21,36 @@ package stars.ahc.plugins.battlesim;
 import java.util.ArrayList;
 
 /**
+ * Abstract class representing a battle simulation.
+ * <p>
+ * Concrete sub-classes implement the actual simulation code. 
+ * 
+ * @see OneOnOneBattle
  * @author Steve Leach
  */
 public abstract class BattleSimulation
 {
+   /**
+    * Battles are divided into up to 16 rounds, with each weapon firing once per round
+    */
    protected int round = 0;
-   protected boolean verbose = false;
+   /**
+    * Stores the ship stack details
+    */
    protected ShipStack[] stacks;
+   /**
+    * The number of stacks of ships involved in this battle
+    */
    protected int stackCount = 0;
+   /**
+    * The maximum number of rounds that a battle can have
+    */
    public static final int MAX_ROUNDS = 16;
+   /**
+    * The maxmimum initiative (hull+computers+weapon) that a ship can have
+    */
    public static final int MAX_INITIATIVE = 40;
+   
    private ArrayList statusListers = new ArrayList();
 
    // From the Stars! help file - may be slightly inaccurate
@@ -46,12 +66,21 @@ public abstract class BattleSimulation
          { 3,	2,	3,	2,	3,	2,	3,	2 }			// 2.5
    };
    
+   /**
+    * Returns the number of times a ship with the specified speed can move in a particular round
+    * <p>
+    * @param speed4 is the battle speed multiplied by 4
+    * @param round is the battle round concerned
+    */
    protected int movesInRound( int speed4, int round )
    {
       if (round > 8) round -= 8;
       return movement[speed4-1][round-1];
    }
 
+   /**
+    * Run the simulation until one side is dead or 16 rounds are up
+    */
    public void simulate()
    {
       while (stillFighting())
@@ -59,9 +88,13 @@ public abstract class BattleSimulation
          simulateNextRound();
       }
       
+      // Show the results of the battle
       showStacks();
    }
    
+   /**
+    * Display the status of all the stacks 
+    */
    public void showStacks()
    {
       for (int n = 0; n < stackCount; n++)
@@ -70,13 +103,16 @@ public abstract class BattleSimulation
       }
    }
    
+   /**
+    * Simulate the next round of combat
+    * <p>
+    * This is implemented by the concrete subclasses 
+    */
    public abstract void simulateNextRound();
    
-   public void setVerbose(boolean verbose)
-   {
-      this.verbose = verbose;
-   }
-
+   /**
+    * Returns true if there are still at least 2 stacks fighting in the battle
+    */
    public boolean stillFighting()
    {
       int stacksFighting = 0;
@@ -93,6 +129,12 @@ public abstract class BattleSimulation
    }
 
    /**
+    * Damage done by beam weapons decreases with range. This calculates the reduction.
+    * <p> 
+    * Returns the percentage of maximum damage that is done at the specified distance.
+    * 
+    * @param distance is the distance from which the shot is fired
+    * @param weaponRange is the maximum range of the weapon
     */
    public static double getRangeMultiplier(int distance, int weaponRange)
    {
@@ -103,17 +145,53 @@ public abstract class BattleSimulation
       return 1.0 - n;
    }
    
+   /**
+    * Returns the specified ship stack 
+    */
+   public ShipStack getStack( String designName )
+   {
+      for (int n = 0; n < stacks.length; n++)
+      {
+         if (stacks[n].design.getName().equals(designName))
+         {
+            return stacks[n];
+         }
+      }
+      return null;
+   }
+   
+   /**
+    * Registers an object is interested in changes to the status of the simulation 
+    */
    public void addStatusListener( StatusListener listener )
    {
-      statusListers.add( listener );
+      if (listener != null)
+      {
+         statusListers.add( listener );
+      }
    }
   
+   /**
+    * Records that the status of the simulation has changed
+    * <p>
+    * The new status is broadcast to all registered status listeners.
+    * 
+    * @see addStatusListener
+    */
    public void statusUpdate( String msg )
    {
       for (int n = 0; n < statusListers.size(); n++)
       {
-         StatusListener listener = (StatusListener)statusListers.get(n);
-         listener.battleStatusUpdate( round, msg );
+         try
+         {
+            StatusListener listener = (StatusListener)statusListers.get(n);
+            
+            listener.battleStatusUpdate( round, msg );
+         }
+         catch (Throwable t)
+         {
+            // protect the simulation from buggy status listeners
+         }
       }
    }
 }
