@@ -16,6 +16,7 @@
 package stars.ahcgui;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Insets;
@@ -43,6 +44,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import stars.ahc.*;
+import stars.ahcgui.pluginmanager.PlugInManager;
+import stars.ahcgui.pluginmanager.PluginLoadError;
 
 /**
  *  Description of the Class
@@ -206,7 +209,12 @@ public class AhcFrame extends javax.swing.JFrame
     {
         //AhcGui.setMainFrame( this );
         contentPane = getContentPane();
-        contentPane.add( addBanner(), BorderLayout.NORTH );
+        
+        JPanel bannerPanel = new JPanel();
+        bannerPanel.add( addBanner() );
+        bannerPanel.setBackground( Color.BLACK );
+        contentPane.add( bannerPanel, BorderLayout.NORTH );
+        
         AhcGui.setMainFrame( this );
         AhcGui.setStatusBox( status );
         addWindowListener(
@@ -219,6 +227,9 @@ public class AhcFrame extends javax.swing.JFrame
                 }
             } );
         setTitle( "AutoHost Client " + AutoHostClient.VERSION );
+        
+        loadPlugins();
+        
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab( "Games", addGamesTab() );
         tabbedPane.addTab( "Options", addOptionTab() );
@@ -243,6 +254,22 @@ public class AhcFrame extends javax.swing.JFrame
     }
 
     /**
+    * 
+    */
+   private void loadPlugins()
+   {
+      try
+      {
+         PlugInManager.getPluginManager().findAndLoadPlugins();
+      }
+      catch (PluginLoadError e)
+      {
+         Log.log( Log.NOTICE, this, e );
+      }
+   }
+
+
+   /**
      * Returns a URL representing a file name if the file exists
      * 
      * @param fileName

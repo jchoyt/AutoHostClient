@@ -20,10 +20,11 @@ package stars.ahc.plugins.map.layers;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 import stars.ahc.Game;
 import stars.ahc.plugins.map.MapConfig;
-import stars.ahc.plugins.map.MapLayer;
+import stars.ahcgui.pluginmanager.MapLayer;
 
 /**
  * Draws the map background.  Currently just fills it in black.
@@ -48,8 +49,14 @@ public class BackgroundLayer implements MapLayer
     */
    public void draw(Graphics2D g)
    {
-      g.setPaint( Color.BLACK );      
-      g.fill( g.getClipBounds() );
+      g.setPaint( Color.BLACK );
+      
+      Rectangle rect = g.getClipBounds(); 
+      
+      if (rect != null)
+      {
+         g.fill( rect );
+      }      
    }
 
    /* (non-Javadoc)
@@ -67,6 +74,31 @@ public class BackgroundLayer implements MapLayer
    {
       this.game = game;
       this.config = config;
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.PlugIn#getName()
+    */
+   public String getName()
+   {
+      return "Background layer";
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.PlugIn#setEnabled(boolean)
+    */
+   public void setEnabled(boolean enabled)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.MapLayer#isScaled()
+    */
+   public boolean isScaled()
+   {
+      return true;
    }
 
 }

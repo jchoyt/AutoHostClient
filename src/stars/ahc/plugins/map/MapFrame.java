@@ -19,27 +19,42 @@
 package stars.ahc.plugins.map;
 
 import java.awt.BorderLayout;
-import java.util.ArrayList;
+import java.awt.Color;
+import java.awt.FlowLayout;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JList;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JTable;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.AbstractTableModel;
 
 import stars.ahc.Game;
+import stars.ahcgui.pluginmanager.MapLayer;
+import stars.ahcgui.pluginmanager.PlugInManager;
 
 /**
  * Swing frame in which the game map is displayed
  * 
  * @author Steve Leach
  */
-public class MapFrame extends JFrame
+public class MapFrame extends JFrame implements MapConfigChangeListener
 {
    protected Game game = null;
    protected MapConfig config = new MapConfig();
-   protected static Map mapFrames = new HashMap(); 
+   protected static Map mapFrames = new HashMap();
+   private JSlider scaleSlider;
+   private MapPanel mapPanel;
+   private JLabel scaleLabel; 
    
    /**
     * Other classes should use viewGameMap() instead of the constructor.
@@ -49,7 +64,9 @@ public class MapFrame extends JFrame
    {
       this.game = game;
       
-      config.mapScale = 0.6;
+      config.mapScale = 1.0;
+      
+      config.addChangeListener( this );
       
       setupMapFrame();
       setupMapControls();
@@ -87,7 +104,7 @@ public class MapFrame extends JFrame
     */
    private void setupMapFrame()
    {
-      setBounds( 20, 20, 500, 400 );
+      setBounds( 20, 20, 720, 580 );
       setTitle( "Map for " + game.getName() + " (" + game.getCurrentYear() + ")" );
       
       getContentPane().setLayout(new BorderLayout());
@@ -98,36 +115,160 @@ public class MapFrame extends JFrame
     */
    private void setupMapControls() throws MapDisplayError
    {
-      MapPanel mapPanel = new MapPanel( game, config );
-
-      ArrayList layers = new ArrayList();
+      JPanel toolbar = new JPanel( new FlowLayout(FlowLayout.LEFT) );
+      getContentPane().add( toolbar, BorderLayout.NORTH );
       
-      //
-      // Load the default map layers.
-      // Note that these are specified as class names as they will eventually
-      // be loaded as part of a plugin infrastructure.
-      //
-      layers.add( mapPanel.addMapLayer( "stars.ahc.plugins.map.layers.BackgroundLayer" ) );
-      layers.add( mapPanel.addMapLayer( "stars.ahc.plugins.map.layers.PlanetLayer" ) );
-            
+      JButton btn = new JButton( "Move" );
+      btn.setSelected( true );
+      toolbar.add( btn );
+      
+      mapPanel = new MapPanel( game, config );
+
       getContentPane().add( mapPanel, BorderLayout.CENTER );
       
       JPanel controlPanel = new JPanel();
+      controlPanel.setLayout( new BoxLayout(controlPanel, BoxLayout.Y_AXIS) );
       controlPanel.setBorder( new BevelBorder(BevelBorder.LOWERED) );
+      controlPanel.setBackground( Color.RED );
 
-      String[] layerNames = new String[ layers.size() ];
-      for (int n = 0; n < layers.size(); n++)
-      {
-         layerNames[n] = ((MapLayer)layers.get(n)).getDescription();
-      }
+      //===============
+      JPanel scalePanel = new JPanel( new FlowLayout(FlowLayout.LEFT) );
       
-      JList layerList = new JList( layerNames );
-      layerList.setSelectedIndex(0);
+      JLabel label = new JLabel( "Scale: " );
+      scalePanel.add( label );
+      scalePanel.setBackground( Color.GREEN );
       
-      controlPanel.add( layerList );
+      scaleSlider = new JSlider();
+      scaleSlider.setMinimum( 10 );
+      scaleSlider.setMaximum( 400 );
+      scaleSlider.setValue( 100 );
+      
+      scalePanel.add( scaleSlider );
+      
+      scaleLabel = new JLabel("100%");
+      scalePanel.add( scaleLabel );
+      
+      controlPanel.add( scalePanel );
+      
+      scaleSlider.addChangeListener( new ChangeListener() {
+         public void stateChanged(ChangeEvent event)
+         {
+            config.mapScale = 1.0 * scaleSlider.getValue() / 100;
+            scaleLabel.setText( Math.round(config.mapScale * 100) + "%" );
+            MapFrame.this.repaint();
+         }
+      });
+
+      //===============
+      
+      JPanel layersPanel = new JPanel();
+      layersPanel.setBackground( Color.YELLOW );
+      layersPanel.setLayout( new BoxLayout(layersPanel,BoxLayout.Y_AXIS) );
+      layersPanel.add( new JLabel("Layers") );
+      LayerTableModel layerModel = new LayerTableModel( this );
+      JTable layerTable = new JTable( layerModel );
+      layerTable.setBorder( new EtchedBorder() );      
+      
+      layersPanel.add( layerTable );
+      controlPanel.add( layersPanel );
+      
+      //===============
+      
+      controlPanel.add( Box.createGlue() );
       
       getContentPane().add( controlPanel, BorderLayout.EAST );
+   }
+   
+   public void redrawMap()
+   {
+      mapPanel.repaint();
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.plugins.map.MapConfigChangeListener#mapConfigChanged(stars.ahc.plugins.map.MapConfig)
+    */
+   public void mapConfigChanged(MapConfig config)
+   {
+      scaleSlider.setValue( (int)Math.round(config.mapScale * 100) );
+      mapPanel.repaint();
    }
 }
 
 
+class LayerTableModel extends AbstractTableModel
+{
+   private MapLayer[] layers;
+   private MapFrame mapFrame;
+   
+   public LayerTableModel( MapFrame mapFrame )
+   {
+      this.mapFrame = mapFrame;
+      initialize();
+   }
+   
+   /**
+    * 
+    */
+   private void initialize()
+   {
+      layers = PlugInManager.getPluginManager().getMapLayers();      
+   }
+
+
+   /* (non-Javadoc)
+    * @see javax.swing.table.TableModel#getColumnCount()
+    */
+   public int getColumnCount()
+   {
+      return 2;
+   }
+
+   /* (non-Javadoc)
+    * @see javax.swing.table.TableModel#getRowCount()
+    */
+   public int getRowCount()
+   {
+      return layers.length;
+   }
+
+   /* (non-Javadoc)
+    * @see javax.swing.table.TableModel#getValueAt(int, int)
+    */
+   public Object getValueAt(int row, int col)
+   {
+      switch (col)
+      {
+         case 0:
+            return new Boolean( layers[row].isEnabled() );
+         case 1:
+            return layers[row].getName();
+      }
+      return null;
+   }
+   
+   public Class getColumnClass(int col)
+   {
+      switch (col)
+      {
+         case 0: return Boolean.class;
+         default: return String.class;
+      }
+   }
+   
+   public boolean isCellEditable(int row, int col)
+   {
+      return (col == 0);
+   }
+   
+   
+   public void setValueAt(Object obj, int row, int col)
+   {
+      switch (col)
+      {
+         case 0:
+            layers[row].setEnabled( ((Boolean)obj).booleanValue() );
+            mapFrame.redrawMap();
+            break;
+      }
+   }
+}

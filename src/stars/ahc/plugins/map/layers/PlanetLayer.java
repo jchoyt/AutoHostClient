@@ -21,18 +21,13 @@ package stars.ahc.plugins.map.layers;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import stars.ahc.Game;
 import stars.ahc.Planet;
 import stars.ahc.plugins.map.MapConfig;
 import stars.ahc.plugins.map.MapDisplayError;
-import stars.ahc.plugins.map.MapLayer;
+import stars.ahcgui.pluginmanager.MapLayer;
 
 /**
  * @author Steve
@@ -40,6 +35,7 @@ import stars.ahc.plugins.map.MapLayer;
  */
 public class PlanetLayer implements MapLayer
 { 
+   private boolean enabled = true;
    private ArrayList planets = new ArrayList();
    private MapConfig mapConfig = null;
       
@@ -48,7 +44,7 @@ public class PlanetLayer implements MapLayer
     */
    public boolean isEnabled()
    {
-      return true;
+      return enabled;
    }
 
    /* (non-Javadoc)
@@ -76,60 +72,6 @@ public class PlanetLayer implements MapLayer
       }
    }
 
-   private void loadPlanets( Game game ) throws MapDisplayError
-   {
-      String mapName = game.getDirectory() + "/" + game.getName() + ".map";
-      loadPlanets( mapName );
-   }
-   
-   private void loadPlanets( String mapFileName ) throws MapDisplayError
-   {
-      File mapFile = new File( mapFileName );
-      
-      if (mapFile.exists())
-      {
-         loadPlanets( mapFile );
-      }
-      else
-      {
-         throw new MapDisplayError( "File not found: " + mapFileName  );
-      }
-   }
-   
-   private void loadPlanets( File mapFile ) throws MapDisplayError
-   {
-      try
-      {
-         BufferedReader reader = new BufferedReader(new FileReader(mapFile));
-         
-         String titles = reader.readLine();
-         
-         String line;
-         
-         while ((line = reader.readLine()) != null)
-         {
-            String[] tokens = line.split("\t");
-            
-            Planet planet = new Planet();
-            planet.name = tokens[3];
-            planet.x = Integer.parseInt( tokens[1] );
-            planet.y = Integer.parseInt( tokens[2] );
-            
-            planets.add( planet );
-         }
-         
-         reader.close();
-      }
-      catch (FileNotFoundException e)
-      {
-         throw new MapDisplayError( "File not found: " + mapFile.getName() );
-      }
-      catch (IOException e)
-      {
-         throw new MapDisplayError( "Error reading file: " + mapFile.getName(), e );
-      }
-   }
-
    /* (non-Javadoc)
     * @see stars.ahcgui.map.MapLayer#initialize(stars.ahc.Game, stars.ahcgui.map.MapConfig)
     */
@@ -137,9 +79,33 @@ public class PlanetLayer implements MapLayer
    {
       this.mapConfig = config;
       
-      loadPlanets( game );
+      planets = PlanetLoader.loadPlanets( game );
       
       mapConfig.calcUniverseSize( planets );
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.PlugIn#getName()
+    */
+   public String getName()
+   {      
+      return "Planet layer";
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.PlugIn#setEnabled(boolean)
+    */
+   public void setEnabled(boolean enabled)
+   {
+      this.enabled = enabled;
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.MapLayer#isScaled()
+    */
+   public boolean isScaled()
+   {
+      return true;
    }
    
 }

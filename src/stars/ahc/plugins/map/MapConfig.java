@@ -7,6 +7,7 @@ package stars.ahc.plugins.map;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import stars.ahc.Planet;
 
@@ -22,15 +23,19 @@ public class MapConfig
    public int gameMinX = 0;
    public int gameMinY = 0;
    public int gameMaxX = 0;
-   public int gameMaxY = 0;   
+   public int gameMaxY = 0;
+   public int centreX = 0;
+   public int centreY = 0;
    public double mapScale = 1.0;
    
+   private Vector changeListeners = new Vector();
+   
    /**
-    * Converts map coordinates into screen coordinates 
+    * Converts map coordinates into (untransformed) screen coordinates 
     */
    public Point mapToScreen( Point mapPos )
    {
-      Point screenPos = new Point( mapPos.x - gameMinX, gameMaxY - mapPos.y);
+      Point screenPos = new Point( mapPos.x - centreX, centreY - mapPos.y );
 
       return screenPos;
    }
@@ -63,8 +68,23 @@ public class MapConfig
       gameMaxX += border;
       gameMaxY += border;
       
-      mapXpos = (gameMinX + gameMaxX) / 2;
-      mapYpos = (gameMinY + gameMaxY) / 2;      
+      centreX = (gameMinX + gameMaxX) / 2;
+      centreY = (gameMinY + gameMaxY) / 2;
+      mapXpos = centreX;      
+      mapYpos = centreY;       
    }
 
+   public void addChangeListener( MapConfigChangeListener listener )
+   {
+      changeListeners.add( listener );
+   }
+   
+   public void notifyChangeListeners()
+   {
+      for (int n = 0; n < changeListeners.size(); n++)
+      {
+         MapConfigChangeListener listener = (MapConfigChangeListener)changeListeners.get(n);
+         listener.mapConfigChanged(this);
+      }
+   }
 }

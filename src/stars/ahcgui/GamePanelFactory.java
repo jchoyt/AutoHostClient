@@ -99,15 +99,6 @@ class GamePanel extends JPanel implements PropertyChangeListener
         c.gridx = 0;
         c.gridy = 0;
 
-        try
-		{
-		   PlugInManager.getPluginManager().findAndLoadPlugins();
-		}
-		catch (PluginLoadError e)
-		{
-		   Log.log( Log.ERROR, this, e );
-		}
-     
         addGameData( game );
         addBlankSpace();
         addPlayerList( game );

@@ -18,108 +18,188 @@
  */
 package stars.ahc.plugins.map;
 
+import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
 
 import stars.ahc.Game;
+import stars.ahcgui.pluginmanager.MapLayer;
+import stars.ahcgui.pluginmanager.PlugInManager;
 
 /**
  * @author Steve Leach
  *
  */
-public class MapPanel extends JPanel
+public class MapPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener
 {
-   private ArrayList layers = new ArrayList();
    private Game game = null;
    private MapConfig config = null;
+   private boolean dragging = false;
+   private Point prevMousePos = null;
    
    public MapPanel( Game game, MapConfig config ) throws MapDisplayError
    {
       this.game = game;
       this.config = config;
       
+      initializeLayers();
+      
+      addMouseListener( this );
+      addMouseMotionListener( this );
+      addMouseWheelListener( this );
    }
 
    /**
-    * Creates, initializes and adds a new map layer
     * 
-    * @param className
-    * @throws MapDisplayError
     */
-   public MapLayer addMapLayer( String className ) throws MapDisplayError
+   private void initializeLayers() throws MapDisplayError
    {
-      try
+      MapLayer[] layers = PlugInManager.getPluginManager().getMapLayers();
+      
+      for (int n = 0; n < layers.length; n++)
       {
-         Class mapLayerClass = Class.forName( className );
-         
-         return addMapLayer( mapLayerClass );
-      }
-      catch (ClassNotFoundException e)
-      {
-         throw new MapDisplayError( "Class not found: " + className, e );
-      }
-   }
-   
-   /**
-    * Creates, initializes and adds a new map layer
-    * 
-    * @param mapLayerClass
-    * @throws MapDisplayError
-    */
-   public MapLayer addMapLayer( Class mapLayerClass ) throws MapDisplayError
-   {
-      try
-      {
-         MapLayer layer = (MapLayer)mapLayerClass.newInstance();
-         
-         layer.initialize( game, config );
-         
-         addMapLayer( layer );
-         
-         return layer;
-      }
-      catch (InstantiationException e)
-      {
-         throw new MapDisplayError( "Could not instantiate class: " + mapLayerClass.getName(), e );
-      }
-      catch (IllegalAccessException e)
-      {
-         throw new MapDisplayError( "Illegal access: " + mapLayerClass.getName(), e );
-      }
-   }
-   
-   /**
-    * The layer should already have been initialized
-    * @param layer
-    */
-   public void addMapLayer( MapLayer layer )
-   {
-      if (layer != null)
-      {
-         layers.add( layer );
+         layers[n].initialize( game, config );
       }
    }
    
    public void paint(Graphics g)
    {
       Graphics2D g2D = (Graphics2D)g;
-
+      
+      MapLayer[] layers = PlugInManager.getPluginManager().getMapLayers();
+      
       // Cycle through the layers
-      for (int n = 0; n < layers.size(); n++)
+      for (int n = 0; n < layers.length; n++)
       {
-         MapLayer layer = (MapLayer)layers.get( n );
-         
-         g2D.scale( config.mapScale, config.mapScale );
-         
          // If the layer is enabled then draw it
-         if ( layer.isEnabled() )
+         if ( layers[n].isEnabled() )
          {
-            layer.draw( g2D );
+            setupTransform( layers[n], g2D );
+
+            if (g2D != null)
+            {
+               layers[n].draw( g2D );
+            }
          }
       }
+   }
+
+   /**
+    * Sets the transformation (movement and scaling) for the graphics device
+    * 
+    * @param layer
+    * @param g2d
+    */
+   private void setupTransform(MapLayer layer, Graphics2D g2d)
+   {
+      AffineTransform xform = new AffineTransform();
+      
+      if (layer.isScaled())
+      {
+         xform.translate( this.getWidth() / 2, this.getHeight() / 2 );
+         xform.scale( config.mapScale, config.mapScale );
+         xform.translate( config.mapXpos - config.gameMinX, config.mapYpos - config.gameMinY );
+      }
+
+      g2d.setTransform( xform );      
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+    */
+   public void mouseClicked(MouseEvent arg0)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
+    */
+   public void mouseEntered(MouseEvent arg0)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+    */
+   public void mouseExited(MouseEvent arg0)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+    */
+   public void mousePressed(MouseEvent event)
+   {
+      dragging = true;
+      setCursor( new Cursor(Cursor.MOVE_CURSOR) );
+      prevMousePos = event.getPoint();
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+    */
+   public void mouseReleased(MouseEvent arg0)
+   {
+      setCursor( new Cursor(Cursor.DEFAULT_CURSOR) );
+      dragging = false;
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent)
+    */
+   public void mouseDragged(MouseEvent event)
+   {
+      int dx = event.getPoint().x - prevMousePos.x;
+      int dy = event.getPoint().y - prevMousePos.y;
+      
+      config.mapXpos += dx / config.mapScale;
+      config.mapYpos += dy / config.mapScale;
+      
+      repaint();
+      
+      prevMousePos = event.getPoint();
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
+    */
+   public void mouseMoved(MouseEvent arg0)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   /* (non-Javadoc)
+    * @see java.awt.event.MouseWheelListener#mouseWheelMoved(java.awt.event.MouseWheelEvent)
+    */
+   public void mouseWheelMoved(MouseWheelEvent event)
+   {
+      System.out.println( "wheel" );
+      int amount = event.getWheelRotation();
+      if (amount > 0)
+      {
+         config.mapScale *= 1.1;
+      }
+      else
+      {
+         config.mapScale /= 1.1;
+      }
+      config.notifyChangeListeners();
    }
 
 }
