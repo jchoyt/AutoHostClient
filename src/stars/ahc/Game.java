@@ -405,7 +405,7 @@ public class Game extends Object
 
 
     /**
-     *  Description of the Method
+     * Loads the game status properties
      */
     public void loadProperties()
     {
@@ -747,11 +747,9 @@ public class Game extends Object
 
 
     /**
-     *  Load game properties
-     *
-     *@param  props  Description of the Parameter
+     * Sets the game's internal state based on the specified properties list  
      */
-    public void loadGameProperties( Properties props )
+    public void parseProperties( Properties props )
     {
         String[] races = props.getProperty( name + ".RaceNames" ).split( "," );
 
@@ -1089,6 +1087,14 @@ public class Game extends Object
     {
         return ahStatus;
     }
+
+
+   /**
+    */
+   public boolean isAutohosted()
+   {
+      return "true".equals( getSahHosted() );
+   }
 
 }
 

@@ -42,25 +42,21 @@ public class LocalGameController implements GameController
         this.game = game;
     }
 
-
     /**
-     *  Gets the currentYear attribute of the LocalGameController object
-     *
-     *@return    The currentYear value
+     * 
+     * @param fileType - either "m" or "x"
      */
-    public String getCurrentYear()
+    private String getFileYear( String id, String fileType )
     {
-       String year = "unknown";
+       String year = "";
        
-       String id = game.getPlayers()[0].id;
-       
-       File mFile = new File( game.directory + File.separator + game.name + ".m" + id  );
-       
-       if (mFile.exists())
+       File file = new File( game.directory + File.separator + game.name + "." + fileType + id  );
+
+       if (file.exists())
        {
           try
           {
-          	FileReader in = new FileReader(mFile);
+          	FileReader in = new FileReader(file);
           	year = Utils.getTurnNumber( in );
           }
           catch (Throwable t)
@@ -70,10 +66,21 @@ public class LocalGameController implements GameController
        }
        else
        {
-          Log.log( Log.WARNING, this, "File not found: " + mFile.getAbsolutePath() );
+          Log.log( Log.WARNING, this, "File not found: " + file.getAbsolutePath() );
        }
        
-        return year;
+       return year;
+    }
+
+    /**
+     *  Gets the currentYear attribute of the LocalGameController object
+     *
+     *@return    The currentYear value
+     */
+    public String getCurrentYear()
+    {
+       String id = game.getPlayers()[0].id ;
+       return getFileYear( id, "m" );
     }
 
 
@@ -130,9 +137,38 @@ public class LocalGameController implements GameController
     public Properties getPlayersByStatus()
     {
         Properties ret = new Properties();
-        ret.setProperty("in", "");
-        ret.setProperty("out", "");
-        ret.setProperty("dead", "");
+        
+        String in = "";
+        String out = "";
+        String dead = "";
+        
+        Player[] players = game.getPlayers();
+        
+        for (int n = 0; n < players.length; n++)
+        {
+           String status = getPlayerStatus( players[n].id );
+           
+           if (status.equals("in"))
+           {
+              if (in.length() > 0)
+              {
+                 in += ",";
+              }
+              in += players[n].getRaceName();
+           }
+           else
+           {
+              if (out.length() > 0)
+              {
+                 out += ",";
+              }
+              out += players[n].getRaceName();
+           }
+        }
+        
+        ret.setProperty("in", in);
+        ret.setProperty("out", out);
+        ret.setProperty("dead", dead);
         return ret;
     }
 
@@ -188,6 +224,28 @@ public class LocalGameController implements GameController
         pcs.addPropertyChangeListener( listener );
     }
 
+    private String getPlayerStatus( String id )
+    {
+       String mYear = getFileYear( id, "m" );
+       String xYear = getFileYear( id, "x" );
+       
+       String status = "";
+       
+       if (Utils.empty(xYear))
+       {
+          status = "waiting";
+       }
+       else if (xYear.equals(mYear))
+       {
+          status = "in";
+       }
+       else
+       { 
+          status = "waiting";
+       }
+       
+       return status;
+    }
 
    /* (non-Javadoc)
     * @see stars.ahc.GameController#getStatusProperties()
@@ -200,7 +258,9 @@ public class LocalGameController implements GameController
       {
          String id = game.getPlayers()[n].id ;
       
-         props.setProperty( "player" + id + "-turn", "local" );
+         String status = getPlayerStatus( id );
+         
+         props.setProperty( "player" + id + "-turn", status );
       }
       
       return;

@@ -390,6 +390,10 @@ public class GamesProperties
                     String gameDirectory = props.getProperty( gameNames[i] + ".GameDir" );
                     currentGame = new Game( gameNames[i], gameDirectory );
                     currentGame.setDirectory( gameDirectory );
+
+                    // Note - this lot can be moved into game.parseProperties() [SL, 2 Nov 04]
+                    
+                    
                     /*
                      *  for each game, set up the players
                      */
@@ -416,8 +420,18 @@ public class GamesProperties
                         currentGame.setPlayers( players );
                     }
 
-                    currentGame.loadGameProperties( props );
+                    currentGame.parseProperties( props );
 
+                    if (currentGame.isAutohosted() == false)
+                    {
+                       // Properties have already been loaded as part of creating the Game object.
+                       // We do it again now after setting up the players, but not for AutoHost
+                       // games as those don't need it and we don't want to poll the server again.
+                       // Steve Leach, 2 Nov 2004
+                       currentGame.loadProperties();
+                    }
+                       
+                    
                     games.add( currentGame );
                 }
                 if ( gameNames.length == 1 )
