@@ -30,6 +30,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -170,8 +171,10 @@ public class ShipDesignEditorPanel extends JPanel
 
    private JPanel createEditPanel()
    {
-      JPanel editPanel = new JPanel( new GridBagLayout() );
-      editPanel.setBorder( new EmptyBorder(3,3,3,3) ); 
+      JPanel editPanel = new JPanel( new BorderLayout() );
+      
+      JPanel fieldPanel = new JPanel( new GridBagLayout() );
+      fieldPanel.setBorder( new EmptyBorder(3,3,3,3) ); 
       
       GridBagConstraints gbc = new GridBagConstraints();
       gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -180,96 +183,86 @@ public class ShipDesignEditorPanel extends JPanel
       gbc.gridy = 1;
       gbc.gridx = 1;
       gbc.gridwidth = 1;
-      editPanel.add( new JLabel("Design:"), gbc );
+      fieldPanel.add( new JLabel("Design:"), gbc );
 
       gbc.gridx++;
       gbc.gridwidth = 4;
       nameField = new JTextField(30);
-      editPanel.add( nameField, gbc );
+      fieldPanel.add( nameField, gbc );
       
       gbc.gridy++;
       gbc.gridx = 1;
       gbc.gridwidth = 1;
-      editPanel.add( new JLabel("Owner:"), gbc );
+      fieldPanel.add( new JLabel("Owner:"), gbc );
       
       gbc.gridx++;
       gbc.gridwidth = 4;
       ownerField = new JTextField(30);
-      editPanel.add( ownerField, gbc );
+      fieldPanel.add( ownerField, gbc );
 
       gbc.gridy++;
       gbc.gridx = 1;
       gbc.gridwidth = 1;
-      editPanel.add( new JLabel("Hull Type:"), gbc );
+      fieldPanel.add( new JLabel("Hull Type:"), gbc );
       
       gbc.gridx++;     
       gbc.gridwidth = 4;
       hullTypeField = new JComboBox(ShipDesign.getHullTypeNames());
-      editPanel.add( hullTypeField, gbc );
+      fieldPanel.add( hullTypeField, gbc );
 
       gbc.gridy++;
       gbc.gridx = 1;
       gbc.gridwidth = 1;
-      editPanel.add( new JLabel("Mass:"), gbc );
+      fieldPanel.add( new JLabel("Mass:"), gbc );
       
       gbc.gridx++;      
       gbc.gridwidth = 1;
       massField = new JTextField(5);
-      editPanel.add( massField, gbc );
+      fieldPanel.add( massField, gbc );
       
       gbc.gridy++;
       gbc.gridx = 1;
       gbc.gridwidth = 1;
-      editPanel.add( new JLabel("Armour:"), gbc );
+      fieldPanel.add( new JLabel("Armour:"), gbc );
       
       gbc.gridx++;      
       gbc.gridwidth = 1;
       armourField = new JTextField(5);
-      editPanel.add( armourField, gbc );
+      fieldPanel.add( armourField, gbc );
 
       gbc.gridx++;
       gbc.gridwidth = 1;
-      editPanel.add( new JLabel("Shields:"), gbc );
+      fieldPanel.add( new JLabel("Shields:"), gbc );
       
       gbc.gridx++;      
       shieldsField = new JTextField(5);
-      editPanel.add( shieldsField, gbc );
+      fieldPanel.add( shieldsField, gbc );
       
       gbc.gridx++;      
       regenShieldsField = new JCheckBox("Regen");
-      editPanel.add( regenShieldsField, gbc );
+      fieldPanel.add( regenShieldsField, gbc );
 
       gbc.gridy++;
       gbc.gridx = 1;
       gbc.gridwidth = 1;
-      editPanel.add( new JLabel("Move:"), gbc );
+      fieldPanel.add( new JLabel("Move:"), gbc );
       
       gbc.gridx++;      
       gbc.gridwidth = 1;
       moveField = new JTextField(5);
-      editPanel.add( moveField, gbc );
+      fieldPanel.add( moveField, gbc );
 
       gbc.gridx++;
       gbc.gridwidth = 1;
-      editPanel.add( new JLabel("Initiative:"), gbc );
+      fieldPanel.add( new JLabel("Initiative:"), gbc );
       
       gbc.gridx++;      
       initiativeField = new JTextField(5);
-      editPanel.add( initiativeField, gbc );
+      fieldPanel.add( initiativeField, gbc );
             
+      editPanel.add( fieldPanel, BorderLayout.NORTH );
       
-      gbc.gridy++;
-      gbc.gridx = 1;
-      gbc.gridwidth = 5;
-      gbc.weightx = 1;
-      gbc.weighty = 1;
-      editPanel.add( getWeaponsBox(), gbc );
-      
-//      gbc.gridy++;
-//      gbc.gridx = 5;
-//      gbc.weightx = 1;
-//      gbc.weighty = 1;
-//      editPanel.add( new JLabel(" "), gbc );
+      editPanel.add( getWeaponsBox(), BorderLayout.CENTER );
       
       refreshFields();
       
@@ -284,27 +277,28 @@ public class ShipDesignEditorPanel extends JPanel
 
       weaponsTable = new JTable( new WeaponsTableModel(this) );
       weaponsTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
-      weaponsTable.setRowHeight( 20 );
+      weaponsTable.setRowHeight( 22 );
+
+      JComboBox weaponTypeSelector = new JComboBox();
+      for (int n = 0; n < Weapon.getAllWeapons().length; n++)
+      {
+         weaponTypeSelector.addItem( Weapon.getAllWeapons()[n].name );
+      }
+      
+      weaponsTable.getColumnModel().getColumn(0).setCellEditor( new DefaultCellEditor(weaponTypeSelector) );
+      
+      weaponsTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
+      
+      weaponsTable.getColumnModel().getColumn(0).setWidth( 200 );
       
       JScrollPane scroller = new JScrollPane(weaponsTable);
       
-      weaponsBox.add( weaponsTable );
+      weaponsBox.add(scroller);
       
       weaponsBox.add( Box.createVerticalStrut(2) );
       
       Box weaponsControls = Box.createHorizontalBox();
-      
-//      weaponsCountField = new JTextField(2);
-//      weaponsCountField.setText("1");
-//      weaponsControls.add( weaponsCountField );
-//      
-//      Vector weaponsTypes = new Vector();
-//      weaponsTypes.add( "Colloidal" );
-      
-//      weaponsTypeList = new JComboBox(weaponsTypes);
-      
-//      weaponsControls.add( weaponsTypeList );
-      
+
       Action addWeaponAction = new AbstractAction("Add") {
          public void actionPerformed(ActionEvent event)
          {
@@ -389,6 +383,8 @@ public class ShipDesignEditorPanel extends JPanel
       moveField.setText( ""+(design.getSpeed4()/4) );
       initiativeField.setText( ""+design.getInitiative() );
       regenShieldsField.setSelected( design.isRegenShields() );
+      
+      weaponsTable.repaint();
    }
    
    void saveChanges()
@@ -485,7 +481,7 @@ class WeaponsTableModel extends AbstractTableModel
    
    public boolean isCellEditable(int row, int col)
    {
-      return (col == 1);
+      return true;
    }
    
    
@@ -499,10 +495,24 @@ class WeaponsTableModel extends AbstractTableModel
       
       switch (col)
       {
+         case 0:
+            String newName = value.toString();
+            Weapon wpn = Weapon.getWeaponByName(newName);
+            design.setWeapon( row, design.getWeaponCount(row), wpn );
+            break;
          case 1:
             int newCount = ((Integer)value).intValue();
             design.setWeaponCount(row,newCount);
             break;
+      }
+   }
+   public String getColumnName(int col)
+   {
+      switch (col)
+      {
+         case 0: 	return "Weapon";
+         case 1: 	return "Count";
+         default:	return null;
       }
    }
 }

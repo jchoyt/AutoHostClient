@@ -56,7 +56,7 @@ public class Weapon
    public static final Weapon STREAMING_PULV = new Weapon("Streaming Pulverizer", TYPE_BEAM, 433, 1, 9, 100 );
    public static final Weapon AMP = new Weapon("Antimatter Pulverizer", TYPE_BEAM, 433, 2, 8, 100 );
    
-   public static final Weapon[] WEAPONS = 
+   private static final Weapon[] WEAPONS = 
    {
          LASER, X_RAY, MINIGUN, YAKIMORA, BLACKJACK, PHASER_BAZOOKER, PULSED_SAPPER, COLLOIDAL_PHASER,
          GATTLING_GUN, MINI_BLASTER, BLUDGEON, MK_IV_BLASTER, PHASED_SAPPER, HEAVY_BLASTER,
@@ -93,5 +93,10 @@ public class Weapon
          }
       }
       return null;
+   }
+   
+   public static Weapon[] getAllWeapons()
+   {
+      return WEAPONS;
    }
 }
