@@ -198,7 +198,7 @@ public class BattleSimulatorTest extends TestCase
    
    public void testBattleThree()
    {
-      BattleSimulation battle = new OneOnOneBattle( rabidDog, 15, armBB, 4 );
+      BattleSimulation battle = new OneOnOneBattle( rabidDog, 16, armBB, 4 );
 
       battle.addStatusListener( consoleStatusListener );
       
@@ -212,8 +212,8 @@ public class BattleSimulatorTest extends TestCase
       assertEquals( 4, battle.getStack("ArmBB").shipCount );
 
       // Damage won't always be exactly the same, but should be in the same region
-      assertTrue( "ArmBBs about 10% damaged", battle.getStack("ArmBB").getDamagePercent() > 7 );
-      assertTrue( "ArmBBs about 10% damaged", battle.getStack("ArmBB").getDamagePercent() < 14 );
+      assertTrue( "ArmBBs about 15% damaged", battle.getStack("ArmBB").getDamagePercent() > 13 );
+      assertTrue( "ArmBBs about 15% damaged", battle.getStack("ArmBB").getDamagePercent() < 17 );
             
       // Rabid Dog stack is wiped out
       assertEquals( 0, battle.getStack("Rabid Dog").shipCount );

@@ -139,7 +139,27 @@ public class OneOnOneBattle extends BattleSimulation
     */
    private void calculatePreferredRange()
    {
-      // TODO: implement this
+      calculatePreferredRange( stacks[0] );
+      calculatePreferredRange( stacks[1] );
+   }
+   
+   private void calculatePreferredRange( ShipStack stack )
+   {
+      ShipDesign design = stack.design;
+      ShipDesign target = stack.target.design;
+      
+      // Simplified system
+      // If we have a longer range than the enemy, try and keep out of range of their weapons
+      // Otherwise, just rush to range 0
+      
+      if (design.getMaxRange() > target.getMaxRange())
+      {
+         stack.preferredRange = target.getMaxRange() + 1;
+      }
+      else
+      {
+         stack.preferredRange = 0;
+      }
    }
    
    /**
@@ -210,26 +230,40 @@ public class OneOnOneBattle extends BattleSimulation
     */
    private void moveStack( int index )
    {
-      ShipStack me = stacks[index];
-      ShipStack you = me.target;
+      ShipStack mover = stacks[index];
+      ShipStack target = mover.target;
 
-      // TODO: move away from target if under preferred range
+      int currentRange = distanceBetween( mover, target );
       
-      if (me.xpos == you.xpos)	 
+      int direction = 1;
+      
+      if (currentRange == mover.preferredRange)
+      {
+         statusUpdate( stacks[index].toString() + " does not move" );
+         return;
+      }
+      else if (currentRange < mover.preferredRange)
+      {
+         direction = -1;
+      }
+      
+      if (mover.xpos == target.xpos)	 
       {
          return;
       }
       
-      if (me.xpos > you.xpos)
+      if (mover.xpos > target.xpos)
       {
-         me.xpos--;
+         mover.xpos -= direction;
       }
       else
       {
-         me.xpos++;
+         mover.xpos += direction;
       }            
       
-      statusUpdate( stacks[index].toString() + " moves to " + me.xpos + "," + me.ypos + " (range " + distanceBetween(me,you) + ")");      
+      String directionStr = (direction == -1) ? "away" : "closer";
+      
+      statusUpdate( stacks[index].toString() + " moves " + directionStr + " to " + mover.xpos + "," + mover.ypos + " (range " + distanceBetween(mover,target) + ")");      
    }
    
    /**
