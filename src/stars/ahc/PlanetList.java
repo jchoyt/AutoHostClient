@@ -35,6 +35,8 @@ import java.util.Map;
  */
 public class PlanetList
 {
+   private Game game;
+   
    private int planetCount = 0;
    
    // List of planet names, fast sequential scan
@@ -46,13 +48,18 @@ public class PlanetList
    // All planet data, one entry per planet per year, fast retrieval by name and year
    private Map planetData = new HashMap();
 
+   public PlanetList( Game game )
+   {
+      this.game = game;      
+   }
+   
    public Planet getPlanet( String planetName, int year )
    {
       String hashValue = planetDataHashValue( planetName, year );
       PlanetData data = (PlanetData)planetData.get( hashValue );
       Point position = (Point)planetPositions.get( planetName );
       
-      return new Planet(planetName,year,position,data);
+      return new Planet(planetName,year,position,data,game);
    }
    
    /**
@@ -68,7 +75,7 @@ public class PlanetList
       PlanetData data = (PlanetData)planetData.get( hashValue );
       Point position = (Point)planetPositions.get( planetName );
       
-      return new Planet(planetName,year,position,data);       
+      return new Planet(planetName,year,position,data,game);       
    }
 
    private String planetDataHashValue( String planetName, int year )

@@ -19,6 +19,8 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -40,34 +42,36 @@ public class Game extends Object
     String name;
     PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
     ArrayList players;    
-    private PlanetList planets = new PlanetList();
+    private PlanetList planets;
     private ArrayList races = new ArrayList();
+    private Properties userDefinedProperties = new Properties();
 
     /**
      *  Constructor for the Game object
      */
     public Game()
     {
-        name = "";
-        players = new ArrayList();
-        directory = "";
+       init( "", "" );
     }
 
 
     /**
      *  Constructor for the Game object
-     *
-     *@param  shortName  Description of the Parameter
-     *@param  directory  Description of the Parameter
      */
     public Game( String shortName, String directory )
     {
-        name = shortName.toString();
-        players = new ArrayList();
-        this.directory = directory;
-        loadProperties();
+       init( shortName, directory );
     }
 
+    private void init( String shortName, String directory )
+    {
+       name = shortName.toString();
+       players = new ArrayList();
+       planets = new PlanetList( this );
+       this.directory = directory;
+       loadProperties();      
+       loadUserDefinedProperties();
+    }
 
     /**
      *  Sets the directory attribute of the Game object
@@ -803,6 +807,69 @@ public class Game extends Object
          }
       }
       return actionRequired;
+   }
+   
+   public void loadUserDefinedProperties()
+   {
+      String userPropertiesFileName = directory + File.separator + name + ".userprops";
+      File userPropertiesFile = new File(userPropertiesFileName);
+
+      if (userPropertiesFile.exists())
+      {
+         try
+         {
+            FileInputStream s = new FileInputStream(userPropertiesFile);
+            userDefinedProperties.load(s);
+         }
+         catch (FileNotFoundException e)
+         {
+            // This should never happen as we have already checked that the file exists
+            e.printStackTrace();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+         
+      }
+      
+   }
+
+
+   /**
+    */
+   public String getUserDefinedProperty(String propertyName)
+   {
+      return userDefinedProperties.getProperty( propertyName );
+   }
+
+   public void setUserDefinedProperty( String propertyName, String value )
+   {
+      userDefinedProperties.setProperty( propertyName, value );
+   }
+
+   /**
+    * 
+    */
+   public void saveUserDefinedProperties()
+   {
+      String userPropertiesFileName = directory + File.separator + name + ".userprops";
+      File userPropertiesFile = new File(userPropertiesFileName);
+      
+      try
+      {
+         FileOutputStream s = new FileOutputStream(userPropertiesFile);
+         
+         userDefinedProperties.store( s, "User defined properties for " + name );
+      }
+      catch (FileNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
    }
 }
 

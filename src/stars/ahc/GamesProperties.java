@@ -450,6 +450,8 @@ public class GamesProperties
           gameNames += game.name;
           
           game.setProperties( props );
+          
+          game.saveUserDefinedProperties();
        }
        
        setProperty( "Games", gameNames );

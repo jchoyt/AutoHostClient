@@ -193,6 +193,33 @@ public class TrayIconManager implements BasePlugIn, NotificationListener
       }
       
 
+      setIconAndTooltip();
+      
+      try
+      {
+         if ((source instanceof AHPoller) && (severity == AHPoller.BALLOON_NOTIFICATION))
+         {
+            // do something here
+         }
+         
+         icon.showBalloon( message, "Stars! AutoHost Client", MIN_TIMEOUT, WindowsTrayIcon.BALLOON_INFO );         
+      }
+      catch (TrayIconException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   /**
+    * 
+    */
+   private void setIconAndTooltip()
+   {
+      if (trayIconSupported() == false)
+      {
+         return;
+      }
+      
       try
       {
 	      if (GamesProperties.actionRequired())
@@ -210,21 +237,8 @@ public class TrayIconManager implements BasePlugIn, NotificationListener
       {
          e.printStackTrace();
       }
-      
-      try
-      {
-         if ((source instanceof AHPoller) && (severity == AHPoller.BALLOON_NOTIFICATION))
-         {
-            // do something here
-         }
-         
-         icon.showBalloon( message, "Stars! AutoHost Client", MIN_TIMEOUT, WindowsTrayIcon.BALLOON_INFO );         
-      }
-      catch (TrayIconException e)
-      {
-         e.printStackTrace();
-      }
    }
+
 
    /* (non-Javadoc)
     * @see stars.ahcgui.pluginmanager.BasePlugIn#init()

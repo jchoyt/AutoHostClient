@@ -21,8 +21,9 @@ package stars.ahc;
 import java.awt.Point;
 
 /**
+ * Encapulates information about a planet in a Stars! game
+ * 
  * @author Steve Leach
- *
  */
 public class Planet implements MapObject
 {
@@ -30,6 +31,7 @@ public class Planet implements MapObject
    private String name;
    private int year;
    private Point position;
+   private Game game;
    
    //
    // Constants for field indexes
@@ -69,12 +71,13 @@ public class Planet implements MapObject
    
    /**
     */
-   public Planet(String name,int year,Point position,PlanetData data)
+   public Planet(String name,int year,Point position,PlanetData data,Game game)
    {
       this.name = name;
       this.year = year;
       this.position = position;
       this.data = data;
+      this.game = game;
    }
 
    public Point getPosition()
@@ -183,5 +186,26 @@ public class Planet implements MapObject
    public int getBorConc()
    {
       return getIntValue( PLANET_CONC_B, 0 );
+   }
+   
+   private String getUserDefinedPropertyFullName( String shortName )
+   {
+      return "Planets." + name.replaceAll(" ","_") + "." + shortName;
+   }
+   
+   /**
+    * Sets a user defined property for this planet 
+    */
+   public void setUserProperty( String propertyName, String value )
+   {
+      game.setUserDefinedProperty( getUserDefinedPropertyFullName( propertyName ), value );
+   }
+   
+   /**
+    * Gets a user defined property for this planet 
+    */
+   public String getUserProperty( String propertyName )
+   {
+      return game.getUserDefinedProperty( getUserDefinedPropertyFullName( propertyName ) );
    }
 }
