@@ -31,13 +31,25 @@ import java.util.Random;
  */
 public class Race
 {
-   private Game game;
+   private Game game = null;
    private Color color = null;
    private String raceName = null;
+   private Properties properties;
    
    public Race( Game game )
    {
       this.game = game;
+      this.properties = game.getUserDefinedProperties();
+   }
+   
+   public Race()
+   {
+      properties = new Properties();
+   }
+   
+   public Race( Properties properties )
+   {
+      this.properties = properties;
    }
    
    public Color getColor()
@@ -146,13 +158,13 @@ public class Race
    public String getUserProperty(String property)
    {
       String propertyName = getUserDefinedPropertyFullName( property );
-      return game.getUserDefinedProperty( propertyName );
+      return properties.getProperty( propertyName );
    }
    
    public void setUserProperty( String property, String value )
    {
       String propertyName = getUserDefinedPropertyFullName( property );
-      game.setUserDefinedProperty( propertyName, value );
+      properties.setProperty( propertyName, value );
    }
    
    public void setUserProperty( String property, int value )
