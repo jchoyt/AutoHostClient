@@ -37,6 +37,7 @@ import java.util.Properties;
  */
 public class Game extends Object
 {
+    private static final int MAX_RACES = 16;
     Properties ahStatus;
     String directory;
     String name;
@@ -633,7 +634,6 @@ public class Game extends Object
     /**
      *  Returns the planets list
      *
-     *@return    The planets value
      */
     public PlanetList getPlanets()
     {
@@ -642,9 +642,9 @@ public class Game extends Object
 
 
     /**
-     *  Description of the Method
+     * Loads the contents of the Stars! map file into the planets list
      *
-     *@exception  ReportLoaderException  Description of the Exception
+     * @author Steve Leach
      */
     public void loadMapFile() throws ReportLoaderException
     {
@@ -660,11 +660,17 @@ public class Game extends Object
        }       
     }
     
+    /**
+     * Loads all Stars! reports for the game
+     * 
+     * @author Steve Leach
+     * @throws ReportLoaderException
+     */
     public void loadReports() throws ReportLoaderException
     {
        loadMapFile();
        
-       for (int n = 1; n <= 16; n++)
+       for (int n = 1; n <= MAX_RACES; n++)
        {
           loadReportFile( REPORTTYPE_PLANET, n, getYear() );
           loadReportFile( REPORTTYPE_FLEET, n, getYear() );
@@ -693,6 +699,11 @@ public class Game extends Object
       }
    }
    
+   /**
+    * Returns the color associated with the race for display on the map, etc.
+    * 
+    * @author Steve Leach
+    */
    public Color getRaceColor( String raceName )
    {
       Race race = getRace( raceName, true );
@@ -703,7 +714,9 @@ public class Game extends Object
    /**
     * Returns a race object matching the specified race (not player) name.
     * <p>
-    * If no matching race is found and create == true then a new race is created and added to the list.  
+    * If no matching race is found and create == true then a new race is created and added to the list.
+    * 
+    * @author Steve Leach  
     */
    public Race getRace( String raceName, boolean create )
    {
@@ -751,7 +764,6 @@ public class Game extends Object
           }
           
           player.setProperties( props );
-          //( ( Player ) players.get( i ) ).writeProperties( out );
       }
       
       props.setProperty( name + ".RaceCount", ""+races.size() );
@@ -794,6 +806,8 @@ public class Game extends Object
 
 
    /**
+    * Returns an iterator to iterate over all the known races in the game
+    * @author Steve Leach
     */
    public Iterator getRaces()
    {
@@ -803,6 +817,7 @@ public class Game extends Object
 
    /**
     * Returns true if player action is required for this game
+    * @author Steve Leach
     */
    public boolean actionRequired()
    {
@@ -825,7 +840,11 @@ public class Game extends Object
       return new File(directory + File.separator + name + ".userprops");
    }
    
-   void loadUserDefinedProperties()
+   /**
+    * Loads user defined properties from the game's user properties file
+    * @author Steve Leach 
+    */
+   public void loadUserDefinedProperties()
    {
       File userPropertiesFile = getUserDefinedPropertiesFile();
 
@@ -852,19 +871,24 @@ public class Game extends Object
 
 
    /**
+    * Support function for use by Planet, Fleet and Race classes
     */
    String getUserDefinedProperty(String propertyName)
    {
       return userDefinedProperties.getProperty( propertyName );
    }
 
+   /**
+    * Support function for use by Planet, Fleet and Race classes
+    */
    void setUserDefinedProperty( String propertyName, String value )
    {
       userDefinedProperties.setProperty( propertyName, value );
    }
 
    /**
-    * 
+    * Saves all user defined properties to the game's user properties file
+    * @author Steve Leach
     */
    public void saveUserDefinedProperties()
    {
@@ -886,21 +910,37 @@ public class Game extends Object
       }
    }
    
+   /**
+    * Returns details of the specified fleet in the specified year
+    * @author Steve Leach
+    */
    public Fleet getFleet( int year, int index )
    {
       return fleets.getFleet( year, index );
    }
    
+   /**
+    * Returns details of the specified fleet in the current year
+    * @author Steve Leach
+    */
    public Fleet getFleet( int index )
    {
       return fleets.getFleet( index );
    }
    
+   /**
+    * Returns the number of fleets known in the specified year
+    * @author Steve Leach
+    */
    public int getFleetCount( int year )
    {
       return fleets.getFleetCount( year );
    }
    
+   /**
+    * Returns the number of fleets known in the current year
+    * @author Steve Leach
+    */
    public int getFleetCount()
    {
       return fleets.getFleetCount( getYear() );
