@@ -12,6 +12,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * 
  */
 package stars.ahcgui;
 import java.awt.BorderLayout;
@@ -223,7 +224,7 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
                 {
                     CardLayout cl = ( CardLayout ) ( cards.getLayout() );
                     cl.show( cards, ( String ) evt.getItem() );
-                    ( ( AbstractOptionPane ) optionPanes.get( ( String ) evt.getItem() ) ).refresh();
+                    ( ( AbstractOptionPane ) optionPanes.get( evt.getItem() ) ).refresh();
                 }
             } );
         selector.add( c );
