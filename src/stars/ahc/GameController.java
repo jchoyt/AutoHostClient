@@ -109,7 +109,8 @@ public interface GameController
      */
     public void addPropertyChangeListener( PropertyChangeListener listener );
 
-    
+    public int getPollInterval();
+
     /**
      * Gets the status properties for the game
      */

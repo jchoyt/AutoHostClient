@@ -44,21 +44,21 @@ public class LocalGameController implements GameController, GameTurnGenerator
     }
 
     /**
-     * 
+     *
      * @param fileType - either "m" or "x"
      */
     private String getFileYear( String id, String fileType )
     {
        String year = "";
-       
+
        File file = new File( game.directory + File.separator + game.name + "." + fileType + id  );
 
        if (file.exists())
        {
           try
           {
-          	FileReader in = new FileReader(file);
-          	year = Utils.getTurnNumber( in );
+            FileReader in = new FileReader(file);
+            year = Utils.getTurnNumber( in );
           }
           catch (Throwable t)
           {
@@ -69,7 +69,7 @@ public class LocalGameController implements GameController, GameTurnGenerator
        {
           Log.log( Log.WARNING, this, "File not found: " + file.getAbsolutePath() );
        }
-       
+
        return year;
     }
 
@@ -138,17 +138,17 @@ public class LocalGameController implements GameController, GameTurnGenerator
     public Properties getPlayersByStatus()
     {
         Properties ret = new Properties();
-        
+
         String in = "";
         String out = "";
         String dead = "";
-        
+
         Player[] players = game.getPlayers();
-        
+
         for (int n = 0; n < players.length; n++)
         {
            String status = getPlayerStatus( players[n].id );
-           
+
            if (status.equals("in"))
            {
               if (in.length() > 0)
@@ -166,7 +166,7 @@ public class LocalGameController implements GameController, GameTurnGenerator
               out += players[n].getRaceName();
            }
         }
-        
+
         ret.setProperty("in", in);
         ret.setProperty("out", out);
         ret.setProperty("dead", dead);
@@ -198,7 +198,7 @@ public class LocalGameController implements GameController, GameTurnGenerator
      *
      *@return    Description of the Return Value
      */
-    public boolean poll() 
+    public boolean poll()
     {
        Log.log( Log.NOTICE, this, "Polling local game" );
        return true;
@@ -226,13 +226,18 @@ public class LocalGameController implements GameController, GameTurnGenerator
         pcs.addPropertyChangeListener( listener );
     }
 
+    public int getPollInterval()
+    {
+        return 30*1000;  //30 seconds
+    }
+
     private String getPlayerStatus( String id )
     {
        String mYear = getFileYear( id, "m" );
        String xYear = getFileYear( id, "x" );
-       
+
        String status = "";
-       
+
        if (Utils.empty(xYear))
        {
           status = "waiting";
@@ -242,10 +247,10 @@ public class LocalGameController implements GameController, GameTurnGenerator
           status = "in";
        }
        else
-       { 
+       {
           status = "waiting";
        }
-       
+
        return status;
     }
 
@@ -255,16 +260,16 @@ public class LocalGameController implements GameController, GameTurnGenerator
    public void loadStatusProperties( Properties props )
    {
       Player[] players = game.getPlayers();
-      
+
       for (int n = 0; n < players.length; n++)
       {
          String id = game.getPlayers()[n].id ;
-      
+
          String status = getPlayerStatus( id );
-         
+
          props.setProperty( "player" + id + "-turn", status );
       }
-      
+
       return;
    }
 
@@ -274,9 +279,9 @@ public class LocalGameController implements GameController, GameTurnGenerator
    public void generateTurns(int turnsToGenerate) throws TurnGenerationError
    {
       String starsExe = GamesProperties.getStarsExecutable();
-      
+
       String hostFileName = game.directory + File.separator + game.name + ".hst";
-      
+
       File gameDirectory = new File(game.getDirectory());
 
       try
@@ -293,12 +298,12 @@ public class LocalGameController implements GameController, GameTurnGenerator
       }
 
       Player[] players = game.getPlayers();
-      
+
       for (int n = 0; n < players.length; n++)
       {
          Utils.genPxxFiles( game, players[n].id, players[n].getStarsPassword(), gameDirectory );
       }
-      
+
       game.loadProperties();
    }
 
@@ -309,8 +314,6 @@ public class LocalGameController implements GameController, GameTurnGenerator
    {
       return new File(game.directory + File.separator + game.name + ".hst").exists();
    }
-
-
 }
 
 

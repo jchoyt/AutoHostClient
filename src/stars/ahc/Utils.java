@@ -127,7 +127,6 @@ public class Utils
                 dest.mkdirs();
             }
             //go get the files
-            Log.log(Log.DEBUG, Utils.class, GamesProperties.AUTOHOST );
             URL url = new URL( GamesProperties.AUTOHOST + gameName + "/" + fileName );
             Log.log( Log.DEBUG, Utils.class, "Going to get " + url.getFile() );
             URLConnection connection = url.openConnection();

@@ -254,6 +254,19 @@ public class AutoHostGameController implements GameController
     }
 
 
+    public int getPollInterval()
+    {
+        /*
+         *  The line below sets how often AHC checks AH for updated files.
+         *  DO NOT MODIFY THIS NUMBER.  Ron has graciously agreed to allow me to write this
+         *  to make our lives a little easier.  If you abuse this, I will request that Ron
+         *  shut down access by this application.  I will NOT be responsible for messing up
+         *  AutoHost.
+         */
+         return 10*60*1000;  //10 minutes
+    }
+
+
    /* (non-Javadoc)
     * @see stars.ahc.GameController#getStatusProperties()
     */
@@ -274,9 +287,7 @@ public class AutoHostGameController implements GameController
        catch ( Exception e )
        {
           Log.log( Log.ERROR, this, e );
-       }       
+       }
     }
-
-
 }
 

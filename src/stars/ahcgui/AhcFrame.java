@@ -12,7 +12,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- * 
+ *
  */
 package stars.ahcgui;
 import java.awt.BorderLayout;
@@ -79,7 +79,7 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
 
     HashMap optionPanes = new HashMap();
     Timer timer = new Timer( true );
-   private JPanel toolbar;
+    private JPanel toolbar;
 
 
     /**
@@ -100,20 +100,20 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
     {
         JPanel ret = new JPanel();
         ret.setLayout( new BoxLayout( ret, BoxLayout.Y_AXIS ) );
-        
-        setupGamesToolbar(ret);
-        
+
+        setupGamesToolbar( ret );
+
         Game[] games = GamesProperties.getGames();
         /*
          *  set up the game pages
          */
-        addBlankSpace(ret);
+        addBlankSpace( ret );
         for ( int i = 0; i < games.length; i++ )
         {
             ret.add( GamePanelFactory.createPanel( games[i] ), games[i].getName() );
-            addBlankSpace(ret);
+            addBlankSpace( ret );
         }
-        
+
         JPanel scrollRet = new JPanel();
         JScrollPane scrollPane = new JScrollPane(
                 ret,
@@ -140,42 +140,43 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
 
 
     /**
-     * Adds a toolbar to the Games tab 
-     * 
-     * @author Steve Leach
+     *  Adds a toolbar to the Games tab
+     *
+     *@param  parent  Description of the Parameter
+     *@author         Steve Leach
      */
-   private void setupGamesToolbar( JPanel parent )
-   {
-      toolbar = new JPanel();
-      toolbar.setBorder( BorderFactory.createEmptyBorder(2,2,2,2) );
-      toolbar.setLayout( new BoxLayout(toolbar,BoxLayout.X_AXIS) );
-      parent.add( toolbar );
-      
-      JButton newButton = new JButton( "New game" );
-      newButton.addActionListener(
+    private void setupGamesToolbar( JPanel parent )
+    {
+        toolbar = new JPanel();
+        toolbar.setBorder( BorderFactory.createEmptyBorder( 2, 2, 2, 2 ) );
+        toolbar.setLayout( new BoxLayout( toolbar, BoxLayout.X_AXIS ) );
+        parent.add( toolbar );
+
+        JButton newButton = new JButton( "New game" );
+        newButton.addActionListener(
             new ActionListener()
             {
-               public void actionPerformed( ActionEvent e )
-               {
-                  try
-                  {
-                     OptionPanelFactory.addNewGame();
-                  }
-                  catch (Throwable t)
-                  {
-                     t.printStackTrace();
-                     JOptionPane.showMessageDialog(AhcFrame.this, "Error: " + t.getMessage() );                     
-                  }
-               }
+                public void actionPerformed( ActionEvent e )
+                {
+                    try
+                    {
+                        OptionPanelFactory.addNewGame();
+                    }
+                    catch ( Throwable t )
+                    {
+                        t.printStackTrace();
+                        JOptionPane.showMessageDialog( AhcFrame.this, "Error: " + t.getMessage() );
+                    }
+                }
             }
-      );
-      toolbar.add( newButton );
-      
-      toolbar.add( Box.createGlue() );      
-   }
+                 );
+        toolbar.add( newButton );
+
+        toolbar.add( Box.createGlue() );
+    }
 
 
-   /**
+    /**
      *  Adds a feature to the LogTab attribute of the AhcFrame object
      *
      *@return    Description of the Return Value
@@ -263,18 +264,18 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
      */
     public void init()
     {
-       setApplicationIcon();
-       
-       setExitHandler();
-       
+        setApplicationIcon();
+
+        setExitHandler();
+
         //AhcGui.setMainFrame( this );
         contentPane = getContentPane();
-        
+
         JPanel bannerPanel = new JPanel();
         bannerPanel.add( addBanner() );
         bannerPanel.setBackground( Color.BLACK );
         contentPane.add( bannerPanel, BorderLayout.NORTH );
-        
+
         AhcGui.setMainFrame( this );
         AhcGui.setStatusBox( status );
         addWindowListener(
@@ -287,9 +288,9 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
                 }
             } );
         setTitle( "AutoHost Client " + AutoHostClient.VERSION );
-        
+
         loadPlugins();
-        
+
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab( "Games", addGamesTab() );
         tabbedPane.addTab( "Options", addOptionTab() );
@@ -302,153 +303,151 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
         contentPane.add( buildStatusPane(), BorderLayout.SOUTH );
         Log.log( Log.MESSAGE, this, "GUI built and ready." );
         AhcGui.setStatus( "GUI built and ready." );
-        
-        startAHPoller();    
+
+        startAHPoller();
     }
+
 
     /**
-    * 
-    */
-   private void startAHPoller()
-   {
-      /*
-         *  The line below sets how often AHC checks AH for updated files.
-         *  DO NOT MODIFY THIS NUMBER.  Ron has graciously agreed to allow me to write this
-         *  to make our lives a little easier.  If you abuse this, I will request that Ron
-         *  shut down access by this application.  I will NOT be responsible for messing up
-         *  AutoHost.
-         */
-        GamesProperties.UPTODATE = true;
-        
-        AHPoller poller = new AHPoller();
-        
-        BasePlugIn p = PlugInManager.getPluginManager().getBasePlugin("System tray icon manager");
-        
-        if (p != null)
-        {
-           poller.addNotificationListener( (NotificationListener)p );
-        }
-        
-        timer.schedule( poller, 10 * 60 * 1000, 10 * 60 * 1000 ); //10 minutes
-   }
-
-
-   /**
-    * 
-    */
-    private void setExitHandler()
+     */
+    private void startAHPoller()
     {
-       addWindowListener( new WindowAdapter()
-       {
-          public void windowClosing(WindowEvent e)
-          {
-             PlugInManager.getPluginManager().cleanupBasePlugins();
-          }
-       } );
+        GamesProperties.UPTODATE = true;
+        AHPoller poller = new AHPoller();
+        BasePlugIn p = PlugInManager.getPluginManager().getBasePlugin( "System tray icon manager" );
+        if ( p != null )
+        {
+            poller.addNotificationListener( ( NotificationListener ) p );
+        }
+        timer.schedule( poller, 30 * 1000, 30 * 1000 );//30 seconds - the AHPoller determines when the polling actually happens
     }
 
 
-   /**
-     * Sets the icon that the application displays in the taskbar.
-     *  
-     * @author Steve Leach
+    /**
+     */
+    private void setExitHandler()
+    {
+        addWindowListener(
+            new WindowAdapter()
+            {
+                public void windowClosing( WindowEvent e )
+                {
+                    PlugInManager.getPluginManager().cleanupBasePlugins();
+                }
+            } );
+    }
+
+
+    /**
+     *  Sets the icon that the application displays in the taskbar.
+     *
+     *@author    Steve Leach
      */
     private void setApplicationIcon()
     {
-       setWindowIcon( this );
+        setWindowIcon( this );
     }
-    
+
+
+    /**
+     *  Sets the windowIcon attribute of the AhcFrame class
+     *
+     *@param  frame  The new windowIcon value
+     */
     public static void setWindowIcon( JFrame frame )
     {
-       URL iconURL = findImage("stars32.gif");
-       Image img = Toolkit.getDefaultToolkit().createImage(iconURL);
-       frame.setIconImage( img );
+        URL iconURL = findImage( "stars32.gif" );
+        Image img = Toolkit.getDefaultToolkit().createImage( iconURL );
+        frame.setIconImage( img );
     }
 
 
-   /**
-    * Finds and loads any plugins (extensions) that have been installed.
-    * <p>
-    * @author Steve Leach
-    */
-   private void loadPlugins()
-   {
-      try
-      {
-         PlugInManager.getPluginManager().findAndLoadPlugins();
-         
-         ArrayList plugins = PlugInManager.getPluginManager().getPlugins(PlugIn.class);
-         
-      }
-      catch (PluginLoadError e)
-      {
-         Log.log( Log.NOTICE, this, e );
-      }
-   }
+    /**
+     *  Finds and loads any plugins (extensions) that have been installed. <p>
+     *
+     *
+     *
+     *@author    Steve Leach
+     */
+    private void loadPlugins()
+    {
+        try
+        {
+            PlugInManager.getPluginManager().findAndLoadPlugins();
+
+            ArrayList plugins = PlugInManager.getPluginManager().getPlugins( PlugIn.class );
+        }
+        catch ( PluginLoadError e )
+        {
+            Log.log( Log.NOTICE, this, e );
+        }
+    }
 
 
-   /**
-     * Returns a URL representing a file name if the file exists
-     * 
-     * @param fileName
-     * @return a URL, or null
-     * @author Steve Leach
+    /**
+     *  Returns a URL representing a file name if the file exists
+     *
+     *@param  fileName
+     *@return           a URL, or null
+     *@author           Steve Leach
      */
     private static URL filenameToURL( String fileName )
     {
-       File file = new File( fileName );
-       
-       if ( file.exists() )
-       {
-         try
-         {
-            return file.toURL();
-         }
-         catch (MalformedURLException e)
-         {
+        File file = new File( fileName );
+
+        if ( file.exists() )
+        {
+            try
+            {
+                return file.toURL();
+            }
+            catch ( MalformedURLException e )
+            {
+                return null;
+            }
+        }
+        else
+        {
             return null;
-         }
-       }
-       else
-       {
-          return null;
-       }
+        }
     }
 
+
     /**
-     * Locates the specified image image 
-     * @return the URL of the image if it could be found
-     */    
+     *  Locates the specified image image
+     *
+     *@param  imageName  Description of the Parameter
+     *@return            the URL of the image if it could be found
+     */
     public static URL findImage( String imageName )
     {
-       URL iconURL = ClassLoader.getSystemResource( "images/" + imageName );
-       
-       if ( iconURL == null )
-       {
-          iconURL = filenameToURL( "./" + imageName );
-       }
-       
-       if ( iconURL == null )
-       {
-          iconURL = filenameToURL( "./images/" + imageName );
-       }
-       
-       return iconURL;
+        URL iconURL = ClassLoader.getSystemResource( "images/" + imageName );
+
+        if ( iconURL == null )
+        {
+            iconURL = filenameToURL( "./" + imageName );
+        }
+
+        if ( iconURL == null )
+        {
+            iconURL = filenameToURL( "./images/" + imageName );
+        }
+
+        return iconURL;
     }
-    
+
+
     /**
      *  Adds a feature to the Banner attribute of the AhcFrame object
      *
-     *@return    Description of the Return Value
-     *
-     * Updated 5 Oct 2004, Steve Leach
-     *    Now also looks for the image in the file system.
-     *    Returns a valid label even if the image is not found.
+     *@return    Description of the Return Value Updated 5 Oct 2004, Steve Leach
+     *      Now also looks for the image in the file system. Returns a valid
+     *      label even if the image is not found.
      */
     protected JLabel addBanner()
     {
-       	URL iconURL = findImage("ahc_sm.png");
-       	
+        URL iconURL = findImage( "ahc_sm.png" );
+
         if ( iconURL != null )
         {
             ImageIcon icon = new ImageIcon( iconURL );
@@ -457,8 +456,8 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
         }
         else
         {
-           Log.log( Log.ERROR, this.getClass(), "Image not found: ahc_sm.png" );
-           return new JLabel("{Image not found}");
+            Log.log( Log.ERROR, this.getClass(), "Image not found: ahc_sm.png" );
+            return new JLabel( "{Image not found}" );
         }
     }
 
@@ -492,57 +491,66 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
     }
 
 
-   /* (non-Javadoc)
-    * @see stars.ahc.NotificationListener#receiveNotification(java.lang.Class, int, java.lang.String)
-    */
-   public void receiveNotification(Object source, int severity, String message)
-   {
-      switch (severity)
-      {
-         case NotificationListener.SEV_STATUS:
-         case NotificationListener.SEV_WARNING:
-            AhcGui.setStatus( message );
-            break;
-            
-         case NotificationListener.SEV_ERROR:
-         case NotificationListener.SEV_CRITICAL:
-            AhcGui.setStatus( message );
-		      JOptionPane.showInternalMessageDialog(
-		            AhcGui.mainFrame.getContentPane(),
-		            message,
-		            "Error",
-		            JOptionPane.ERROR_MESSAGE );
-         	break;
-      }
-   }
+    /*
+     *  (non-Javadoc)
+     *  @see stars.ahc.NotificationListener#receiveNotification(java.lang.Class, int, java.lang.String)
+     */
+    /**
+     *  Description of the Method
+     *
+     *@param  source    Description of the Parameter
+     *@param  severity  Description of the Parameter
+     *@param  message   Description of the Parameter
+     */
+    public void receiveNotification( Object source, int severity, String message )
+    {
+        switch ( severity )
+        {
+            case NotificationListener.SEV_STATUS:
+            case NotificationListener.SEV_WARNING:
+                AhcGui.setStatus( message );
+                break;
+            case NotificationListener.SEV_ERROR:
+            case NotificationListener.SEV_CRITICAL:
+                AhcGui.setStatus( message );
+                JOptionPane.showInternalMessageDialog(
+                        AhcGui.mainFrame.getContentPane(),
+                        message,
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE );
+                break;
+        }
+    }
 
 
-   /**
-    * Adds the "Hide" button to the main toolbar.
-    * <p>
-    * The hide button is only added if the TrayIconManager is available to create a
-    * system tray icon from which the application can be restored. 
-    */
-   public void addHideButton()
-   {
-      PlugInManager manager = PlugInManager.getPluginManager();
-      BasePlugIn plugin = manager.getBasePlugin("System tray icon manager");
-      
-      if ((plugin != null) && (plugin.isEnabled()))
-      {  
-         
-         JButton hideButton = new JButton("Hide");
-         
-         hideButton.addActionListener( new ActionListener() {
-            public void actionPerformed(ActionEvent e)
-            {
-               AhcFrame.this.setVisible(false);
-            }
-         });
-         
-         int index = toolbar.getComponentCount(); 
-         toolbar.add( hideButton, index-1 );
-      }
-   }
+    /**
+     *  Adds the "Hide" button to the main toolbar. <p>
+     *
+     *  The hide button is only added if the TrayIconManager is available to
+     *  create a system tray icon from which the application can be restored.
+     */
+    public void addHideButton()
+    {
+        PlugInManager manager = PlugInManager.getPluginManager();
+        BasePlugIn plugin = manager.getBasePlugin( "System tray icon manager" );
+
+        if ( ( plugin != null ) && ( plugin.isEnabled() ) )
+        {
+
+            JButton hideButton = new JButton( "Hide" );
+
+            hideButton.addActionListener(
+                new ActionListener()
+                {
+                    public void actionPerformed( ActionEvent e )
+                    {
+                        AhcFrame.this.setVisible( false );
+                    }
+                } );
+
+            int index = toolbar.getComponentCount();
+            toolbar.add( hideButton, index - 1 );
+        }
+    }
 }
 

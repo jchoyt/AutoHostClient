@@ -86,7 +86,8 @@ public class Game extends Object
         fleets = new FleetList( this );
         shipDesigns = new ShipDesignList( this );
         this.directory = directory;
-        sahHosted = GamesProperties.getProperty( shortName+ ".sahHosted", "true" );
+        loadProperties();
+        sahHosted = GamesProperties.getProperty( shortName + ".sahHosted", "true" );
         if ( sahHosted.equals( "true" ) )
         {
             Log.log( Log.DEBUG, this, shortName + ": SahHosted game" );
@@ -414,9 +415,9 @@ public class Game extends Object
        {
           controller.loadStatusProperties( ahStatus );
        }
-       
+
        pcs.firePropertyChange( "gameStatus", 0, 1 );
-       
+
 //        ahStatus = new Properties();
 //        try
 //        {
@@ -747,7 +748,7 @@ public class Game extends Object
 
 
     /**
-     * Sets the game's internal state based on the specified properties list  
+     * Sets the game's internal state based on the specified properties list
      */
     public void parseProperties( Properties props )
     {
@@ -1088,6 +1089,15 @@ public class Game extends Object
         return ahStatus;
     }
 
+    /**
+     *  Gets the pollInterval attribute of the Game object
+     *
+     *@return    The pollInterval value - number of milliseconds between polling
+     */
+    public int getPollInterval()
+    {
+        return controller.getPollInterval();
+    }
 
    /**
     */
@@ -1106,27 +1116,27 @@ public class Game extends Object
       {
          return true;
       }
-      
+
       return false;
    }
 
    /**
-    * Generate the next game turn 
+    * Generate the next game turn
     */
    public void generateNextTurn() throws TurnGenerationError
    {
       if (controller instanceof GameTurnGenerator)
       {
-	      GameTurnGenerator gen = (GameTurnGenerator)controller;
-	      
-	      if (gen.readyToGenerate())
-	      {
-	         gen.generateTurns(1);
-	      }
-	      else
-	      {
-	         throw new TurnGenerationError( "Not ready to generate" );
-	      }
+          GameTurnGenerator gen = (GameTurnGenerator)controller;
+
+          if (gen.readyToGenerate())
+          {
+             gen.generateTurns(1);
+          }
+          else
+          {
+             throw new TurnGenerationError( "Not ready to generate" );
+          }
       }
    }
 }
