@@ -23,6 +23,8 @@ import java.text.ParseException;
 import java.util.Properties;
 import java.util.Random;
 
+import stars.ahc.plugins.base.HabCalculator;
+
 /**
  * Represents a race in a Stars! game, controlled by a Player 
  * 

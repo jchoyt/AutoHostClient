@@ -1,2 +1,3 @@
 plugin=stars.ahc.plugins.base.TrayIconManager
+plugin=stars.ahc.plugins.base.HabCalculator
 plugin=stars.ahc.plugins.objedit.ObjectEditorButton

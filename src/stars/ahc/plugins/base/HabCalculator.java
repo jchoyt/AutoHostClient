@@ -16,14 +16,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * 
  */
-package stars.ahc;
+package stars.ahc.plugins.base;
+
+import javax.swing.JFrame;
+
+import stars.ahc.Planet;
+import stars.ahc.Race;
+import stars.ahcgui.pluginmanager.BasePlugIn;
 
 /**
  * Calculates hab values for planets after terraforming. 
  * 
  * @author Steve Leach
  */
-public class HabCalculator
+public class HabCalculator implements BasePlugIn
 {
    private static int NULL_RACE = -2;
    private static int NO_HAB_RANGE = -3;
@@ -62,7 +68,7 @@ public class HabCalculator
     * <p>
     * Negative numbers indicate error codes. 
     */
-   public static int calcHabValue( Planet planet, Race race, int terraFormLevel )
+   public int calcHabValue( Planet planet, Race race, int terraFormLevel )
    {
       return calcHabValue( planet, race, terraFormLevel, terraFormLevel, terraFormLevel );
    }
@@ -74,7 +80,7 @@ public class HabCalculator
     * <p>
     * Negative numbers indicate error codes. 
     */
-   public static int calcHabValue( Planet planet, Race race )
+   public int calcHabValue( Planet planet, Race race )
    {
       return calcHabValue( planet, race, race.getMaxTerraForm() );
    }
@@ -86,7 +92,7 @@ public class HabCalculator
     * <p>
     * Negative numbers indicate error codes. 
     */
-   public static int calcHabValue( Planet planet, Race race, int grav_level, int temp_level, int rad_level )
+   public int calcHabValue( Planet planet, Race race, int grav_level, int temp_level, int rad_level )
    {
       long habValue = 0;
       final double sqrt3 = 1.7320508075688772; // Math.sqrt(3.0)
@@ -257,5 +263,54 @@ public class HabCalculator
    {
       int clicks = getRandomHabVal(RAD);
       return radFromClicks(clicks);
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.BasePlugIn#init(javax.swing.JFrame)
+    */
+   public void init(JFrame mainWindow)
+   {
+      // nothing to do
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.BasePlugIn#cleanup()
+    */
+   public void cleanup()
+   {
+      // nothing to do
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.PlugIn#getName()
+    */
+   public String getName()
+   {
+      return "Planet Habitability Calculator";
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.PlugIn#getDescription()
+    */
+   public String getDescription()
+   {
+      return getName();
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.PlugIn#isEnabled()
+    */
+   public boolean isEnabled()
+   {
+      return true;
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.PlugIn#setEnabled(boolean)
+    */
+   public void setEnabled(boolean enabled)
+   {
+      // Not implemented
+      // This is a passive plugin so there is no need to disable it
    }
 }

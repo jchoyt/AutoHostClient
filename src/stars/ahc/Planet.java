@@ -20,6 +20,8 @@ package stars.ahc;
 
 import java.awt.Point;
 
+import stars.ahc.plugins.base.HabCalculator;
+
 /**
  * Encapulates information about a planet in a Stars! game
  * 

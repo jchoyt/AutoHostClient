@@ -7,10 +7,10 @@ package test.stars.ahc;
 
 import java.awt.Point;
 
-import stars.ahc.HabCalculator;
 import stars.ahc.Planet;
 import stars.ahc.PlanetData;
 import stars.ahc.Race;
+import stars.ahc.plugins.base.HabCalculator;
 import junit.framework.TestCase;
 
 /**
@@ -19,6 +19,7 @@ import junit.framework.TestCase;
  */
 public class HabCalculatorTest extends TestCase
 {
+   private HabCalculator calc = new HabCalculator();
    
    private Planet createPlanet( String name, String grav, String temp, String rad )
    {
@@ -43,11 +44,11 @@ public class HabCalculatorTest extends TestCase
       humanoids.setRadRange( 22, 82 );
       
       Planet DoReMi = createPlanet( "Do Re Mi", "2.24", "-124", "92" );
-      habValue = HabCalculator.calcHabValue( DoReMi, humanoids, 7, 11, 11 );
+      habValue = calc.calcHabValue( DoReMi, humanoids, 7, 11, 11 );
       assertEquals( 14, habValue );
 
       Planet Strike3 = createPlanet( "Srike 3", "0.75", "144", "34" );
-      habValue = HabCalculator.calcHabValue( Strike3, humanoids, 7, 11, 11 );
+      habValue = calc.calcHabValue( Strike3, humanoids, 7, 11, 11 );
       assertEquals( 52, habValue );
    }
    
@@ -72,7 +73,7 @@ public class HabCalculatorTest extends TestCase
          
          // Is it habitable with no terraforming
 
-         int hab0 = HabCalculator.calcHabValue( planet, humanoids, 0 );
+         int hab0 = calc.calcHabValue( planet, humanoids, 0 );
 
          if (hab0 > 0)
          {
@@ -81,7 +82,7 @@ public class HabCalculatorTest extends TestCase
 
          // Is it habitable with 15% terraforming
          
-         int hab15 = HabCalculator.calcHabValue( planet, humanoids, 15 );
+         int hab15 = calc.calcHabValue( planet, humanoids, 15 );
 
          if (hab15 > 0)
          {
