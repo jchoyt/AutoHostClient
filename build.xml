@@ -31,8 +31,8 @@
 
   <target name="jar-map" description="Rebuild the map plugin file">
     <jar jarfile="plugins/map.jar" manifest="META-INF/MANIFEST.MF" description="rebuild the map plugin jarfile">
-      <fileset dir="." includes="plugin.data"/>
-      <fileset dir="${build}" includes="**/plugins.map/**" />
+      <fileset dir="." includes="map.ahcplugin"/>
+      <fileset dir="${build}" includes="**/plugins/map/**" />
     </jar>
   </target>
 
