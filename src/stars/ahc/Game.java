@@ -234,15 +234,15 @@ public class Game extends Object
                 }
                 out.append( ahStatus.getProperty( "player" + i + "-race" ) );
             }
-            else if(ret.startsWith( "skipped" ) )
+            else if ( ret.startsWith( "skipped" ) )
             {
                 if ( out.length() != 0 )
                 {
                     out.append( ", " );
                 }
                 out.append( ahStatus.getProperty( "player" + i + "-race" ) );
-                out.append( " ( skipped ");
-                out.append( ret.substring(8) );
+                out.append( " ( skipped " );
+                out.append( ret.substring( 8 ) );
                 out.append( " )" );
             }
             else if ( ret.equals( "inactive" ) || ret.startsWith( "dead" ) )
@@ -439,6 +439,18 @@ public class Game extends Object
         }
         out.write( name + ".GameDir=" + directory + lineEnding );
         out.write( name + ".PlayerNumbers=" + playerNumbers + lineEnding );
+    }
+
+
+    /**
+     *  Sets the playerTurnStatus attribute of the Game object
+     *
+     *@param  playerNum  The new playerTurnStatus value
+     *@param  value      The new playerTurnStatus value
+     */
+    public void setPlayerTurnStatus( int playerNum, String value )
+    {
+        ahStatus.setProperty( "player" + playerNum + "-turn", value );
     }
 }
 

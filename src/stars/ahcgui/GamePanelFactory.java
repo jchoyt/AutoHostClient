@@ -486,7 +486,7 @@ class AnalyzeGameButton extends JButton implements ActionListener
 class UploadButton extends JButton implements ActionListener
 {
 
-
+    final static String UPLOADED = "in via AHC - SAH will reflect this soon";
     Game game;
 
 
@@ -504,8 +504,7 @@ class UploadButton extends JButton implements ActionListener
 
 
     /**
-     *  Retrieves turns from Autohost, copies them into the game directory and
-     *  backup directory.
+     *  Uploads turns to Autohost
      *
      *@param  e  Description of the Parameter
      */
@@ -514,6 +513,9 @@ class UploadButton extends JButton implements ActionListener
         Player[] players = game.getPlayers();
         File playerXFile = null;
         boolean success = true;
+        StringBuffer ret = new StringBuffer( "The following players have been uploaded for game " );
+        ret.append( game.getName() );
+        ret.append(":");
         for ( int i = 0; i < players.length; i++ )
         {
             if ( players[i].getToUpload() )
@@ -524,6 +526,9 @@ class UploadButton extends JButton implements ActionListener
                         players[i].getUploadPassword() );
                 players[i].setLastUpload( playerXFile.lastModified() );
                 players[i].setNeedsUpload( false );
+                ret.append( " " );
+                ret.append( players[i] );
+                game.setPlayerTurnStatus(i, UPLOADED);
             }
         }
         GamesProperties.writeProperties();
@@ -532,7 +537,8 @@ class UploadButton extends JButton implements ActionListener
             AhcGui.setStatus( "All players for " + game.getName() + " have been uploaded" );
             JOptionPane.showInternalMessageDialog(
                     AhcGui.mainFrame.getContentPane(),
-                    "All players for " + game.getName() + " have been uploaded",
+                    ret.toString() +
+                    ".  Autohost will reflect this in a few minutes.",
                     "Upload Results",
                     JOptionPane.INFORMATION_MESSAGE );
         }

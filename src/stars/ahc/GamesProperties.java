@@ -38,14 +38,11 @@ public class GamesProperties extends Object
     /**
      *  Description of the Field
      */
-    public static String AUTOHOST = "ftp://library.southern.edu/starout/";
-    //public static String AUTOHOST = "file:///devel/autohostclient/ahclone/";
+    public static String AUTOHOST = "ftp://starsautohost.org/starout/";
     public static boolean UPTODATE = false;
     /**
      *  Description of the Field
      */
-    //public static String AUTOHOST = "http://library.southern.edu/stars/starout/";
-    //static GamesPropsChangeListener changeListener = new GamesPropsChangeListener();
     static Game currentGame;
     static ArrayList games = new ArrayList();
     static boolean initiated = false;

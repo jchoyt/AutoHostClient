@@ -273,7 +273,7 @@ public class AhcFrame extends javax.swing.JFrame
         retPane.setLayout( new BoxLayout( retPane, BoxLayout.Y_AXIS ) );
         status.setBorder( BorderFactory.createTitledBorder( "Current Status" ) );
         retPane.add( status );
-        retPane.add( new JLabel( "<html>Thanks to Ron Miller for AutoHost - http://library.southern.edu/stars/stars.htm</html>" ) );
+        retPane.add( new JLabel( "<html>Thanks to Ron Miller for AutoHost - http://starsautohost.org</html>" ) );
         return retPane;
     }
 
