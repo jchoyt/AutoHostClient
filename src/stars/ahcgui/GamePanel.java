@@ -763,7 +763,7 @@ class PlayerJLabel extends JLabel implements PropertyChangeListener
        }
        catch (Throwable t)
        {
-          Log.log( Log.ERROR, this.getClass(), t );
+          Log.log( Log.ERROR, this.getClass(), "Error:" + t.getMessage() );
           setText( "<html>Error: " + t.getMessage() + "</html>" );
        }
     }

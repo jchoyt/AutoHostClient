@@ -336,11 +336,12 @@ public class GamesProperties
     {
         try
         {
+           initProperties();
+           
             if ( propsLocation == null )
             {
                 propsLocation = "ahclient.props";
             }
-            props = new Properties();
             InputStream in = new FileInputStream( propsLocation );
             props.load( in );
         }
@@ -380,7 +381,7 @@ public class GamesProperties
              *  set up the games
              */
             String gameList = props.getProperty( "Games" );
-            if ( gameList != null )
+            if ( Utils.empty(gameList) == false )
             {
                 String[] gameNames = gameList.split( "[, ]" );
                 games = new ArrayList();
@@ -393,24 +394,27 @@ public class GamesProperties
                      *  for each game, set up the players
                      */
                     String playerList = props.getProperty( gameNames[i] + ".PlayerNumbers" );
-                    String[] playerNumbers = playerList.split( "[, ]" );
-                    Player[] players = new Player[playerNumbers.length];
-                    for ( int j = 0; j < playerNumbers.length; j++ )
+                    if (playerList != null)
                     {
-                        if ( playerNumbers[j].equals( "" ) )
-                        {
-                            continue;
-                        }
-                        Player newPlayer = new Player();
-                        newPlayer.setGame( currentGame );
-                        newPlayer.setStarsPassword( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".StarsPassword" ) );
-                        newPlayer.setUploadPassword( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".UploadPassword" ) );
-                        newPlayer.setId( playerNumbers[j] );
-                        newPlayer.setToUpload( Boolean.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".upload" ) ).booleanValue() );
-                        newPlayer.setLastUpload( Long.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".lastUpload" ) ).longValue() );
-                        players[j] = newPlayer;
+	                    String[] playerNumbers = playerList.split( "[, ]" );
+	                    Player[] players = new Player[playerNumbers.length];
+	                    for ( int j = 0; j < playerNumbers.length; j++ )
+	                    {
+	                        if ( playerNumbers[j].equals( "" ) )
+	                        {
+	                            continue;
+	                        }
+	                        Player newPlayer = new Player();
+	                        newPlayer.setGame( currentGame );
+	                        newPlayer.setStarsPassword( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".StarsPassword" ) );
+	                        newPlayer.setUploadPassword( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".UploadPassword" ) );
+	                        newPlayer.setId( playerNumbers[j] );
+	                        newPlayer.setToUpload( Boolean.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".upload" ) ).booleanValue() );
+	                        newPlayer.setLastUpload( Long.valueOf( props.getProperty( gameNames[i] + ".player" + playerNumbers[j] + ".lastUpload" ) ).longValue() );
+	                        players[j] = newPlayer;
+	                    }
+	                    currentGame.setPlayers( players );
                     }
-                    currentGame.setPlayers( players );
                     
                     currentGame.loadGameProperties( props );
                     
@@ -573,6 +577,14 @@ public class GamesProperties
           plugin.saveConfiguration( props );
        }
     }
+
+   /**
+    * 
+    */
+   public static void initProperties()
+   {
+      props = new Properties();
+   }
 }
 
 /*

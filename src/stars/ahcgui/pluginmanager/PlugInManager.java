@@ -31,7 +31,7 @@ import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import stars.ahc.Log;
+import javax.swing.JFrame;
 
 /**
  * Finds and loads AutoHostClient plugins.
@@ -48,6 +48,8 @@ import stars.ahc.Log;
 public class PlugInManager
 {
    private static PlugInManager singleton = null;
+   
+   private ArrayList basePlugins = new ArrayList();
 
    /**
     * Get a reference to the system-wide plugin manager instance.
@@ -217,11 +219,11 @@ public class PlugInManager
     */
    private void processPlugIn(File pluginFile, String className, URLClassLoader loader) throws PluginLoadError
    {
-      Log.log( Log.NOTICE, this, "Loading plugin " + className + " from " + pluginFile.getName() );
+      //Log.log( Log.NOTICE, this, "Loading plugin " + className + " from " + pluginFile.getName() );
 
       try
       {
-         Class pluginClass = loader.loadClass( className );
+         Class pluginClass = Class.forName( className, false, Thread.currentThread().getContextClassLoader() );
 
          plugins.add( pluginClass );
          
@@ -273,5 +275,55 @@ public class PlugInManager
    public ArrayList getAllPlugins()
    {
       return getPlugins( PlugIn.class );
+   }
+   
+   public void installBasePlugins( JFrame appWindow )
+   {
+      ArrayList baseClasses = getPlugins( BasePlugIn.class );
+      
+      for (int n = 0; n < baseClasses.size(); n++)
+      {
+         Class c = (Class)baseClasses.get(n);
+         
+         try
+         {
+            BasePlugIn plugin = (BasePlugIn)c.newInstance();
+            plugin.init(appWindow);
+            basePlugins.add( plugin );
+         }
+         catch (InstantiationException e)
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+         catch (IllegalAccessException e)
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+      }
+   }
+   
+   public void cleanupBasePlugins()
+   {
+      for (int n = 0; n < basePlugins.size(); n++)
+      {
+         BasePlugIn plugin = (BasePlugIn)basePlugins.get(n);
+         plugin.cleanup();
+      }
+   }
+   
+   public BasePlugIn getBasePlugin( String name )
+   {
+      for (int n = 0; n < basePlugins.size(); n++)
+      {
+         BasePlugIn plugin = (BasePlugIn)basePlugins.get(n);
+
+         if (name.equals( plugin.getName()))
+         {
+            return plugin;
+         }
+      }
+      return null;
    }
 }

@@ -38,6 +38,10 @@
       <fileset dir="." includes="analyzer.ahcplugin"/>
       <fileset dir="${build}" includes="**/plugins/analyzer/**" />
     </jar>
+    <jar jarfile="plugins/base.jar" description="rebuild the base plugin jarfile">
+      <fileset dir="." includes="base.ahcplugin"/>
+      <fileset dir="${build}" includes="**/plugins/base/**" />
+    </jar>
   </target>
 
   <target name="test" depends="compile">

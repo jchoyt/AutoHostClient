@@ -3,20 +3,18 @@
  *
  * Copyright (c) 2004, Steve Leach
  */
-package stars.ahcgui.trayicon;
+package stars.ahc.plugins.base;
 
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 import stars.ahc.NotificationListener;
 import stars.ahcgui.AhcFrame;
-import stars.ahcgui.pluginmanager.PlugInManager;
-import stars.ahcgui.pluginmanager.PluginLoadError;
+import stars.ahcgui.pluginmanager.BasePlugIn;
 
 import com.jeans.trayicon.TrayIconException;
 import com.jeans.trayicon.TrayIconPopup;
@@ -27,34 +25,26 @@ import com.jeans.trayicon.WindowsTrayIcon;
  * @author Steve Leach
  *
  */
-public class TrayIconManager implements NotificationListener
+public class TrayIconManager implements BasePlugIn, NotificationListener
 {
    private static TrayIconManager manager = null;
-   private AhcFrame mainFrame;
+   private JFrame mainFrame;
    private String appName;
    private boolean trayIconSupported = false;
    private WindowsTrayIcon icon = null;
    
-   public static TrayIconManager getTrayIconManager()
+   public TrayIconManager()
    {
-      if (manager == null)
-      {
-         manager = new TrayIconManager();         
-      }
-      
-      return manager;
-   }
-   
-   private TrayIconManager()
-   {
-      
    }
 
+  
    /**
     * @param mainFrame
     */
-   public void init(AhcFrame mainFrame, String appName)
+   public void init(JFrame mainFrame, String appName)
    {
+      System.out.println( "Initialising TrayIconManager" );
+      
       this.mainFrame = mainFrame;
       this.appName = appName;
             
@@ -68,15 +58,10 @@ public class TrayIconManager implements NotificationListener
     */
    private void createIcon()
    {
-      if (trayIconSupported == false)
-      {
-         return;
-      }
-      
       try
       {
-	      Image img = Toolkit.getDefaultToolkit().getImage("images"+File.separator+"stars16.gif");
-	      icon = new WindowsTrayIcon(img, 16, 16);
+	      ImageIcon img = new ImageIcon( AhcFrame.findImage("stars16.gif") );
+	      icon = new WindowsTrayIcon(img.getImage(), 16, 16);
 	      icon.setToolTipText("Stars! AutoHostClient");
 	      icon.setPopup( makeTrayIconPopup() );
 	      icon.setVisible(true);
@@ -118,17 +103,6 @@ public class TrayIconManager implements NotificationListener
       }
       
       System.load( dll.getAbsolutePath() );
-      
-      File jarFile = new File("plugins/trayicon.jar");      
-      try
-      {
-         PlugInManager.getPluginManager().registerClassLoader( jarFile );
-      }
-      catch (PluginLoadError e)
-      {
-         e.printStackTrace();
-         return;
-      }
       
       try
       {
@@ -195,12 +169,59 @@ public class TrayIconManager implements NotificationListener
    {
       try
       {
-         icon.showBalloon( message, "", 1, WindowsTrayIcon.BALLOON_INFO );
+         icon.showBalloon( message, "Stars! AutoHost Client", 10, WindowsTrayIcon.BALLOON_INFO );
       }
       catch (TrayIconException e)
       {
          e.printStackTrace();
       }
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.BasePlugIn#init()
+    */
+   public void init()
+   {
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.PlugIn#getName()
+    */
+   public String getName()
+   {
+      return "System tray icon manager";
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.PlugIn#getDescription()
+    */
+   public String getDescription()
+   {
+      return "System tray icon manager";
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.PlugIn#isEnabled()
+    */
+   public boolean isEnabled()
+   {
+      return true;
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.PlugIn#setEnabled(boolean)
+    */
+   public void setEnabled(boolean enabled)
+   {
+   }
+
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.BasePlugIn#init(javax.swing.JFrame)
+    */
+   public void init(JFrame mainWindow)
+   {
+      init( mainWindow, "AHClient" );
    }
 }
 

@@ -16,11 +16,18 @@
 package stars.ahc;
 import java.io.File;
 import java.io.IOException;
-import javax.swing.filechooser.FileFilter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
+
 import stars.ahcgui.AhcFrame;
-import stars.ahcgui.trayicon.TrayIconManager;
+import stars.ahcgui.pluginmanager.BasePlugIn;
+import stars.ahcgui.pluginmanager.PlugInManager;
 
 /**
  *  Description of the Class
@@ -95,6 +102,8 @@ public class AutoHostClient extends java.lang.Object
             setUpRoutine();
         }
 
+        setupClassLoader();
+        
         GamesProperties.init( propsFile );
         Log.log( Log.MESSAGE, AutoHostClient.class, "Properties file loaded and parsed" );
         
@@ -107,12 +116,55 @@ public class AutoHostClient extends java.lang.Object
     /**
     * 
     */
+   private static void setupClassLoader()
+   {
+      File pluginDir = new File("plugins");
+      
+      File[] plugins = pluginDir.listFiles();
+      
+      ArrayList urlList = new ArrayList();
+      
+      for (int n = 0; n < plugins.length; n++)
+      {
+         if (plugins[n].getName().toLowerCase().endsWith(".jar"))
+         {
+            try
+            {
+               URL url = plugins[n].toURL();
+               urlList.add( url );
+            }
+            catch (MalformedURLException e)
+            {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            }
+         }
+      }
+      
+      URL[] urls = (URL[])urlList.toArray( new URL[0] );
+      
+      URLClassLoader loader = new URLClassLoader( urls );
+      System.out.println( loader );
+      
+      Thread.currentThread().setContextClassLoader( loader );
+   }
+
+
+   /**
+    * 
+    */
    private static void startPoller()
    {
       poller = new AHPoller();
       
       poller.addNotificationListener( mainFrame );
-      poller.addNotificationListener( TrayIconManager.getTrayIconManager() );
+      
+      BasePlugIn p = PlugInManager.getPluginManager().getBasePlugin("System tray icon manager");
+      
+      if (p != null)
+      {
+         poller.addNotificationListener( (NotificationListener)p );
+      }
       
       poller.run();
       
@@ -148,11 +200,12 @@ public class AutoHostClient extends java.lang.Object
     {
         mainFrame = new AhcFrame();
         mainFrame.pack();
+
+        PlugInManager manager = PlugInManager.getPluginManager();
         
-        TrayIconManager trayIconManager = TrayIconManager.getTrayIconManager();
-        trayIconManager.init( mainFrame, "AHClient" );
+        manager.installBasePlugins( mainFrame );
         
-        if (trayIconManager.trayIconSupported())
+        if (manager.getBasePlugin("System tray icon manager") != null)
         {
            mainFrame.addHideButton();
         }
@@ -265,5 +318,6 @@ public class AutoHostClient extends java.lang.Object
         }
         return;
     }
+    
 }
 

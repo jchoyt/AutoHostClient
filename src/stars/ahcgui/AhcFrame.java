@@ -58,7 +58,6 @@ import stars.ahc.NotificationListener;
 import stars.ahcgui.pluginmanager.PlugIn;
 import stars.ahcgui.pluginmanager.PlugInManager;
 import stars.ahcgui.pluginmanager.PluginLoadError;
-import stars.ahcgui.trayicon.TrayIconManager;
 
 /**
  *  Description of the Class
@@ -320,7 +319,7 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
        {
           public void windowClosing(WindowEvent e)
           {
-             TrayIconManager.getTrayIconManager().cleanup();
+             PlugInManager.getPluginManager().cleanupBasePlugins();
           }
        } );
     }
@@ -392,7 +391,7 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
      * Locates the specified image image 
      * @return the URL of the image if it could be found
      */    
-    private static URL findImage( String imageName )
+    public static URL findImage( String imageName )
     {
        URL iconURL = ClassLoader.getSystemResource( "images/" + imageName );
        
@@ -498,21 +497,17 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
     */
    public void addHideButton()
    {
-      // Only include the hide button if system tray functionality is supported 
-      if (TrayIconManager.getTrayIconManager().trayIconSupported())
-      {
-         JButton hideButton = new JButton("Hide");
-         
-         hideButton.addActionListener( new ActionListener() {
-            public void actionPerformed(ActionEvent e)
-            {
-               AhcFrame.this.setVisible(false);
-            }
-         });
-         
-         int index = toolbar.getComponentCount(); 
-         toolbar.add( hideButton, index-1 );
-      }
+      JButton hideButton = new JButton("Hide");
+      
+      hideButton.addActionListener( new ActionListener() {
+         public void actionPerformed(ActionEvent e)
+         {
+            AhcFrame.this.setVisible(false);
+         }
+      });
+      
+      int index = toolbar.getComponentCount(); 
+      toolbar.add( hideButton, index-1 );
    }
 }
 
