@@ -27,6 +27,7 @@ import javax.swing.JFrame;
 
 import stars.ahc.AHPoller;
 import stars.ahc.GamesProperties;
+import stars.ahc.Log;
 import stars.ahc.NotificationListener;
 import stars.ahcgui.AhcFrame;
 import stars.ahcgui.pluginmanager.BasePlugIn;
@@ -214,16 +215,23 @@ public class TrayIconManager implements BasePlugIn, NotificationListener
       
       try
       {
-         if ((source instanceof AHPoller) && (severity == AHPoller.BALLOON_NOTIFICATION))
+         if ((source instanceof AHPoller))
          {
-            // do something here
+            // If the notification is from the AutoHost poller, only display the message as a balloon
+            // if action is required by the user.
+            if (GamesProperties.actionRequired())
+            {
+               icon.showBalloon( message, "Stars! AutoHost Client", MIN_TIMEOUT, WindowsTrayIcon.BALLOON_INFO );
+            }
          }
-         
-         icon.showBalloon( message, "Stars! AutoHost Client", MIN_TIMEOUT, WindowsTrayIcon.BALLOON_INFO );         
+         else
+         {
+            icon.showBalloon( message, "Stars! AutoHost Client", MIN_TIMEOUT, WindowsTrayIcon.BALLOON_INFO );
+         }
       }
       catch (TrayIconException e)
       {
-         e.printStackTrace();
+         Log.log( Log.ERROR, this, e.getMessage() );
       }
    }
 
@@ -252,7 +260,7 @@ public class TrayIconManager implements BasePlugIn, NotificationListener
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         Log.log( Log.ERROR, this, e.getMessage() );
       }
    }
 
