@@ -8,6 +8,7 @@ package stars.ahc.plugins.battlesim;
 /**
  * @author Steve Leach
  *
+ * @deprecated - use BattleSimulationListener instead
  */
 public interface StatusListener
 {

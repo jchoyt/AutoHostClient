@@ -44,9 +44,12 @@ public class ShipStack
    public boolean escaped = false;
    public int randomMass = 0;
    public ShipStack target = null;
+   public ShipStack targetedBy = null;
    public int preferredRange = 0;
    public int battleOrders = ORDERS_MAX_RATIO;
    public int movesMade = 0;
+   public int sortValue = 0;
+   public int ownerId = 0;
    
    public ShipStack( ShipDesign design, int count )
    {

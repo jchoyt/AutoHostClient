@@ -47,7 +47,7 @@ import stars.ahcgui.pluginmanager.PlugIn;
  * @author Steve Leach
  *
  */
-public class BattleSimulator extends JFrame implements PlugIn, StatusListener
+public class BattleSimulator extends JFrame implements PlugIn, BattleSimulationListener
 {
    private Game game;
    private JTextArea results;
@@ -198,11 +198,21 @@ public class BattleSimulator extends JFrame implements PlugIn, StatusListener
       int qty1 = Utils.safeParseInt( design1count.getText(), 0 );
       int qty2 = Utils.safeParseInt( design2count.getText(), 0 );
       
-      BattleSimulation sim = new OneOnOneBattle( game.getShipDesign(choice1), qty1, game.getShipDesign(choice2), qty2 );
+      BattleSimulation sim = new BattleSimulation();
+      
+      sim.addNewStack( game.getShipDesign(choice1), qty1, 1 );
+      sim.addNewStack( game.getShipDesign(choice2), qty2, 2 );
       
       sim.addStatusListener( this );
       
-      sim.simulate();
+      try
+      {
+         sim.simulate();
+      }
+      catch (BattleSimulationError e)
+      {
+         results.setText( results.getText() + "Error: " + e.getMessage() + "\n");
+      }
    }
 
    /* (non-Javadoc)
@@ -211,6 +221,14 @@ public class BattleSimulator extends JFrame implements PlugIn, StatusListener
    public void battleStatusUpdate(int round, String message)
    {
       results.setText( results.getText() + "Round " + round + " : " + message + "\n"); 
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.plugins.battlesim.BattleSimulationListener#handleNotification(stars.ahc.plugins.battlesim.BattleSimulationNotification)
+    */
+   public void handleNotification(BattleSimulationNotification notification)
+   {
+      results.setText( results.getText() + "Round " + notification.round + " : " + notification.message + "\n"); 
    }
    
 }

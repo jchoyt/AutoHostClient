@@ -21,9 +21,10 @@ import junit.framework.TestCase;
 import stars.ahc.ShipDesign;
 import stars.ahc.Weapon;
 import stars.ahc.plugins.battlesim.BattleSimulation;
-import stars.ahc.plugins.battlesim.OneOnOneBattle;
+import stars.ahc.plugins.battlesim.BattleSimulationError;
+import stars.ahc.plugins.battlesim.BattleSimulationListener;
+import stars.ahc.plugins.battlesim.BattleSimulationNotification;
 import stars.ahc.plugins.battlesim.ShipStack;
-import stars.ahc.plugins.battlesim.StatusListener;
 
 /**
  * @author Steve Leach
@@ -33,10 +34,10 @@ public class BattleSimulatorTest extends TestCase
 {
    private ShipDesign rabidDog, ccc, armBB;
    
-   private StatusListener consoleStatusListener = new StatusListener() {
-      public void battleStatusUpdate(int round, String message)
+   private BattleSimulationListener consoleStatusListener = new BattleSimulationListener() {
+      public void handleNotification(BattleSimulationNotification notification)
       {
-         System.out.println( "Round " + round + " : " + message );
+         System.out.println( "Round " + notification.round + " : " + notification.message );
       }
    };
 
@@ -125,7 +126,12 @@ public class BattleSimulatorTest extends TestCase
    
    public void testBattleOne() throws Exception
    {
-      BattleSimulation battle = new OneOnOneBattle( rabidDog, 12, ccc, 14 );
+      // Setup the battle simulator
+      
+      BattleSimulation battle = new BattleSimulation();
+      
+      battle.addNewStack( rabidDog, 12 );
+      battle.addNewStack( ccc, 14 );
       
       battle.simulate();
       
@@ -148,9 +154,10 @@ public class BattleSimulatorTest extends TestCase
     */
    public void testBattleTwo() throws Exception
    {
-      BattleSimulation battle = new OneOnOneBattle( rabidDog, 7, ccc, 14 );
-
-      //battle.addStatusListener( consoleStatusListener );
+      BattleSimulation battle = new BattleSimulation();
+      
+      battle.addNewStack( rabidDog, 7 );
+      battle.addNewStack( ccc, 14 );
       
       battle.simulate();
       
@@ -173,7 +180,7 @@ public class BattleSimulatorTest extends TestCase
       ShipDesign defender = new ShipDesign();
       defender.setJamming( 49 );
       
-      double accuracy = OneOnOneBattle.getFinalAccuracy( 0.75, attacker, defender );
+      double accuracy = BattleSimulation.getFinalAccuracy( 0.75, attacker, defender );
       
       assertEquals( 0.38, accuracy, 0.01 );
    }
@@ -184,14 +191,14 @@ public class BattleSimulatorTest extends TestCase
       attacker.addComputer( ShipDesign.BATTLE_NEXUS, 1 );
       ShipDesign defender = new ShipDesign();
       
-      double accuracy = OneOnOneBattle.getFinalAccuracy( 0.75, attacker, defender );
+      double accuracy = BattleSimulation.getFinalAccuracy( 0.75, attacker, defender );
       
       assertEquals( 0.88, accuracy, 0.01 );
       
       attacker = new ShipDesign();
       attacker.addComputer( ShipDesign.SUPER_COMPUTER, 2 );
       
-      accuracy = OneOnOneBattle.getFinalAccuracy( 0.75, attacker, defender );
+      accuracy = BattleSimulation.getFinalAccuracy( 0.75, attacker, defender );
       
       assertEquals( 0.88, accuracy, 0.01 );      
    }
@@ -203,7 +210,7 @@ public class BattleSimulatorTest extends TestCase
       ShipDesign defender = new ShipDesign();
       defender.setJamming( 49 );
       
-      double accuracy = OneOnOneBattle.getFinalAccuracy( 0.75, attacker, defender );
+      double accuracy = BattleSimulation.getFinalAccuracy( 0.75, attacker, defender );
       
       assertEquals( 0.83, accuracy, 0.01 );
    }
@@ -215,16 +222,17 @@ public class BattleSimulatorTest extends TestCase
       ShipDesign defender = new ShipDesign();
       defender.setJamming( 49 );
       
-      double accuracy = OneOnOneBattle.getFinalAccuracy( 0.75, attacker, defender );
+      double accuracy = BattleSimulation.getFinalAccuracy( 0.75, attacker, defender );
       
       assertEquals( 0.53, accuracy, 0.01 );
    }
    
-   public void testBattleThree()
+   public void testBattleThree() throws BattleSimulationError
    {
-      BattleSimulation battle = new OneOnOneBattle( rabidDog, 20, armBB, 4 );
-
-      //battle.addStatusListener( consoleStatusListener );
+      BattleSimulation battle = new BattleSimulation();
+      
+      battle.addNewStack( rabidDog, 20 );
+      battle.addNewStack( armBB, 4 );
       
       battle.simulate();
       
@@ -249,7 +257,7 @@ public class BattleSimulatorTest extends TestCase
     */
    public void testDistanceBetween()
    {
-      OneOnOneBattle battle = new OneOnOneBattle();
+      BattleSimulation battle = new BattleSimulation();
       
       ShipStack s1 = new ShipStack(null,1);
       ShipStack s2 = new ShipStack(null,2);
@@ -287,14 +295,16 @@ public class BattleSimulatorTest extends TestCase
       assertEquals( 5, battle.distanceBetween(s1,s2) );
    }
    
-   public void testDisengageOne()
+   public void testDisengageOne() throws BattleSimulationError
    {
       ShipStack cynic = new ShipStack( cynicDD, 1 );
       cynic.battleOrders = ShipStack.ORDERS_DISENGAGE;
       
       ShipStack staz = new ShipStack( interceptor2, 3 );
       
-      BattleSimulation battle = new OneOnOneBattle( cynic, staz );
+      BattleSimulation battle = new BattleSimulation(2);
+      battle.addStack( cynic );
+      battle.addStack( staz );
 
       battle.addStatusListener( consoleStatusListener );
       

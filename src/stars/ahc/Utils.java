@@ -383,7 +383,11 @@ public class Utils
    {
       return random.nextFloat();
    }
-
+   
+   public static int getRandomInt()
+   {
+      return random.nextInt();
+   }
 
    /**
     * Returns a string representation of a color.
