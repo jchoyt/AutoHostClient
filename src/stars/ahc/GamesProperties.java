@@ -607,6 +607,15 @@ public class GamesProperties
       
       return actionRequired;
    }
+
+   /**
+    * @param string
+    * @return
+    */
+   public static String getProperty(String key)
+   {
+      return props.getProperty(key);
+   }
 }
 
 /*

@@ -11,6 +11,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -26,25 +27,32 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import stars.ahc.Game;
+import stars.ahc.GamesProperties;
 import stars.ahc.Planet;
 import stars.ahc.ReportLoaderException;
 import stars.ahc.plugins.map.MapConfig;
 import stars.ahc.plugins.map.MapDisplayError;
+import stars.ahcgui.pluginmanager.ConfigurablePlugIn;
 import stars.ahcgui.pluginmanager.MapLayer;
 
 /**
  * @author Steve Leach
  *
  */
-public class PlanetNamesLayer implements MapLayer
+public class PlanetNamesLayer implements MapLayer, ConfigurablePlugIn
 {
+   private static final int DEFAULT_TEXT_SIZE = 8;
+   private static final int WHICH_ALL = 0;
+   private static final int WHICH_OCCUPIED = 1;
+   
    private boolean enabled = true;
    private Game game;
    private MapConfig config;
    private Box controls;
    private JRadioButton occupiedPlanetsButton;
    private JRadioButton allPlanetsButton;
-   private static final int DEFAULT_TEXT_SIZE = 8;
+   private int textSize = DEFAULT_TEXT_SIZE;
+   private int whichPlanets = WHICH_ALL;
    private JSpinner textSizeField;
 
    /* (non-Javadoc)
@@ -70,6 +78,8 @@ public class PlanetNamesLayer implements MapLayer
    {
       this.game = game;
       this.config = config;
+      
+      loadProperties();
       
       if (game.getPlanetCount() == 0)
       {
@@ -106,13 +116,8 @@ public class PlanetNamesLayer implements MapLayer
       {
          Planet planet = game.getPlanet(n,config.year);
          
-         boolean drawName = true;
-         
-         if (controls != null)
-         {
-            drawName = 	allPlanetsButton.isSelected() ||
-         				(occupiedPlanetsButton.isSelected() && planet.isOccupied());
-         }
+         boolean drawName = (whichPlanets == WHICH_ALL) ||
+         					((whichPlanets == WHICH_OCCUPIED)&& planet.isOccupied());
          
          if (drawName)
          {
@@ -131,14 +136,7 @@ public class PlanetNamesLayer implements MapLayer
    }
 
    private void setupFont(Graphics2D g)
-   {
-      int textSize = DEFAULT_TEXT_SIZE;
-      
-      if (controls != null)
-      {
-         textSize = ((Integer)textSizeField.getModel().getValue()).intValue(); 
-      }
-      
+   {     
       Font font = new Font( "SansSerif", Font.PLAIN, textSize );
       
       g.setFont( font );
@@ -172,6 +170,7 @@ public class PlanetNamesLayer implements MapLayer
          ActionListener defaultListener = new ActionListener() {
             public void actionPerformed(ActionEvent event)
             {
+               getFieldValues();
                config.notifyChangeListeners();
             }
          };
@@ -192,13 +191,22 @@ public class PlanetNamesLayer implements MapLayer
          whichPlanetsBox.add( allPlanetsButton );         
          whichPlanetsBox.add( occupiedPlanetsButton );
 
+         if (whichPlanets == WHICH_ALL)
+         {
+            allPlanetsButton.setSelected(true);
+         }
+         else if (whichPlanets == WHICH_OCCUPIED)
+         {
+            occupiedPlanetsButton.setSelected(true);
+         }
+         
          controls.add( whichPlanetsBox );
          
          Box textSizePanel = Box.createHorizontalBox();
          textSizePanel.setBorder( new EtchedBorder() );
          textSizePanel.add( new JLabel("Text size:") );
          
-         SpinnerModel textSizeFieldModel = new SpinnerNumberModel(DEFAULT_TEXT_SIZE,1,40,1);
+         SpinnerModel textSizeFieldModel = new SpinnerNumberModel(textSize,1,40,1);
          textSizeField = new JSpinner(textSizeFieldModel);
          
          // FIXME: for some reason this isn't having any effect
@@ -209,6 +217,7 @@ public class PlanetNamesLayer implements MapLayer
             {
                // Tell the map config to notify all listeners that something has changed.
                // This will force a map redraw.
+               getFieldValues();
                config.notifyChangeListeners();
             }
          } );
@@ -223,4 +232,68 @@ public class PlanetNamesLayer implements MapLayer
       return controls;
    }
 
+   private void getFieldValues()
+   {
+      if (controls != null)
+      {
+         textSize = ((Integer)textSizeField.getModel().getValue()).intValue();
+         
+         if (allPlanetsButton.isSelected())
+         {
+            whichPlanets = WHICH_ALL;
+         }
+         else if (occupiedPlanetsButton.isSelected())
+         {
+            whichPlanets = WHICH_OCCUPIED;
+         }
+      }
+   }
+   
+   private String getPropertyBase()
+   {
+      return "Plugins.MapLayers.PlanetNamesLayer." + game.getName();
+   }
+   
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.ConfigurablePlugIn#saveConfiguration(java.util.Properties)
+    */
+   public void saveConfiguration(Properties properties)
+   {
+      properties.setProperty( getPropertyBase()+".textSize", ""+textSize );
+      
+      String which_text = "all";
+      switch (whichPlanets)
+      {
+         case WHICH_OCCUPIED: which_text = "occupied";
+      }
+      properties.setProperty( getPropertyBase()+".whichPlanets", which_text );
+      
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahcgui.pluginmanager.ConfigurablePlugIn#loadConfiguration(java.util.Properties)
+    */
+   public void loadConfiguration(Properties properties)
+   {
+      // empty - see loadProperties()
+   }
+
+   private void loadProperties()
+   {
+      textSize = GamesProperties.getIntProperty( getPropertyBase()+".textSize", DEFAULT_TEXT_SIZE );
+      
+      String whichStr = GamesProperties.getProperty( getPropertyBase()+".whichPlanets" );
+      
+      if (whichStr != null)
+      {
+         if (whichStr.equals("all"))
+         {
+            whichPlanets = WHICH_ALL;
+         }
+         else if (whichStr.equals("occupied"))
+         {
+            whichPlanets = WHICH_OCCUPIED;
+         }
+      }
+   }
 }

@@ -169,7 +169,11 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
 	         if (layer instanceof ConfigurablePlugIn)
 	         {
 	            ConfigurablePlugIn cp = (ConfigurablePlugIn)layer;
-	            cp.loadConfiguration( savedProperties );
+	            
+	            if (savedProperties != null)
+	            {
+	               cp.loadConfiguration( savedProperties );
+	            }
 	         }
 	         
 	         layers.add( layer );
@@ -566,7 +570,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    public void loadConfiguration(Properties properties)
    {
       this.savedProperties = properties;
-
+      
       for (int n = 0; n < layers.size(); n++)
       {
          MapLayer layer = (MapLayer)layers.get(n);
@@ -578,6 +582,10 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
             layer.setEnabled( enabled == "true" );
          }
          
+         if (layer instanceof ConfigurablePlugIn)
+         {
+            ((ConfigurablePlugIn)layer).loadConfiguration( properties );
+         }
       }     
       
    }

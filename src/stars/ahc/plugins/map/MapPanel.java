@@ -121,6 +121,9 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
       }
    }
 
+   /**
+    * Returns an Affine Transform applying the current map configuration (pan and zoom) 
+    */
    private AffineTransform getMapTransform()
    {
       AffineTransform xform = new AffineTransform();
@@ -219,21 +222,29 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
     * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
     */
    public void mouseMoved(MouseEvent event)
-   {      
-      Point screenPos = event.getPoint();
-
-      // First, apply the reverse of the current transform
-      
-      AffineTransform xform;
+   {
       try
       {
-         xform = getMapTransform().createInverse();
+	      Point screenPos = event.getPoint();
+	
+	      Point mapPos = screenToMap(screenPos);
+	      
+	      notifyMapMouseMoveListeners( screenPos, mapPos );
       }
-      catch (NoninvertibleTransformException e)
+      catch (Throwable t)
       {
-         // currently ignore this as if it happens it will happen a lot
-         return;
+         // TODO: need to decide what to do with this.
+         // We can't ignore it, but we don't want to pass it on to the user
+         // or even log it indescriminantly because if it happens it will
+         // happen repeatedly.
       }
+   }
+
+   private Point screenToMap(Point screenPos) throws NoninvertibleTransformException
+   {
+      // First, apply the reverse of the current transform
+      
+      AffineTransform xform = getMapTransform().createInverse();
             
       Point mapPos = new Point();
       xform.transform( screenPos, mapPos );
@@ -242,7 +253,7 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
       
       mapPos = config.screenToMap( mapPos );
       
-      notifyMapMouseMoveListeners( screenPos, mapPos );
+      return mapPos;
    }
 
    /* (non-Javadoc)
