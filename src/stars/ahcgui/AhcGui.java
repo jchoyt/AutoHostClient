@@ -36,7 +36,7 @@ public class AhcGui extends java.lang.Object
     protected static JComboBox optionSelector;
     static JPanel gameCards;
     static JPanel gameOptionCards;
-    static AhcFrame mainFrame;
+    public static AhcFrame mainFrame;
     static JLabel statusBox;
 
 

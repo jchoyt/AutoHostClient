@@ -14,24 +14,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahc;
-
-import java.util.Date;
-import java.text.*;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-
+import javax.swing.JOptionPane;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
+import stars.ahcgui.*;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
+
+import java.util.Date;
 
 /**
  *  Description of the Class
@@ -74,41 +74,93 @@ public class Utils
 
 
     /**
+     *  Sets up the backup and staging directories if they don't already exist.
+     *
+     *@param  currentGame  Description of the Parameter
+     */
+    public static void setupDirs( Game currentGame )
+    {
+        try
+        {
+            String stage = currentGame.getDirectory() + "/staging";
+            String backup = currentGame.getDirectory() + "/backup";
+            /*
+             *  create staging and backup directories if they don't exist already
+             */
+            File gameDir = new File( currentGame.getDirectory() );
+            File stageDir = new File( stage );
+            File backupDir = new File( backup );
+            if ( !gameDir.exists() )
+            {
+                gameDir.mkdir();
+            }
+            if ( !stageDir.exists() )
+            {
+                stageDir.mkdir();
+            }
+            if ( !backupDir.exists() )
+            {
+                backupDir.mkdir();
+            }
+            File xyFile = new File( gameDir, currentGame.getName() + ".xy" );
+            if ( !xyFile.exists() )
+            {
+                Utils.getFileFromAutohost( currentGame.getName(), currentGame.getName() + ".xy", currentGame.getDirectory() );
+            }
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
      *  Gets the allyTurnsFromAutohost attribute of the Utils class
      *
      *@param  gameName         Description of the Parameter
      *@param  destination      Description of the Parameter
      *@param  fileName         Description of the Parameter
-     *@exception  IOException  Description of the Exception
      */
     public static void getFileFromAutohost( String gameName, String fileName, String destination )
-        throws IOException
     {
-        //create destination if it doesn't exist
-        File dest = new File( destination );
-        if ( !dest.exists() )
+        try
         {
-            dest.mkdirs();
+            //create destination if it doesn't exist
+            File dest = new File( destination );
+            if ( !dest.exists() )
+            {
+                dest.mkdirs();
+            }
+            //go get the files
+            URL url = new URL( GamesProperties.AUTOHOST + gameName + "/" + fileName );
+            Log.log( Log.DEBUG, Utils.class, "Going to get " + url.getFile() );
+            URLConnection connection = url.openConnection();
+            InputStream stream = connection.getInputStream();
+            BufferedInputStream in = new BufferedInputStream( stream );
+            FileOutputStream file = new FileOutputStream( destination + "/" + fileName );
+            BufferedOutputStream out = new BufferedOutputStream( file );
+            int loop;
+            while ( ( loop = in.read() ) != -1 )
+            {
+                out.write( loop );
+            }
+            out.flush();
+            out.close();
+            file.close();
+            in.close();
+            stream.close();
+            Log.log( Log.DEBUG, Utils.class, "Done - successfully retrieved " + url.getFile() );
         }
-        //go get the files
-        URL url = new URL( GamesProperties.AUTOHOST + gameName + "/" + fileName );
-        Log.log(Log.DEBUG,Utils.class, "Going to get " + url.getFile());
-        URLConnection connection = url.openConnection();
-        InputStream stream = connection.getInputStream();
-        BufferedInputStream in = new BufferedInputStream( stream );
-        FileOutputStream file = new FileOutputStream( destination + "/" + fileName );
-        BufferedOutputStream out = new BufferedOutputStream( file );
-        int loop;
-        while ( ( loop = in.read() ) != -1 )
+        catch ( IOException e )
         {
-            out.write( loop );
+            JOptionPane.showInternalMessageDialog(
+                    AhcGui.mainFrame.getContentPane(),
+                    fileName + " couldn't be retrieved from AutoHost",
+                    "Retrieval problem",
+                    JOptionPane.INFORMATION_MESSAGE );
+            return;
         }
-        out.flush();
-        out.close();
-        file.close();
-        in.close();
-        stream.close();
-        Log.log(Log.DEBUG,Utils.class, "Done - successfully retrieved " + url.getFile());
     }
 
 
@@ -120,6 +172,18 @@ public class Utils
     public static File getStarsExecutable()
     {
         return starsExecutable;
+    }
+
+
+    /**
+     *  Gets the time attribute of the Utils class
+     *
+     *@return    The time value
+     */
+    public static String getTime()
+    {
+        SimpleDateFormat format = new SimpleDateFormat( "(h:mm:ss) " );
+        return format.format( new Date() );
     }
 
 
@@ -251,51 +315,6 @@ public class Utils
     public static boolean mapNeeded( String year )
     {
         return year.matches( mapNeededRegex );
-    }
-
-    /**
-     *  Sets up the backup and staging directories if they don't already exist.
-     */
-    public static void setupDirs(Game currentGame)
-    {
-        try
-        {
-            String stage = currentGame.getDirectory() + "/staging";
-            String backup = currentGame.getDirectory() + "/backup";
-            /*
-             *  create staging and backup directories if they don't exist already
-             */
-            File gameDir = new File( currentGame.getDirectory() );
-            File stageDir = new File( stage );
-            File backupDir = new File( backup );
-            if ( !gameDir.exists() )
-            {
-                gameDir.mkdir();
-            }
-            if ( !stageDir.exists() )
-            {
-                stageDir.mkdir();
-            }
-            if ( !backupDir.exists() )
-            {
-                backupDir.mkdir();
-            }
-            File xyFile = new File( gameDir, currentGame.getName() + ".xy" );
-            if ( !xyFile.exists() )
-            {
-                Utils.getFileFromAutohost( currentGame.getName(), currentGame.getName() + ".xy", currentGame.getDirectory() );
-            }
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public static String getTime()
-    {
-        SimpleDateFormat format = new SimpleDateFormat("(h:mm:ss) ");
-        return format.format(new Date());
     }
 }
 
