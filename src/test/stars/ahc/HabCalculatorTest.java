@@ -42,9 +42,9 @@ public class HabCalculatorTest extends TestCase
       
       Race humanoids = new Race(game);
       humanoids.setRaceName( "Humanoids" );
-      humanoids.setGravRange( 0.25, 3.92 );
-      humanoids.setTempRange( -128, 128 );
-      humanoids.setRadRange( 22, 82 );
+      humanoids.setGravRange( 0.25, 3.92, false );
+      humanoids.setTempRange( -128, 128, false );
+      humanoids.setRadRange( 22, 82, false );
       
       Planet DoReMi = createPlanet( "Do Re Mi", "2.24", "-124", "92" );
       habValue = calc.calcHabValue( DoReMi, humanoids, 7, 11, 11 );
@@ -63,9 +63,9 @@ public class HabCalculatorTest extends TestCase
       
       Race humanoids = new Race(game);
       humanoids.setRaceName( "Humanoids" );
-      humanoids.setGravRange( 0.25, 3.92 );
-      humanoids.setTempRange( -128, 128 );
-      humanoids.setRadRange( 22, 82 );
+      humanoids.setGravRange( 0.25, 3.92, false );
+      humanoids.setTempRange( -128, 128, false );
+      humanoids.setRadRange( 22, 82, false );
 
       for (int n = 0; n < testSize; n++)
       {

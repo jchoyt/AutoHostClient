@@ -329,15 +329,15 @@ public class RaceEditorPanel extends JPanel implements ObjectEditorTab, ListSele
       //
       double grav_min = Utils.safeParseFloat( gravEditor.getMinText(), 0 );
       double grav_max = Utils.safeParseFloat( gravEditor.getMaxText(), 0 );
-      race.setGravRange( grav_min, grav_max );
+      race.setGravRange( grav_min, grav_max, false );
       
       int temp_min = Utils.safeParseInt( tempEditor.getMinText(), 0 );
       int temp_max = Utils.safeParseInt( tempEditor.getMaxText(), 0 );
-      race.setTempRange( temp_min, temp_max );
+      race.setTempRange( temp_min, temp_max, false );
 
       int rad_min = Utils.safeParseInt( radEditor.getMinText(), 0 );
       int rad_max = Utils.safeParseInt( radEditor.getMaxText(), 0 );
-      race.setRadRange( rad_min, rad_max );
+      race.setRadRange( rad_min, rad_max, false );
       
       //
       // Save mapped properties

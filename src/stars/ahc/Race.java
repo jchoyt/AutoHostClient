@@ -182,16 +182,23 @@ public class Race
       return true; 
    }
    
-   public void setGravRange( double min, double max )
+   public void setGravRange( double min, double max, boolean immune )
    {
       setUserProperty( "gravMinClicks", StarsRuleSet.gravToClicks( min ) );
       setUserProperty( "gravMaxClicks", StarsRuleSet.gravToClicks( max ) );
+      setUserProperty( "gravImmune", ""+immune );
    }
    
    public int getUserIntProperty( String name, int defaultValue )
    {
       String s = getUserProperty( name );
       return Utils.safeParseInt( s, defaultValue );      
+   }
+
+   public boolean getUserBoolProperty( String name, boolean defaultValue )
+   {
+      String s = getUserProperty( name );
+      return "true".equals(s);      
    }
    
    public int getMinGravClicks()
@@ -204,10 +211,11 @@ public class Race
       return getUserIntProperty( "gravMaxClicks", 0 );
    }
    
-   public void setTempRange( int min, int max )
+   public void setTempRange( int min, int max, boolean immune )
    {
       setUserProperty( "tempMinClicks", StarsRuleSet.tempToClicks(min) );
       setUserProperty( "tempMaxClicks", StarsRuleSet.tempToClicks(max) );
+      setUserProperty( "tempImmune", ""+immune );
    }
 
    public int getMinTempClicks()
@@ -220,10 +228,11 @@ public class Race
       return getUserIntProperty( "tempMaxClicks", 0 );
    }
 
-   public void setRadRange( int min, int max )
+   public void setRadRange( int min, int max, boolean immune )
    {
       setUserProperty( "radMinClicks", StarsRuleSet.radToClicks(min) );
       setUserProperty( "radMaxClicks", StarsRuleSet.radToClicks(max) );
+      setUserProperty( "radImmune", ""+immune );
    }
    
    public int getMinRadClicks()
@@ -268,20 +277,17 @@ public class Race
    
    public boolean gravImmune()
    {
-      // TODO Auto-generated method stub
-      return false;
+      return getUserBoolProperty("gravImmune",false);
    }
 
    public boolean tempImmune()
    {
-      // TODO Auto-generated method stub
-      return false;
+      return getUserBoolProperty("tempImmune",false);
    }
 
    public boolean radImmune()
    {
-      // TODO Auto-generated method stub
-      return false;
+      return getUserBoolProperty("radImmune",false);
    }
 
    /**
