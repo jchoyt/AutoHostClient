@@ -95,6 +95,7 @@ public class ShipDesign
 
    public ShipDesign()
    {
+      setupWeaponSlots();
    }
 
    private void setupWeaponSlots()
@@ -235,7 +236,7 @@ public class ShipDesign
    }
    public double getWeaponAccuracy(int slot)
    {
-      return weaponAccuracy[slot];
+      return weaponAccuracy[slot] / 100.0;
    }
    public String getOwner()
    {
@@ -491,5 +492,29 @@ public class ShipDesign
    public void setResourceCost(int resourceCost)
    {
       this.resourceCost = resourceCost;
+   }
+   
+   /**
+    * Returns the main weapon slot for the design.
+    * <p>
+    * This is the slot that has the most weapons in it.  If there are several
+    * slots with the same number of weapons, the first is used.
+    * <p>
+    * This method is intended for use in selecting targets, as different 
+    * weapon types will prefer different targets.
+    */
+   public int getMainWeaponSlot()
+   {
+      int max = 0;
+      int slot = 0;
+      for (int n = 0; n < weaponSlotsUsed; n++)
+      {
+         if (weaponCount[n] > max)
+         {
+            max = weaponCount[n];
+            slot = n;
+         }
+      }
+      return slot;
    }
 }

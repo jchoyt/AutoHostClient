@@ -49,12 +49,28 @@ public class ShipStack
    public int battleOrders = ORDERS_MAX_RATIO;
    public int movesMade = 0;
    public int sortValue = 0;
-   public int ownerId = 0;
+   public int side = 0;
    
    public ShipStack( ShipDesign design, int count )
    {
+      init( design, count, 0 );
+   }
+   
+   public ShipStack( ShipDesign design, int count, int side )
+   {
+      init( design, count, side );
+   }
+   
+   public void init( ShipDesign design, int count, int side )
+   {
       this.design = design;
       this.shipCount = count;
+      this.side = side;
+      
+      if (design != null)
+      {
+         this.shields = design.getShields() * count;
+      }
    }
    
    /**
