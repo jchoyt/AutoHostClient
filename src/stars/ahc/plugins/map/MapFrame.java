@@ -699,7 +699,7 @@ class LayerTableModel extends AbstractTableModel
          case 0:
             return new Boolean( layers[row].isEnabled() );
          case 1:
-            return layers[row].getName();
+            return layers[row].getDescription();
       }
       return null;
    }

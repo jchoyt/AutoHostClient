@@ -261,5 +261,22 @@ public class Fleet implements MapObject
    {
       return new Point( getX(), getY() );
    }
+
+
+   /**
+    * @return the fleet ID
+    */
+   public int getID()
+   {
+      int hashPos = getName().lastIndexOf('#');
+      
+      if (hashPos > 0)
+      {
+         String idStr = getName().substring(hashPos+1);
+         return Utils.safeParseInt( idStr, 0 );
+      }
+      
+      return 0;
+   }
 }
 

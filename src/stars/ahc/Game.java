@@ -936,6 +936,11 @@ public class Game extends Object
       return fleets.getFleet( index );
    }
    
+   public Fleet getFleetByID( int year, String owner, int id )
+   {
+      return fleets.getFleetByID( year, owner, id );
+   }
+   
    /**
     * Returns the number of fleets known in the specified year
     * @author Steve Leach

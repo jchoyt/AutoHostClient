@@ -124,6 +124,30 @@ public class FleetList
       FleetData fleetData = getFleetData( year, true );
       return fleetData.getFleetCount();
    }
+
+   /**
+    * @param year
+    * @param id
+    * @return
+    */
+   public Fleet getFleetByID(int year, String owner, int id)
+   {
+      int fleetCount = getFleetCount(year);
+      
+      for (int n = 0; n < fleetCount; n++)
+      {
+         Fleet fleet = getFleet( year, n );
+         
+         if (fleet.getID() == id)
+         {
+            if (fleet.getOwner().equals(owner))
+            {
+               return fleet;
+            }
+         }
+      }
+      return null;
+   }
 }
 
 /**

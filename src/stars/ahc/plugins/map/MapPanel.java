@@ -111,10 +111,7 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
                }
                catch (Throwable t)
                {
-                  // TODO: handle this elegantly
-                  // We want to continue drawing the map (graceful degredation).
-                  // We also want to inform the user and/or log the error.
-                  // But we don't want thousands of messages if there are lots of redraws.
+                  mapFrame.setStatus( "Error drawing " + layer.getName() + " : " + t.getMessage() );
                }
             }
          }

@@ -29,7 +29,7 @@ import stars.ahc.plugins.map.AbstractMapLayer;
  * @author Steve Leach
  *
  */
-public class FleetLayer extends AbstractMapLayer
+public class FleetTrackLayer extends AbstractMapLayer
 {
 
    /* (non-Javadoc)
@@ -37,7 +37,7 @@ public class FleetLayer extends AbstractMapLayer
     */
    public String getDescription()
    {
-      return "Fleets";
+      return "Fleet tracks";
    }
 
    /* (non-Javadoc)
@@ -53,26 +53,21 @@ public class FleetLayer extends AbstractMapLayer
 
          if (Utils.empty(fleet.getValue(Fleet.PLANET)))
          {
-	         Point screenPos = mapConfig.mapToScreen( fleet.getPosition() );
-	         
 	         g.setColor( game.getRaceColor( fleet.getOwner() ) );
 	         
-	         g.drawLine( screenPos.x-2, screenPos.y-2, screenPos.x+2, screenPos.y+2 );
-	         g.drawLine( screenPos.x-2, screenPos.y+2, screenPos.x+2, screenPos.y-2 );
-
-//	         Point prevPos = screenPos;
-//	         
-//	         for (int y = mapConfig.year-1; y > 2400; y--)
-//	         {
-//	            Fleet f = game.getFleetByID( y, fleet.getOwner(), fleet.getID() );
-//	            
-//	            if (f != null)
-//	            {
-//	               Point p = mapConfig.mapToScreen( f.getPosition() );
-//	               g.drawLine( prevPos.x, prevPos.y, p.x, p.y );
-//	               prevPos = p;
-//	            }
-//	         }
+	         Point prevPos = mapConfig.mapToScreen( fleet.getPosition() );
+	         
+	         for (int y = mapConfig.year-1; y > 2400; y--)
+	         {
+	            Fleet f = game.getFleetByID( y, fleet.getOwner(), fleet.getID() );
+	            
+	            if (f != null)
+	            {
+	               Point p = mapConfig.mapToScreen( f.getPosition() );
+	               g.drawLine( prevPos.x, prevPos.y, p.x, p.y );
+	               prevPos = p;
+	            }
+	         }
          }
       }
    }
@@ -82,7 +77,7 @@ public class FleetLayer extends AbstractMapLayer
     */
    public String getName()
    {
-      return "Fleets layer";
+      return "Fleet tracks layer";
    }
 
 }
