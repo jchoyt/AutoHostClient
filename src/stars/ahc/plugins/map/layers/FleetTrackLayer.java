@@ -20,8 +20,17 @@ package stars.ahc.plugins.map.layers;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Iterator;
+import java.util.Vector;
+
+import javax.swing.Box;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
 
 import stars.ahc.Fleet;
+import stars.ahc.Race;
 import stars.ahc.Utils;
 import stars.ahc.plugins.map.AbstractMapLayer;
 
@@ -32,6 +41,11 @@ import stars.ahc.plugins.map.AbstractMapLayer;
 public class FleetTrackLayer extends AbstractMapLayer
 {
    private boolean enabled = false;
+   private JComponent controls = null;
+   private String selectedRace = null;
+   private String selectedFleet = null;
+   private JComboBox raceList;
+   private JComboBox fleetList;
    
    /* (non-Javadoc)
     * @see stars.ahcgui.pluginmanager.PlugIn#getDescription()
@@ -52,24 +66,39 @@ public class FleetTrackLayer extends AbstractMapLayer
       {
          Fleet fleet = game.getFleet( mapConfig.year, n );
 
-         g.setColor( game.getRaceColor( fleet.getOwner() ) );
-         
-         Point prevPos = mapConfig.mapToScreen( fleet.getPosition() );
-         
-         for (int y = mapConfig.year-1; y > 2400; y--)
+         if (raceTest(fleet) && fleetTest(fleet))
          {
-            Fleet f = game.getFleetByID( y, fleet.getOwner(), fleet.getID() );
-            
-            if (f != null)
-            {
-               Point p = mapConfig.mapToScreen( f.getPosition() );
-               g.drawLine( prevPos.x, prevPos.y, p.x, p.y );
-               prevPos = p;
-            }
+	         g.setColor( game.getRaceColor( fleet.getOwner() ) );
+	         
+	         Point prevPos = mapConfig.mapToScreen( fleet.getPosition() );
+	         
+	         for (int y = mapConfig.year-1; y > 2400; y--)
+	         {
+	            Fleet f = game.getFleetByID( y, fleet.getOwner(), fleet.getID() );
+	            
+	            if (f != null)
+	            {
+	               Point p = mapConfig.mapToScreen( f.getPosition() );
+	               g.drawLine( prevPos.x, prevPos.y, p.x, p.y );
+	               prevPos = p;
+	            }
+	         }
          }
       }
    }
 
+   /**
+    */
+   private boolean raceTest( Fleet fleet )
+   {
+      return (selectedRace == null) || (selectedRace.equals(fleet.getOwner()));
+   }
+
+   private boolean fleetTest( Fleet fleet )
+   {
+      return (selectedFleet == null) || (selectedFleet.equals(fleet.getName()));
+   }
+   
    /* (non-Javadoc)
     * @see stars.ahcgui.pluginmanager.PlugIn#getName()
     */
@@ -85,5 +114,119 @@ public class FleetTrackLayer extends AbstractMapLayer
    public void setEnabled(boolean enabled)
    {
       this.enabled = enabled;
+   }
+   
+   
+   public JComponent getControls()
+   {
+      if (controls == null)
+      {
+         controls = Box.createVerticalBox();
+         
+         Vector races = new Vector();
+         races.add( "All races" );
+         
+         Iterator r = game.getRaces();
+         while (r.hasNext())
+         {
+            Race race = (Race)r.next();
+            if (Utils.empty( race.getRaceName() ) == false)
+            {
+               races.add( race.getRaceName() );
+            }
+         }
+         
+         ActionListener defaultActionListener = new ActionListener() {
+            public void actionPerformed(ActionEvent event)
+            {
+               getControlValues();
+               updateControls( (JComponent)event.getSource() );
+               mapConfig.notifyChangeListeners();
+            }
+         };
+         
+         raceList = new JComboBox(races);
+         raceList.setSelectedIndex(0);
+         raceList.addActionListener( defaultActionListener );
+         
+         controls.add( raceList );
+        
+         String[] fleets = new String[1];
+         fleets[0] = "All fleets";
+         fleetList = new JComboBox( fleets );
+         
+         fleetList.addActionListener( defaultActionListener );
+         
+         rebuildFleetList();
+         
+         controls.add( fleetList );
+         
+         controls.add( Box.createVerticalGlue() );
+      }
+      
+      return controls;
+   }
+   
+   private void getControlValues()
+   {
+      selectedRace = raceList.getSelectedItem().toString();
+      
+      if (selectedRace.startsWith("All"))
+      {
+         selectedRace = null;
+      }
+      
+      if (fleetList.getSelectedItem() == null)
+      {
+         selectedFleet = null;
+      }
+      else
+      {
+         selectedFleet = fleetList.getSelectedItem().toString();
+      
+	      if (selectedFleet.startsWith("All"))
+	      {
+	         selectedFleet = null;
+	      }
+      }
+   }
+   
+   private void updateControls( JComponent originator )
+   {
+      if (originator == raceList)
+      {
+         rebuildFleetList();
+      }
+   }
+
+   /**
+    * 
+    */
+   private void rebuildFleetList()
+   {
+      fleetList.removeAllItems();
+      
+      if (selectedRace == null)
+      {
+         fleetList.addItem( "All fleets" );
+      }
+      else
+      {
+         fleetList.addItem( "All fleets for " + selectedRace );
+      }
+      
+      int fleetCount = game.getFleetCount( mapConfig.year );
+      
+      for (int n = 0; n < fleetCount; n++)
+      {
+         Fleet fleet = game.getFleet( mapConfig.year, n );
+         
+         if (raceTest(fleet))
+         {
+            fleetList.addItem( fleet.getName() );
+         }
+      }      
+      
+      fleetList.setSelectedIndex(0);
    }
 }
