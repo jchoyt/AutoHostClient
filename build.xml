@@ -68,6 +68,7 @@
       <fileset dir="${build}" includes="**/Weapon.class"/>
       <fileset dir="${build}" includes="**/ShipHull.class"/>
       <fileset dir="html" includes="battlesim.htm"/>
+      <fileset dir="." includes="bigbattle.sim"/>
    	  <manifest>
 	  		<attribute name="Main-Class" value="stars.ahc.plugins.battlesim.StandAloneBattleSimulator"/>
 	  </manifest>

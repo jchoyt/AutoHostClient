@@ -22,6 +22,8 @@ import java.awt.Point;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,6 +143,12 @@ public class BattleSimulation
    {
       loadFrom( fileName );
    }
+   
+   public BattleSimulation( URL url ) throws IOException
+   {
+      loadFrom( url );
+   }
+   
    
    /**
     * Initialise the stacks array 
@@ -1567,11 +1575,23 @@ public class BattleSimulation
     */
    public void loadFrom( String fileName ) throws IOException
    {
+      FileInputStream s = new FileInputStream(fileName);
+      loadFrom( s );
+      s.close();
+   }
+   
+   public void loadFrom( URL url ) throws IOException
+   {
+      InputStream s = url.openStream();
+      loadFrom( s );
+      s.close();
+   }
+   
+   public void loadFrom( InputStream s ) throws IOException
+   {
       Properties props = new Properties();
       
-      FileInputStream s = new FileInputStream(fileName);
       props.load( s );
-      s.close();
       
       stackCount = Utils.safeParseInt( props.getProperty( "StackCount" ) );
       initStacks(stackCount);
@@ -1581,7 +1601,7 @@ public class BattleSimulation
       for (int n = 0; n < stackCount; n++)
       {
          stacks[n] = new ShipStack( props, n );         
-      }
+      }      
    }
 
    /**

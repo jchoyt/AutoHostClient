@@ -108,6 +108,7 @@ public class StandAloneBattleSimulator extends JFrame
    private AbstractAction importDesignAction;
    private JScrollPane resultsScroller;
    private AbstractAction saveAsAction;
+   private AbstractAction testDataAction;
 
    public static void main( String[] args ) throws Exception
    {      
@@ -115,7 +116,7 @@ public class StandAloneBattleSimulator extends JFrame
       
       if (args.length > 0)
       {
-         simWin.openSimulation( args[0] );
+         simWin.openSimulation( new File(args[0]) );
       }
       else
       {
@@ -261,6 +262,13 @@ public class StandAloneBattleSimulator extends JFrame
       };
       aboutAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F1, ActionEvent.ALT_MASK) );
       
+      testDataAction = new AbstractAction("Test") {
+         public void actionPerformed(ActionEvent event)
+         {
+            loadTestData();
+         }
+      };
+      
       addStackAction = new AbstractAction("Add") {
          public void actionPerformed(ActionEvent event)
          {
@@ -320,6 +328,8 @@ public class StandAloneBattleSimulator extends JFrame
       mainMenu.add( helpMenu );
       
       helpMenu.add( new JMenuItem(helpAction) );
+      helpMenu.addSeparator();
+      helpMenu.add( new JMenuItem(testDataAction) );
       helpMenu.addSeparator();
       helpMenu.add( new JMenuItem(aboutAction) );
       
@@ -513,7 +523,7 @@ public class StandAloneBattleSimulator extends JFrame
       
       if (rc == JFileChooser.APPROVE_OPTION)
       {
-         openSimulation( chooser.getSelectedFile().getAbsolutePath() );
+         openSimulation( chooser.getSelectedFile() );
 
          refreshControls();
          
@@ -521,17 +531,38 @@ public class StandAloneBattleSimulator extends JFrame
       }
    }
 
-   public void openSimulation( String fileName )
+   public void openSimulation( File file )
    {
       try
       {
-         currentSimFile = new File(fileName);
-         sim = new BattleSimulation( fileName );
+         currentSimFile = file;
+         sim = new BattleSimulation( file.getAbsolutePath() );
          sim.addStatusListener( new TextAreaStatusListener(resultsArea) );
          runSimAction.setEnabled( true );
          stackTableModel.setSimulation( sim );
          saveAction.setEnabled( true );
          repaint();
+      }
+      catch (Throwable t)
+      {
+         logError( t );
+         showError( t );
+         sim = null;
+      }
+   }
+   
+   public void openSimulation( URL url )
+   {
+      try
+      {
+	      currentSimFile = null;
+	      sim = new BattleSimulation( url );
+	      
+	      sim.addStatusListener( new TextAreaStatusListener(resultsArea) );
+	      runSimAction.setEnabled( true );
+	      stackTableModel.setSimulation( sim );
+	      saveAction.setEnabled( true );
+	      repaint();
       }
       catch (Throwable t)
       {
@@ -605,6 +636,25 @@ public class StandAloneBattleSimulator extends JFrame
          catch (IOException e)
          {
             logError( e );
+         }
+      }
+   }
+   
+   private void loadTestData()
+   {
+      URL url = getClass().getClassLoader().getResource("bigbattle.sim");
+      
+      if (url != null)
+      {
+         openSimulation( url );
+      }
+      else
+      {
+         File file = new File("bigbattle.sim");
+         
+         if (file.exists())
+         {
+            openSimulation( file );
          }
       }
    }
@@ -741,7 +791,14 @@ public class StandAloneBattleSimulator extends JFrame
          else
          {
             text += stack.getShipCount() + " left, ";
-            text += stack.getDamagePercent() + "% damage, ";
+            if (stack.getDamagePercent() == 0)
+            {
+               text += "undamaged, ";
+            }
+            else
+            {
+               text += stack.getDamagePercent() + "% damage, ";
+            }
             text += stack.shields + " shields left";
          }
          
