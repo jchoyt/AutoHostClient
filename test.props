@@ -1,4 +1,4 @@
-StarsExecutable=wine -- /c/stars/stars.exe
+StarsExecutable=/home/jchoyt/bin/stars.sh
 ProxyHost=gatekeeper.mitre.org
 ProxyPort=80
 dtroubl1.player5.lastUpload=0
