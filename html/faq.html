@@ -44,13 +44,59 @@
               </li>
             </ul>
             <sup>*</sup>note the DOS 8.3 name. If you have spaces in your path, it may give you trouble. Try using the first 6 letters and "~1" for the directory name. Also note that case DOES matter.
+            <hr>
+            <b>Q</b>: I know I'm an incredible geek, and selfish too, for wanting a superior OS while still running excellent games, but I want to run this on Linux.  Will it work?<br><br>
+            <b>A</b>: I'm a selfish geek, too.  Of course it'll run under Linux.  When setting up your "stars.exe" location, use something like "wine -- c:\stars\stars".  Of course you have to have your paths set up properly.  For more help in setting things up with wine, I can help if I have time.  <a href="mailto:jchoyt@users.sourceforge.net">Email me.</a>
+            <br><br><b>Update:</b> I use a simple bash script to run Stars! under Linux.  For my Stars! executable, I point to this file: <blockquote><pre>#! /bin/bash
+wine -- /c/stars/stars.exe "$@"</pre></blockquote><br><br>Mark Montgomery gracefully provided these scripts for running AHC (bash) and Stars! (Perl).  Pick yer poison :o):
+<blockquote><pre> #Lauch Stars Auto Host Client
+cd ~/.wine/fake_windows/stars
+java -jar ahclient.jar</pre>
+</blockquote>
+<hr width="25" align="center">
+<blockquote>
+<pre>#!/usr/bin/perl -w
+# Launch stars! in wine.
+# Script takes 3 arguments so you can have stars load a game and send
+# the password if you like.
+# The Stars! command for this is "stars.exe gamefile -p gamepass."
+# This script will work properly with the Stars! AutoHost Client.
+# Just point the stars! executable configuration option of SAHC to this
+# script instead of directly to the stars! exe.
+# If you need more command line options, just add more $arg# variables.
+# Mark D. Montgomery II
+# 08/16/2004
+# techiem2@techiem2.net
+
+use POSIX;
+
+my ($arg0, $arg1, $arg2, $arg3) = @ARGV;
+system "cd ~/.wine/fake_windows";
+
+my $cmd = "wine -- c:/stars/stars.exe $arg0 $arg1 $arg2 $arg3";
+my $ret = system $cmd;
+exit $ret;</pre>
+</blockquote>
             <hr />
             <b>Q</b>: AHC doesn't work (anymore).  Why not?
             <br />
             <br />
             <b>A</b>: Ron recently moved his hosting to a new location.  Make sure you get AHC version 2.1 or later.
             <hr />
-
+            <b>Q</b>: How do I make those .f files mentioned so I can analyze them?
+            <br />
+            <br />
+            <b>A</b>: AHC should automatically make the files when you download an m-file. Check the directory where your m-files are - you are lookinng for files of the form &lt;gamename&gt;.F&lt;player number&gt; (e.g., buguni3.F11). If you can't find them, you can create them from within Stars!. Use the Reports->Dump to Text File->Fleets (or ->Planets for planet info) menu item. The .Fxx files are the Fleet reports. The .Pxx reports are for planets.
+            <br>
+            <br>
+            <b>FUQ</b> (Follow-up Question)  It didn't make them automatically.  I found the reports option.  It makes a gamename.fle file. If I rename it to gamename.f&lt;playernumber&gt; AHC tries to open it but gives a bunch of java errors in the log.
+            <br />
+            <br />
+            <b>A</b> Ah - it needs the NewReports.  If the reports are creating .fle files instead of .Fxx files, you need to add this line in your Stars.ini file (in the Windows director).  From <a href="http://www.starsfaq.com/fileinfo.htm" target="_blank">http://www.starsfaq.com/fileinfo.htm</a>:
+            <br>
+            <br>
+            "Adding newreports=1 to the [misc] section will give increased information in your text dumps and change the name of the dump files from gamename.pla to gamename.p## (## being the player number)"
+            <hr />
             <br />
             <br />
 <script language="JavaScript1.2" type="text/javascript" src="links.js">
