@@ -40,7 +40,7 @@ import stars.ahcgui.pluginmanager.PlugInManager;
  * @author Steve Leach
  *
  */
-public class MapPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener
+public class MapPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, MapConfigChangeListener
 {
    private Game game = null;
    private MapConfig config = null;
@@ -58,6 +58,8 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
       addMouseListener( this );
       addMouseMotionListener( this );
       addMouseWheelListener( this );
+      
+      config.addChangeListener( this );
    }
 
    /**
@@ -119,9 +121,11 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
       
       if (layer.isScaled())
       {
+         int mapSize = config.gameMaxX - config.gameMinX;
+         
          xform.translate( this.getWidth() / 2, this.getHeight() / 2 );
-         xform.scale( config.mapScale, config.mapScale );
-         xform.translate( config.mapXpos - config.gameMinX, config.mapYpos - config.gameMinY );
+         xform.scale( config.mapScale, config.mapScale );         
+         xform.translate( config.mapXpos - config.gameMinX - mapSize/2, config.mapYpos - config.gameMinY - mapSize / 2 );
       }
 
       g2d.setTransform( xform );      
@@ -213,6 +217,14 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
          config.mapScale /= 1.1;
       }
       config.notifyChangeListeners();
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.plugins.map.MapConfigChangeListener#mapConfigChanged(stars.ahc.plugins.map.MapConfig)
+    */
+   public void mapConfigChanged(MapConfig config)
+   {
+      repaint();
    }
 
 }

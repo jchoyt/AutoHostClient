@@ -29,13 +29,25 @@ import java.awt.image.BufferedImage;
 public abstract class AbstractCachedMapLayer extends AbstractMapLayer
 {
    protected ImageCache imageCache = new ImageCache();
-   
-   public void setNewImage( BufferedImage img )
+      
+   public void setNewImage( BufferedImage img, MapLayerConfig cfg )
    {
       synchronized (imageCache)
       {
-         imageCache.setNewImage( img );
+         imageCache.setNewImage( img, cfg );
       }
+      
+      mapConfig.notifyChangeListeners();     
+   }
+
+   /**
+    * Returns the current map layer configuration.
+    * <p>
+    * Subclasses should override this. 
+    */
+   protected MapLayerConfig getLayerConfig()
+   {
+      return new MapLayerConfig( game.getYear() );
    }
    
    /* (non-Javadoc)
@@ -45,7 +57,7 @@ public abstract class AbstractCachedMapLayer extends AbstractMapLayer
    {
       synchronized (imageCache)
       {
-         if (imageCache.currentImage == ImageCache.NO_IMAGE)
+         if (imageCache.isCurrent( getLayerConfig() ) == false)
          {
             startDrawing();
          }
@@ -97,6 +109,7 @@ class ImageCache
    
    public int currentImage = NO_IMAGE;
    public BufferedImage[] images = new BufferedImage[CACHE_SIZE];
+   public MapLayerConfig[] configs = new MapLayerConfig[CACHE_SIZE];
    
    public ImageCache()
    {
@@ -111,7 +124,15 @@ class ImageCache
       return images[currentImage];
    }
 
-   public void setNewImage(BufferedImage img)
+   public boolean isCurrent( MapLayerConfig config )
+   {
+      if (currentImage == NO_IMAGE) return false;
+      if (configs[currentImage] == null) return false;
+      
+      return config.equals( configs[currentImage] );
+   }
+   
+   public void setNewImage(BufferedImage img, MapLayerConfig config)
    {
       if (currentImage == 0)
       {
@@ -123,6 +144,7 @@ class ImageCache
       }
       
       images[currentImage] = img;
+      configs[currentImage] = config;
    }
 }
 
@@ -146,6 +168,8 @@ class DrawingThread extends Thread
    {
       BufferedImage img = owner.createLayerImage();
       
-      owner.setNewImage( img );
+      MapLayerConfig cfg = owner.getLayerConfig();
+      
+      owner.setNewImage( img, cfg );
    }
 }

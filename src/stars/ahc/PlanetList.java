@@ -135,11 +135,11 @@ public class PlanetList
       }
       catch (FileNotFoundException e)
       {
-         throw new ReportLoaderException( "File not found: " + mapFile.getName(), e );
+         throw new ReportLoaderException( "File not found: " + mapFile.getName(), e, mapFile.getName() );
       }
       catch (IOException e)
       {
-         throw new ReportLoaderException( "Error reading file: " + mapFile.getName(), e );
+         throw new ReportLoaderException( "Error reading file: " + mapFile.getName(), e, mapFile.getName() );
       }      
    }
 
@@ -170,11 +170,11 @@ public class PlanetList
       }
       catch (FileNotFoundException e)
       {
-         throw new ReportLoaderException( "File not found: " + reportFile.getName(), e );
+         throw new ReportLoaderException( "File not found: " + reportFile.getName(), e, reportFile.getName() );
       }
       catch (IOException e)
       {
-         throw new ReportLoaderException( "Error reading file: " + reportFile.getName(), e );
+         throw new ReportLoaderException( "Error reading file: " + reportFile.getName(), e, reportFile.getName() );
       }      
    }
    

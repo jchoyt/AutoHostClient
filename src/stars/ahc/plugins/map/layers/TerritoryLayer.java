@@ -79,7 +79,7 @@ public class TerritoryLayer extends AbstractCachedMapLayer
                   screenPos[n].x += mapConfig.getUniverseSize()/2;
                   screenPos[n].y += mapConfig.getUniverseSize()/2;
                   rootPop[n] = Math.sqrt( planet.getPopulation() );
-                  baseColor[n] = game.getPlayerColor( planet.getOwner() );
+                  baseColor[n] = game.getRaceColor( planet.getOwner() );
                }
                 
                float r = (float)( (stepCount - step) * (200 + rootPop[n]) * 0.0025 );

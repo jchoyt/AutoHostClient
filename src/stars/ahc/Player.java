@@ -23,8 +23,13 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import stars.ahcgui.AhcGui;
+
 /**
- *  Description of the Class
+ * A player using Autohost in a Stars! game.
+ * <p>
+ * Each Player will control a Race.
+ *
+ *@see stars.ahc.Race
  *
  *@author     jchoyt
  *@created    November 27, 2002
@@ -541,6 +546,9 @@ public class Player extends Object
         return year;
     }
 
+    /**
+     * @deprecated getColor() is now part of stars.ahc.Race instead 
+     */
     public Color getColor()
     {
        if (this.color == null)

@@ -15,24 +15,26 @@
  */
 package stars.ahcgui;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
+
 import stars.ahc.EssaiPostURLConnection;
 import stars.ahc.Game;
 import stars.ahc.GamesProperties;
@@ -265,6 +267,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
 	         }
         }
         //=====================
+                
     }
 
 
@@ -377,15 +380,29 @@ class DeleteGameButton extends JButton implements ActionListener
 
 
     /**
-     *  Retrieves turns from Autohost, copies them into the game directory and
-     *  backup directory. Sets the last download time and updates the properties
-     *  file on disk.
-     *
-     *@param  e  Description of the Parameter
+     * 
      */
     public void actionPerformed( ActionEvent e )
     {
-        GamesProperties.removeGame( game );
+       try
+       {
+          // Added confirmation dialog, 11 Oct 2004, Steve Leach
+          int rc = JOptionPane.showConfirmDialog(
+                getParent(),
+                "Are you sure you want to remove this game ?",
+                "Remove game",
+                JOptionPane.YES_NO_OPTION);
+          
+          if (rc == JOptionPane.YES_OPTION)
+          {
+             GamesProperties.removeGame( game );
+          }
+       }
+       catch (Throwable t)
+       {
+          t.printStackTrace();
+          JOptionPane.showMessageDialog(this, "Error: " + t.getMessage() );
+       }
     }
 }
 /**

@@ -33,7 +33,7 @@ public class PlanetLoader
       }
       else
       {
-         throw new ReportLoaderException( "File not found: " + mapFileName, null  );
+         throw new ReportLoaderException( "File not found: " + mapFileName, mapFileName  );
       }
    }
    

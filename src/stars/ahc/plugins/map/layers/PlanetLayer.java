@@ -60,7 +60,7 @@ public class PlanetLayer extends AbstractMapLayer
          }
          else
          {
-            g.setColor( game.getPlayerColor( planet.getOwner() ) );
+            g.setColor( game.getRaceColor( planet.getOwner() ) );
          }
          
          g.fillOval( screenPos.x, screenPos.y, 5, 5 );

@@ -19,7 +19,9 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -31,6 +33,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Timer;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -38,12 +41,18 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
-import stars.ahc.*;
+
+import stars.ahc.AHPoller;
+import stars.ahc.AutoHostClient;
+import stars.ahc.Game;
+import stars.ahc.GamesProperties;
+import stars.ahc.Log;
 import stars.ahcgui.pluginmanager.PlugInManager;
 import stars.ahcgui.pluginmanager.PluginLoadError;
 
@@ -84,6 +93,9 @@ public class AhcFrame extends javax.swing.JFrame
     {
         JPanel ret = new JPanel();
         ret.setLayout( new BoxLayout( ret, BoxLayout.Y_AXIS ) );
+        
+        setupGamesToolbar(ret);
+        
         Game[] games = GamesProperties.getGames();
         /*
          *  set up the game pages
@@ -120,6 +132,41 @@ public class AhcFrame extends javax.swing.JFrame
 
 
     /**
+     * Adds a toolbar to the Games tab 
+     * 
+     * @author Steve Leach
+     */
+   private void setupGamesToolbar( JPanel parent )
+   {
+      JPanel toolbar = new JPanel();
+      toolbar.setBorder( BorderFactory.createEmptyBorder(2,2,2,2) );
+      toolbar.setLayout( new BoxLayout(toolbar,BoxLayout.X_AXIS) );
+      parent.add( toolbar );
+      
+      JButton newButton = new JButton( "New game" );
+      newButton.addActionListener(
+            new ActionListener()
+            {
+               public void actionPerformed( ActionEvent e )
+               {
+                  try
+                  {
+                     OptionPanelFactory.addNewGame();
+                  }
+                  catch (Throwable t)
+                  {
+                     t.printStackTrace();
+                     JOptionPane.showMessageDialog(AhcFrame.this, "Error: " + t.getMessage() );                     
+                  }
+               }
+            }
+      );
+      toolbar.add( newButton );
+      toolbar.add( Box.createGlue() );
+   }
+
+
+   /**
      *  Adds a feature to the LogTab attribute of the AhcFrame object
      *
      *@return    Description of the Return Value
@@ -207,6 +254,8 @@ public class AhcFrame extends javax.swing.JFrame
      */
     public void init()
     {
+       setApplicationIcon();
+       
         //AhcGui.setMainFrame( this );
         contentPane = getContentPane();
         
@@ -254,7 +303,22 @@ public class AhcFrame extends javax.swing.JFrame
     }
 
     /**
-    * 
+     * Sets the icon that the application displays in the taskbar.
+     *  
+     * @author Steve Leach
+     */
+    private void setApplicationIcon()
+    {
+       URL iconURL = findImage("stars32.gif");
+       Image img = Toolkit.getDefaultToolkit().createImage(iconURL);
+       setIconImage( img );
+    }
+
+
+   /**
+    * Finds and loads any plugins (extensions) that have been installed.
+    * <p>
+    * @author Steve Leach
     */
    private void loadPlugins()
    {
@@ -274,6 +338,7 @@ public class AhcFrame extends javax.swing.JFrame
      * 
      * @param fileName
      * @return a URL, or null
+     * @author Steve Leach
      */
     private static URL filenameToURL( String fileName )
     {
@@ -297,21 +362,21 @@ public class AhcFrame extends javax.swing.JFrame
     }
 
     /**
-     * Locates the banner image 
+     * Locates the specified image image 
      * @return the URL of the image if it could be found
      */    
-    private static URL findBannerImage()
+    private static URL findImage( String imageName )
     {
-       URL iconURL = ClassLoader.getSystemResource( "images/ahc_sm.png" );
+       URL iconURL = ClassLoader.getSystemResource( "images/" + imageName );
        
        if ( iconURL == null )
        {
-          iconURL = filenameToURL( "./ahc_sm.png" );
+          iconURL = filenameToURL( "./" + imageName );
        }
        
        if ( iconURL == null )
        {
-          iconURL = filenameToURL( "./images/ahc_sm.png" );
+          iconURL = filenameToURL( "./images/" + imageName );
        }
        
        return iconURL;
@@ -328,7 +393,7 @@ public class AhcFrame extends javax.swing.JFrame
      */
     protected JLabel addBanner()
     {
-       	URL iconURL = findBannerImage();
+       	URL iconURL = findImage("ahc_sm.png");
        	
         if ( iconURL != null )
         {

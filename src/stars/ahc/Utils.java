@@ -15,6 +15,7 @@
  */
 package stars.ahc;
 
+import java.awt.Color;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -27,8 +28,10 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 
 import javax.swing.JOptionPane;
 
@@ -46,7 +49,7 @@ public class Utils
      *  The path name of the Stars! executable file
      */
     public static File starsExecutable = null;
-
+    private static Random random = new Random();
 
     /**
      *  Sets the starsExecutable attribute of the Utils object
@@ -342,6 +345,8 @@ public class Utils
     
     /**
      * Returns true if the string is null, zero length or contains only whitespace
+     * 
+     * @author Steve Leach
      */
     public static boolean empty( String str )
     {
@@ -354,6 +359,8 @@ public class Utils
    /**
     * Converts a string to an integer.  If the string does not contain a valid
     * integer then the default value is returned.
+    * 
+    * @author Steve Leach
     */
    public static int safeParseInt(String value, int defaultValue)
    {
@@ -367,5 +374,55 @@ public class Utils
       }
    }
     
+   /**
+    * Returns a pseudo-random floating point value between 0 and 1.
+    * 
+    * @author Steve Leach
+    */
+   public static float getRandomFloat()
+   {
+      return random.nextFloat();
+   }
+
+
+   /**
+    * Returns a string representation of a color.
+    * <p>
+    * The colour string us in the format rr:bb:gg where rr, bb and gg are
+    * red, blue and green values in the range 0 to 255.
+    * 
+    * @see getColorFromString()
+    * @author Steve Leach  
+    */
+   public static String getColorStr(Color color)
+   {
+      return "" + color.getRed() + ":" + color.getGreen() + ":" + color.getBlue();
+   }
+   
+   /**
+    * Creates a Color object from a color string
+    * <p>
+    * See getColorStr() for details of the format.
+    * 
+    * @see getColorStr()
+    * @author Steve Leach 
+    */
+   public static Color getColorFromString( String str ) throws ParseException
+   {
+      try
+      {
+         String[] tokens = str.split(":");
+         
+         int r = Integer.parseInt(tokens[0]);
+         int g = Integer.parseInt(tokens[1]);
+         int b = Integer.parseInt(tokens[2]);
+         
+         return new Color( r, g, b );
+      }
+      catch (Throwable t)
+      {
+         throw new ParseException( "String cannot be parsed as a color: '" + str + "'", 0 );
+      }
+   }
 }
 

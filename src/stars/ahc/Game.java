@@ -38,9 +38,9 @@ public class Game extends Object
     String directory;
     String name;
     PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
-    ArrayList players;
+    ArrayList players;    
     private PlanetList planets = new PlanetList();
-
+    private ArrayList races = new ArrayList();
 
     /**
      *  Constructor for the Game object
@@ -646,7 +646,7 @@ public class Game extends Object
        }
        else
        {
-          throw new ReportLoaderException( "Map file not found", null  );
+          throw new ReportLoaderException( "Map file not found", mapFile.getName()  );
        }       
     }
     
@@ -674,19 +674,42 @@ public class Game extends Object
       }
    }
    
-   public Color getPlayerColor( String playerName )
+   public Color getRaceColor( String raceName )
    {
-      for (int n = 0; n < players.size(); n++)
+      Race race = getRace( raceName, true );
+      
+      return race.getColor();
+   }
+   
+   /**
+    * Returns a race object matching the specified race (not player) name.
+    * <p>
+    * If no matching race is found and create == true then a new race is created and added to the list.  
+    */
+   public Race getRace( String raceName, boolean create )
+   {
+      // First, try and find the race in the list
+      for (int n = 0; n < races.size(); n++)
       {
-         Player player = (Player)players.get(n);
+         Race race = (Race)races.get(n);
          
-         if (player.getRaceName().equals(playerName))
+         if (race.equals(raceName))
          {
-            return player.getColor();
+            return race;
          }
       }
       
-      return Color.MAGENTA;		// TODO: throw an error here instead
+      // Next, if it has not been found then create it (if this is what is requested)
+      if (create)
+      {         
+         Race newRace = new Race();
+         newRace.setRaceName( raceName );
+         races.add( newRace );
+         return newRace;
+      }
+      
+      // Otherwise, return null
+      return null;
    }
 }
 
