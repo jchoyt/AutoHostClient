@@ -573,5 +573,10 @@ public class Player extends Object
       props.setProperty( game.getName() + ".player" + id + ".UploadPassword", uploadPassword );
       props.setProperty( game.getName() + ".player" + id + ".upload", ""+toUpload );
    }
+   
+   public boolean actionRequired()
+   {
+      return needsUpload || needsDownload;
+   }
 }
 

@@ -784,5 +784,25 @@ public class Game extends Object
    {
       return races.iterator();
    }
+
+
+   /**
+    * Returns true if player action is required for this game
+    */
+   public boolean actionRequired()
+   {
+      boolean actionRequired = false;
+      
+      Player[] players = getPlayers();
+      
+      for (int m = 0; m < players.length; m++)
+      {
+         if (players[m].actionRequired())
+         {
+            actionRequired = true;
+         }
+      }
+      return actionRequired;
+   }
 }
 

@@ -585,6 +585,26 @@ public class GamesProperties
    {
       props = new Properties();
    }
+
+   /**
+    * Returns true if all player turns are in for all games.
+    */
+   public static boolean actionRequired()
+   {
+      boolean actionRequired = false;
+      
+      for (int n = 0; n < games.size(); n++)
+      {
+         Game game = (Game)games.get(n);
+       
+         if (game.actionRequired())
+         {
+            actionRequired = true;
+         }
+      }
+      
+      return actionRequired;
+   }
 }
 
 /*

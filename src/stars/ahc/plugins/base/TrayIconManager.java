@@ -26,6 +26,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 import stars.ahc.AHPoller;
+import stars.ahc.GamesProperties;
 import stars.ahc.NotificationListener;
 import stars.ahcgui.AhcFrame;
 import stars.ahcgui.pluginmanager.BasePlugIn;
@@ -45,6 +46,8 @@ public class TrayIconManager implements BasePlugIn, NotificationListener
    private String appName;
    private boolean trayIconSupported = false;
    private WindowsTrayIcon icon = null;
+   private ImageIcon someOutIcon = null;
+   private ImageIcon allInIcon = null;
    
    public TrayIconManager()
    {
@@ -73,9 +76,11 @@ public class TrayIconManager implements BasePlugIn, NotificationListener
       {
          if (trayIconSupported())
          {
-		      ImageIcon img = new ImageIcon( AhcFrame.findImage("stars16.gif") );
-		      icon = new WindowsTrayIcon(img.getImage(), 16, 16);
-		      icon.setToolTipText("Stars! AutoHostClient");
+		      someOutIcon = new ImageIcon( AhcFrame.findImage("stars16.gif") );
+		      allInIcon = new ImageIcon( AhcFrame.findImage("allInIcon.gif") );
+		      
+		      icon = new WindowsTrayIcon(allInIcon.getImage(), 16, 16);
+		      icon.setToolTipText("Stars! AutoHost Client");
 		      icon.setPopup( makeTrayIconPopup() );
 		      icon.setVisible(true);
 		      icon.addActionListener( new RestoreListener(mainFrame,false) );
@@ -187,6 +192,25 @@ public class TrayIconManager implements BasePlugIn, NotificationListener
          return;
       }
       
+
+      try
+      {
+	      if (GamesProperties.actionRequired())
+	      {
+	         icon.setImage( someOutIcon.getImage(), 16, 16 );
+	         icon.setToolTipText( "Stars! AutoHost Client\nPlayer action is required" );
+	      }
+	      else
+	      {
+	         icon.setImage( allInIcon.getImage(), 16, 16 );
+	         icon.setToolTipText( "Stars! AutoHost Client\nNo action required" );
+	      }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+      
       try
       {
          if ((source instanceof AHPoller) && (severity == AHPoller.BALLOON_NOTIFICATION))
@@ -194,7 +218,7 @@ public class TrayIconManager implements BasePlugIn, NotificationListener
             // do something here
          }
          
-         icon.showBalloon( message, "Stars! AutoHost Client", MIN_TIMEOUT, WindowsTrayIcon.BALLOON_INFO );
+         icon.showBalloon( message, "Stars! AutoHost Client", MIN_TIMEOUT, WindowsTrayIcon.BALLOON_INFO );         
       }
       catch (TrayIconException e)
       {
@@ -265,10 +289,17 @@ class RestoreListener implements ActionListener
 
 	public void actionPerformed(ActionEvent evt) 
 	{
-		// Make main window visible if it was hidden
-		parent.setVisible(true);
-		// Request input focus
-		parent.requestFocus();
+	   if (parent.isVisible())
+	   {
+	      parent.setVisible(false);
+	   }
+	   else
+	   {
+	      // Make main window visible if it was hidden
+	      parent.setVisible(true);
+	      // Request input focus
+	      parent.requestFocus();
+	   }
 	}
 
 }
