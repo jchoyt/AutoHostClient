@@ -20,7 +20,7 @@ player10-race=The Stick Insects
 player10-turn=in Jul. 24 '03  - 8:42
 player11-race=The Snails
 player11-turn=waiting
-game-year=2521
+game-year=2522
 next-gen-time=Will generate at the latest: Jul. 30 '03 - 7:00
 schedule=<table><tr><td align=center colspan=7>Generate schedule:</td></tr><tr><td align=center>Sun<br>no-gen</td><td align=center>Mon<br>07:00</td><td align=center>Tue<br>no-gen</td><td align=center>Wed<br>07:00</td><td align=center>Thu<br>no-gen</td><td align=center>Fri<br>07:00</td><td align=center>Sat<br>no-gen</td></tr></table>
 strict=no

@@ -1,4 +1,4 @@
-package stars.ahc;
+package stars.ahcgui;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.BoxLayout;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -20,7 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import stars.ahcgui.*;
+import stars.ahc.*;
 
 /**
  *  Description of the Class
@@ -32,6 +33,11 @@ public class Eval
 {
     List fleets = new ArrayList();
     Map fleetsByOwner = new HashMap();
+    String filesEvaluated = null;
+    public final static String WARSHIP_INCLUDE = "Include warships";
+    public final static String UTILITY_INCLUDE = "Include utility ships";
+    public final static String SCOUT_INCLUDE = "Include scouts";
+    public final static String OWNED_INCLUDE = "Include my fleets";
 
 
     /**
@@ -45,6 +51,7 @@ public class Eval
         {
             try
             {
+                filesEvaluated += fFile[i].getCanonicalPath() + " ";
                 BufferedReader in = new BufferedReader( new FileReader( fFile[i] ) );
                 String line = in.readLine();//skip the first line - it has the titles in it
                 while ( ( line = in.readLine() ) != null )
@@ -155,11 +162,10 @@ public class Eval
     public JPanel createCommentPane()
     {
         JPanel ret = new JPanel();
-        ret.setLayout(new BoxLayout(ret, BoxLayout.Y_AXIS));
-        ret.add( new JLabel( "It is important to realize that since these analyses are based on the f-files " ) );
-        ret.add( new JLabel( "that the totals show are only those files you can actually SEE." ) );
-        ret.add( new JLabel( "Also note that these are experimental and have not gone through vigorous testing.  I would appreciate" ) );
-        ret.add( new JLabel( "and feedback, positive or negative, at jchoyt@users.sourceforge.net." ) );
+        ret.setLayout( new BoxLayout( ret, BoxLayout.Y_AXIS ) );
+        ret.add( new JLabel( "<html><body>It is important to realize that since these analyses are based on the f-files, that the totals shown are only for those fleets you can actually see.  Also note that these are pages experimental and have not gone through vigorous testing.<br><br>" +
+                "I would appreciate and feedback, positive or negative, at jchoyt@users.sourceforge.net.<br><br>" +
+                "Evaluating " + filesEvaluated.toString() + "</body></html>" ) );
         return ret;
     }
 
@@ -250,10 +256,34 @@ public class Eval
     protected JPanel createWarFleetTab( Game game )
     {
         JPanel ret = new JPanel();
-        ret.setLayout( new BorderLayout() );
+        ret.setLayout( new BoxLayout( ret, BoxLayout.Y_AXIS ) );
         /*
-         *  add some stuff here
+         *  add table of largest warfleets
+         *  get a copy of the fleets array and pass it to the table model.  The table model will take care of all sorting.
          */
+        ArrayList thisTabFleets = new ArrayList();
+        thisTabFleets.addAll( fleets );
+        WarFleetTableModel model = new WarFleetTableModel( thisTabFleets );
+        TableSorter sorter = new TableSorter( model );
+        JTable table = new JTable( sorter );
+        sorter.addMouseListenerToHeaderInTable( table );
+        JScrollPane scrollpane = new JScrollPane( table );
+        ret.add( scrollpane );
+
+        /* add options */
+        JPanel options = new JPanel();
+        options.setLayout(new BoxLayout(options, BoxLayout.X_AXIS));
+        JCheckBox warshipCheckbox = new JCheckBox( WARSHIP_INCLUDE, model.getIncludeWarship());
+        warshipCheckbox.addItemListener(model);
+        options.add(warshipCheckbox);
+        JCheckBox utilCheckbox = new JCheckBox( UTILITY_INCLUDE, model.getIncludeUtil());
+        utilCheckbox.addItemListener(model);
+        options.add(utilCheckbox);
+        JCheckBox scoutCheckbox = new JCheckBox( SCOUT_INCLUDE, model.getIncludeScout());
+        scoutCheckbox.addItemListener(model);
+        options.add(scoutCheckbox);
+        ret.add(options);
+
         return ret;
     }
 
@@ -269,8 +299,17 @@ public class Eval
         JPanel ret = new JPanel();
         ret.setLayout( new BorderLayout() );
         /*
-         *  add some stuff here
+         *  add table of largest bomber fleets
+         *  get a copy of the fleets array and pass it to the table model.  The table model will take care of all sorting.
          */
+        ArrayList thisTabFleets = new ArrayList();
+        thisTabFleets.addAll( fleets );
+        BomberFleetTableModel model = new BomberFleetTableModel( thisTabFleets );
+        TableSorter sorter = new TableSorter( model );
+        JTable table = new JTable( sorter );
+        sorter.addMouseListenerToHeaderInTable( table );
+        JScrollPane scrollpane = new JScrollPane( table );
+        ret.add( scrollpane );
         return ret;
     }
 
@@ -299,6 +338,7 @@ public class Eval
         table.getColumnModel().getColumn( 5 ).setPreferredWidth( 40 );
         table.getColumnModel().getColumn( 6 ).setPreferredWidth( 40 );
         table.getColumnModel().getColumn( 7 ).setPreferredWidth( 40 );
+        table.getColumnModel().getColumn( 8 ).setPreferredWidth( 40 );
         JScrollPane scrollpane = new JScrollPane( table );
         ret.add( scrollpane, BorderLayout.CENTER );
         return ret;

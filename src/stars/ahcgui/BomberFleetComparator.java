@@ -25,33 +25,14 @@ import stars.ahcgui.*;
  *@author     jchoyt
  *@created    February 23, 2004
  */
-public class WarFleetComparator implements Comparator
+public class BomberFleetComparator implements Comparator
 {
-    protected boolean includeWarship = true;
-    protected boolean includeUtil = false;
-    protected boolean includeScout = true;
-
 
     /**
-     *  Constructor for the WarFleetComparator object
-     *
-     *@param  warship  Description of the Parameter
-     *@param  util     Description of the Parameter
-     *@param  scout    Description of the Parameter
+     *  Constructor for the BomberFleetComparator object using the default
+     *  values for what to include (warships and scouts)
      */
-    public WarFleetComparator( boolean warship, boolean util, boolean scout )
-    {
-        includeScout = scout;
-        includeUtil = util;
-        includeWarship = warship;
-    }
-
-
-    /**
-     *  Constructor for the WarFleetComparator object using the default values
-     *  for what to include (warships and scouts)
-     */
-    public WarFleetComparator() { }
+    public BomberFleetComparator() { }
 
 
     /**
@@ -85,21 +66,8 @@ public class WarFleetComparator implements Comparator
         Fleet f2 = ( Fleet ) o2;
         int count1 = 0;
         int count2 = 0;
-        if ( includeWarship )
-        {
-            count1 += f1.getIntValue( Fleet.WARSHIP );
-            count2 += f2.getIntValue( Fleet.WARSHIP );
-        }
-        if ( includeScout )
-        {
-            count1 += f1.getIntValue( Fleet.SCOUT );
-            count2 += f2.getIntValue( Fleet.SCOUT );
-        }
-        if ( includeUtil )
-        {
-            count1 += f1.getIntValue( Fleet.UTILITY );
-            count2 += f2.getIntValue( Fleet.UTILITY );
-        }
+        count1 += f1.getIntValue( Fleet.BOMBER );
+        count2 += f2.getIntValue( Fleet.BOMBER );
         return new Integer( count2 ).compareTo( new Integer( count1 ) );
     }
 
@@ -125,7 +93,7 @@ public class WarFleetComparator implements Comparator
      */
     public boolean equals( Object obj )
     {
-        if ( obj instanceof WarFleetComparator )
+        if ( obj instanceof BomberFleetComparator )
         {
             return true;
         }
@@ -135,37 +103,5 @@ public class WarFleetComparator implements Comparator
         }
     }
 
-
-    /**
-     *  Sets the includeWarship attribute of the WarFleetComparator object
-     *
-     *@param  includeWarship  The new includeWarship value
-     */
-    public void setIncludeWarship( boolean includeWarship )
-    {
-        this.includeWarship = includeWarship;
-    }
-
-
-    /**
-     *  Sets the includeUtil attribute of the WarFleetComparator object
-     *
-     *@param  includeUtil  The new includeUtil value
-     */
-    public void setIncludeUtil( boolean includeUtil )
-    {
-        this.includeUtil = includeUtil;
-    }
-
-
-    /**
-     *  Sets the includeScout attribute of the WarFleetComparator object
-     *
-     *@param  includeScout  The new includeScout value
-     */
-    public void setIncludeScout( boolean includeScout )
-    {
-        this.includeScout = includeScout;
-    }
 }
 

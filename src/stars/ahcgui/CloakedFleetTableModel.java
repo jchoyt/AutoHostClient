@@ -10,10 +10,9 @@ import javax.swing.table.AbstractTableModel;
  *@author     jchoyt
  *@created    February 16, 2004
  */
-public class CloakedFleetTableModel extends AbstractTableModel
+public class CloakedFleetTableModel extends FleetTabTableModel
 {
 
-    protected List fleets = new ArrayList();
     public static int cloakLimit = 75;
     public boolean showOwn = true;
 
@@ -33,57 +32,6 @@ public class CloakedFleetTableModel extends AbstractTableModel
             {
                 fleets.add( temp );
             }
-        }
-    }
-
-
-    /**
-     *  Gets the columnName attribute of the CloakedFleetTableModel object
-     *
-     *@param  col  Description of the Parameter
-     *@return      The columnName value
-     */
-    public String getColumnName( int col )
-    {
-        switch ( col )
-        {
-            case 0:
-                return "Fleet Name";
-            case 1:
-                return "Location";
-            case 2:
-                return "Cloak";
-            case 3:
-                return "Ship Count";
-            case 4:
-                return "Speed (warp)";
-            case 5:
-                return "Warship Count";
-            case 6:
-                return "Utility Ship Count";
-            case 7:
-                return "Bomber Count";
-            default:
-                throw new RuntimeException( "Only 8 columns in the list" );
-        }
-    }
-
-
-    /**
-     *  Gets the columnClass attribute of the CloakedFleetTableModel object
-     *
-     *@param  col  Description of the Parameter
-     *@return      The columnClass value
-     */
-    public Class getColumnClass( int col )
-    {
-        if ( col > 1 )
-        {
-            return Integer.class;
-        }
-        else
-        {
-            return String.class;
         }
     }
 
@@ -123,64 +71,6 @@ public class CloakedFleetTableModel extends AbstractTableModel
     public int getRowCount()
     {
         return fleets.size();
-    }
-
-
-    /**
-     *  Gets the columnCount attribute of the EvalTableModel object
-     *
-     *@return    The columnCount value
-     */
-    public int getColumnCount()
-    {
-        return 8;
-    }
-
-
-    /**
-     *  Description of the Method
-     *
-     *@param  columnNo  Description of the Parameter
-     *@param  fleet     Description of the Parameter
-     *@return           Description of the Return Value
-     */
-    private Object valueMapping( int columnNo, Fleet fleet )
-    {
-        switch ( columnNo )
-        {
-            case 0:
-                return fleet.getValue( Fleet.FLEET_NAME );
-            case 1:
-                return fleet.getNiceLocation();
-            case 2:
-                return new Integer( fleet.getIntValue( Fleet.CLOAK ) );
-            case 3:
-                return new Integer( fleet.getIntValue( Fleet.SHIP_COUNT ) );
-            case 4:
-                return new Integer( fleet.getIntValue( Fleet.WARP ) );
-            case 5:
-                return new Integer( fleet.getIntValue( Fleet.WARSHIP ) );
-            case 6:
-                return new Integer( fleet.getIntValue( Fleet.UTILITY ) );
-            case 7:
-                return new Integer( fleet.getIntValue( Fleet.BOMBER ) );
-            default:
-                throw new RuntimeException( "Only 8 columns in the list" );
-        }
-    }
-
-
-    /**
-     *  Gets the valueAt attribute of the EvalTableModel object
-     *
-     *@param  row     Description of the Parameter
-     *@param  column  Description of the Parameter
-     *@return         The valueAt value
-     */
-    public Object getValueAt( int row, int column )
-    {
-        Fleet fleet = ( Fleet ) fleets.get( row );
-        return valueMapping( column, fleet );
     }
 }
 

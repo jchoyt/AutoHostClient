@@ -18,10 +18,9 @@
     <javac srcdir="${src}" target="1.1" destdir="${build}" deprecation="on" debug="on" description="Compile the java code from ${src} into ${build}">
       <include name="**/*.java" />
     </javac>
-    <!--<copy todir="${build}/images">
+    <copy todir="${build}/images">
       <fileset dir="images"/>
     </copy>
-    -->
   </target>
 
   <target name="jar" depends="compile">
