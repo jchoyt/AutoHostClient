@@ -78,7 +78,7 @@ public class ShipCountTableModel extends AbstractTableModel
      */
     public int getRowCount()
     {
-        return owners.length;
+        return owners == null ? 0 : owners.length;
     }
 
 

@@ -1,15 +1,15 @@
 package stars.ahcgui;
 
-import java.util.*;
-import javax.swing.table.TableModel;
-import javax.swing.event.TableModelEvent;
-// Imports for picking up mouse events from the JTable.
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.InputEvent;
+import java.util.Date;
+import java.util.Vector;
+
 import javax.swing.JTable;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 /**
  *  A sorter for TableModels. The sorter has a model (conforming to TableModel)
  *  and itself implements TableModel. TableSorter does not store or copy the
@@ -230,6 +230,14 @@ public class TableSorter extends TableMap
     public void reallocateIndexes()
     {
         int rowCount = model.getRowCount();
+        
+        if (rowCount <= 0)
+        {
+           // no rows, so no index
+           indexes = new int[0];
+           return;
+        }
+        
         // Set up a new array of indexes with the right number of elements
         // for the new data model.
         indexes = new int[rowCount];
@@ -412,7 +420,8 @@ public class TableSorter extends TableMap
      */
     public void sortByColumn( int column )
     {
-        this.ascending = ascending;
+        // this.ascending = ascending;  ---- this doesn't do anything, 6 Oct 04, Steve Leach
+       
         sortingColumns.removeAllElements();
         sortingColumns.addElement( new Integer( column ) );
         sort( this );
