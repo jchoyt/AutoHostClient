@@ -163,8 +163,16 @@ public class Eval
     {
         JPanel ret = new JPanel();
         ret.setLayout( new BorderLayout() );
-        ret.add( new JLabel( "<html><body>It is important to realize that since these analyses are based on the f-files, that the totals shown are only for those fleets you can actually see.  Also note that these are pages experimental and have not gone through vigorous testing.<br><br>" +
-                "I would appreciate and feedback, positive or negative, at jchoyt@users.sourceforge.net.<br><br>" +
+        ret.add( new JLabel( "<html><body>Since these analyses are based on the f-files, the results shown are only " +
+                "for those fleets you can actually see.  This is a double-edged sword.  If you have public player scores, you can tell how "+
+                "much is hiding.  If you don't have public player scores, while you can judge the local strength " +
+                "of an enemy (or ally), you won't konw their full strength and may assume an enemy has less than he does.  <font color=blue>If you used more "+
+                "than one f-file to generate these reports, note that some fleets may be double counted.  </font>This occurs when a "+
+                "fleet is known by two different names in the two or more f-files.  For instance, if you've named your fleet "+
+                "\"Killer 1\", an ally's f-file will not reflect this naming and there is no way to reliably make the connection "+
+                "between the two f-files.  In these cases, I have taken the easy way out by including the fleet count twice and warning you.  " +
+                "<font color=red>These are pages experimental and have not gone through vigorous testing.</font><br>" +
+                "I would appreciate and feedback, positive or negative, at jchoyt@users.sourceforge.net.<br>" +
                 "Evaluating " + filesEvaluated.toString() + "</body></html>" ), BorderLayout.CENTER );
         return ret;
     }
