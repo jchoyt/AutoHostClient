@@ -30,4 +30,9 @@ public class MapLayerConfig
    {
       return (cfg.year == this.year);
    }
+   
+   public String toString()
+   {
+      return "MapLayerConfig: " + year;
+   }
 }

@@ -55,26 +55,25 @@ public abstract class AbstractCachedMapLayer extends AbstractMapLayer
     */
    public void draw(Graphics2D g)
    {
+      // Step 1. Find appropriate image in cache, or kick off a thread to create one
       synchronized (imageCache)
       {
-         if (imageCache.isCurrent( getLayerConfig() ) == false)
+         if (imageCache.findAndSelectImage( getLayerConfig()) == false)
          {
             startDrawing();
          }
       }
       
+      // Step 2. Draw the image from the cache
       synchronized (imageCache)
       {
-         if (imageCache.currentImage != ImageCache.NO_IMAGE)
+         BufferedImage img = imageCache.getCurrentImage(); 
+         
+         if (img != null)
          {
-            BufferedImage img = imageCache.getCurrentImage(); 
+            int offset = -mapConfig.getUniverseSize()/2;
             
-            if (img != null)
-            {
-               int offset = -mapConfig.getUniverseSize()/2;
-               
-               g.drawImage( img, null, offset, offset );
-            }
+            g.drawImage( img, null, offset, offset );
          }
       }
             
@@ -114,29 +113,66 @@ class ImageCache
 {
    public static final int NO_IMAGE = -1;
    public static final int CACHE_SIZE = 2;
+   public static final int NULL_YEAR = -9999;
    
    public int currentImage = NO_IMAGE;
    public BufferedImage[] images = new BufferedImage[CACHE_SIZE];
    public MapLayerConfig[] configs = new MapLayerConfig[CACHE_SIZE];
-   
+
    public ImageCache()
    {
       for (int n = 0; n < CACHE_SIZE; n++)
       {
          images[n] = null;
+         configs[n] = new MapLayerConfig(NULL_YEAR);
       }
    }
    
+   /**
+    * Searches the cache for an image matching the specified config.
+    * <p>
+    * Returns true if one is found and selected, false otherwise.
+    */
+   public boolean findAndSelectImage(MapLayerConfig desiredConfig)
+   {
+      debug( "Searching for image with config: " + desiredConfig );
+      
+      for (int n = 0; n < CACHE_SIZE; n++)
+      {
+         if (configs[n].equals(desiredConfig))
+         {
+            debug( "Found at index " + n );
+            currentImage = n;
+            return true;
+         }
+      }
+      
+      return false;
+   }
+
+   /**
+    * @return
+    */
+   public MapLayerConfig getActiveLayerConfig()
+   {
+      return configs[currentImage];
+   }
+
    /**
     * 
     */
    public void invalidateCurrent()
    {
-      configs[currentImage].year = -9999;
+      debug( "Invalidating current (" + configs[currentImage].toString() );
+      configs[currentImage].year = NULL_YEAR;
    }
 
+   /**
+    * Returns the currently active image, or null if there is no active image. 
+    */
    public BufferedImage getCurrentImage()
    {
+      if (currentImage == NO_IMAGE) return null;
       return images[currentImage];
    }
 
@@ -159,8 +195,15 @@ class ImageCache
          currentImage = 0;
       }
       
+      debug( "Setting current image index to " + currentImage + ", year = " + config.year );
+      
       images[currentImage] = img;
       configs[currentImage] = config;
+   }
+   
+   private void debug( String msg )
+   {
+      //System.out.println( msg );
    }
 }
 
