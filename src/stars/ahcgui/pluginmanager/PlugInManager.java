@@ -22,9 +22,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -33,8 +30,13 @@ import java.util.jar.JarFile;
 
 import javax.swing.JFrame;
 
+import stars.ahc.Log;
+
 /**
- * Finds and loads AutoHostClient plugins.
+ * Finds, loads and manages AutoHost Client plugins.
+ * <p><p>
+ * By default, plugins are loaded from the plugins subdirectory of the working directory.  Other
+ * directories can be added using the addPluginDirectory() method.
  * <p><p>
  * Plugins are JAR files containing classes that implement the plugin interfaces.  Each plugin file
  * also contains a file called "plugin.data" that lists the plugin classes.
@@ -47,10 +49,11 @@ import javax.swing.JFrame;
  */
 public class PlugInManager
 {
+   /**
+    * Hold a reference to the only permitted instance of this class
+    */
    private static PlugInManager singleton = null;
    
-   private ArrayList basePlugins = new ArrayList();
-
    /**
     * Get a reference to the system-wide plugin manager instance.
     */
@@ -64,24 +67,48 @@ public class PlugInManager
       return singleton;
    }
 
+   /**
+    * Only constructor is private - other classes must use the static getPluginManager() method 
+    */
    private PlugInManager()
    {
-      directories.add( "./plugins" );
+      addPluginDirectory( "./plugins" );
    }
 
+   /**
+    * List of directories to scan for plugins
+    */
    private ArrayList directories = new ArrayList();
+   
+   /**
+    * List of plugin loaders
+    */
    private Vector loaders = new Vector();
+   
+   /**
+    * List of all plugins that have been loaded
+    */
    private ArrayList plugins = new ArrayList();
-//   private ArrayList gamePanelButtons = new ArrayList();
-//   private ArrayList mapLayers = new ArrayList();
 
+
+   /**
+    * List of all the base plugins that have been loaded
+    */
+   private ArrayList basePlugins = new ArrayList();
+
+   
+   /**
+    * Registers a new plugin directory
+    *  
+    * @param directory
+    */
    public void addPluginDirectory( String directory )
    {
       directories.add( directory );
    }
 
    /**
-    * Searches the plugins directory for plugin files and loads all the plugins it finds in them.
+    * Searches the plugins directories for plugin files and loads all the plugins it finds in them.
     */
    public void findAndLoadPlugins() throws PluginLoadError
    {
@@ -94,13 +121,17 @@ public class PlugInManager
    }
 
    /**
-    * @throws Exception
-    *
+    * Searches the specified directory for plugin files and loads all the plugins they contain
     */
    private void findAndLoadPluginsFromDirectory(String pluginDirectory) throws PluginLoadError
    {
       File dir = new File( pluginDirectory );
 
+      if (dir.exists() == false)
+      {
+         throw new PluginLoadError( "Plug-in directory does not exist: " + pluginDirectory );
+      }
+      
       File[] files = dir.listFiles();
 
       // Scan through all the files in the directory looking for Jar files
@@ -117,7 +148,8 @@ public class PlugInManager
    }
 
    /**
-    * Load the plugins from the file
+    * Load all the plugins found in the specified jar file
+    * 
     * @throws PluginLoadError
     * @throws Exception
     */
@@ -138,7 +170,7 @@ public class PlugInManager
             
             if (entry.getName().endsWith(".ahcplugin"))
             {
-               processPluginDescriptor(file, jar, entry);
+               processPluginDescriptor(jar, entry);
             }
          }
          
@@ -150,7 +182,7 @@ public class PlugInManager
 
          if (entry != null)
          {
-            processPluginDescriptor(file, jar, entry);
+            processPluginDescriptor(jar, entry);
          }         
       }
       catch (IOException e)
@@ -160,17 +192,11 @@ public class PlugInManager
    }
 
    /**
-    * @param file
-    * @param jar
-    * @param entry
-    * @throws IOException
-    * @throws PluginLoadError
+    * Reads a plugin descriptor file
     */
-   private void processPluginDescriptor(File file, JarFile jar, JarEntry entry) throws IOException, PluginLoadError
+   private void processPluginDescriptor(JarFile jar, JarEntry entry) throws IOException, PluginLoadError
    {
       BufferedReader reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry)));
-
-      URLClassLoader loader = registerClassLoader( file );
 
       String line;
 
@@ -179,54 +205,43 @@ public class PlugInManager
          String[] tokens = line.split("=");
          if (tokens.length < 2)
          {
-            throw new PluginLoadError( "Plugin data not valid: '" + line + "' in " + file.getName() );
+            throw new PluginLoadError( "Plugin data not valid: '" + line + "' in " + jar.getName() );
          }
          String key = tokens[0];
-         String value = tokens[1];
+         String pluginClass = tokens[1];
 
          if (key.equals("plugin"))
          {
-            processPlugIn( file, value, loader );
+            try
+            {
+               processPlugIn( pluginClass );
+            }
+            catch (Throwable t)
+            {
+               // Don't re-throw this because we want to continue loading other classes 
+               Log.log( Log.ERROR, this, "Could not load plugin: " + pluginClass );
+            }
          }
       }
    }
 
    /**
-    * Registers a new plugin class loader
+    * Adds the specified plugin class to the list of loaded plugins
+    * <p>
+    * A test instance of the class will also be created to ensure that the plugin is valid.
     */
-   public URLClassLoader registerClassLoader(File file) throws PluginLoadError
+   private void processPlugIn(String className) throws PluginLoadError
    {
-      URL[] urls = new URL[1];
-
       try
       {
-         urls[0] = file.toURL();
-      }
-      catch (MalformedURLException e)
-      {
-         throw new PluginLoadError( "Malformed URL loading plugin: " + file.getName(), e );
-      }
-
-      URLClassLoader loader = new URLClassLoader( urls );
-
-      loaders.add( loader );
-
-      return loader;
-   }
-
-   /**
-    */
-   private void processPlugIn(File pluginFile, String className, URLClassLoader loader) throws PluginLoadError
-   {
-      //Log.log( Log.NOTICE, this, "Loading plugin " + className + " from " + pluginFile.getName() );
-
-      try
-      {
+         // Get the class
          Class pluginClass = Class.forName( className, false, Thread.currentThread().getContextClassLoader() );
 
-         plugins.add( pluginClass );
-         
+         // Create a new instance to check that it works OK
          PlugIn plugin = (PlugIn)pluginClass.newInstance();
+         
+         // Add it to the list of plugins (will not happen if the new instance could not be created)
+         plugins.add( pluginClass );         
       }
       catch (ClassNotFoundException e)
       {
@@ -262,6 +277,9 @@ public class PlugInManager
       return matchingPlugins;
    }
    
+   /**
+    * Returns all the loaded plugins 
+    */
    public ArrayList getAllPlugins()
    {
       return getPlugins( PlugIn.class );
@@ -284,23 +302,29 @@ public class PlugInManager
             plugin.init(appWindow);
             basePlugins.add( plugin );
          }
-         catch (InstantiationException e)
+         catch (Throwable t)
          {
-            e.printStackTrace();
-         }
-         catch (IllegalAccessException e)
-         {
-            e.printStackTrace();
+            Log.log( Log.ERROR, this, "Error installing plugin: " + c.getName() );
          }
       }
    }
    
+   /**
+    * Gives all the base plugins a chance to clean up after themselves
+    */
    public void cleanupBasePlugins()
    {
       for (int n = 0; n < basePlugins.size(); n++)
       {
          BasePlugIn plugin = (BasePlugIn)basePlugins.get(n);
-         plugin.cleanup();
+         try
+         {
+            plugin.cleanup();
+         }
+         catch (Throwable t)
+         {
+            Log.log( Log.ERROR, this, "Error cleaning up plugin: " + plugin.getName() );
+         }
       }
    }
    
