@@ -67,6 +67,11 @@ public class OneOnOneBattle extends BattleSimulation
       initStacks();
    }
    
+   public OneOnOneBattle()
+   {
+      stackCount = 0;
+   }
+   
    /**
     * Set the ship stacks to their starting configurations.
     */
@@ -151,7 +156,7 @@ public class OneOnOneBattle extends BattleSimulation
    }
    
    /**
-    * Calculate the range at which the ship would like to fight, based on battle orders 
+    * Calculate the range at which the ships would like to fight, based on battle orders 
     */
    private void calculatePreferredRange()
    {
@@ -159,27 +164,30 @@ public class OneOnOneBattle extends BattleSimulation
       calculatePreferredRange( stacks[1] );
    }
    
+   /**
+    * Calculate the range at which the stack would like to fight, based on battle orders 
+    */
    private void calculatePreferredRange( ShipStack stack )
    {
       ShipDesign design = stack.design;
       ShipDesign target = stack.target.design;
       
+      // TODO: improve on this simplified system
+      
       if (stack.battleOrders == ShipStack.ORDERS_DISENGAGE)
       {
-         stack.preferredRange = 999;
-         return;
+         // Disengaging ships want to be as far as possible from their target
+         stack.preferredRange = Integer.MAX_VALUE;
       }
-      
-      // Simplified system
-      // If we have a longer range than the enemy, try and keep out of range of their weapons
-      // Otherwise, just rush to range 0
-      
-      if (design.getMaxRange() > target.getMaxRange())
+      else if (design.getMaxRange() > target.getMaxRange())
       {
-         stack.preferredRange = target.getMaxRange() + 1;
+         // We have better range, so stay out of range of their weapons
+         // Should this use "our max range", or "their max range + 1" ?
+         stack.preferredRange = design.getMaxRange();
       }
       else
       {
+         // They have equal or better range, so just close to range 0
          stack.preferredRange = 0;
       }
    }
@@ -208,7 +216,7 @@ public class OneOnOneBattle extends BattleSimulation
       {
          if (movesInRound(stacks[n].design.getSpeed4(),round) >= threshold)
          {
-            moveStack(n);
+            moveStack2D(n);
          }
       }      
    }
@@ -246,9 +254,77 @@ public class OneOnOneBattle extends BattleSimulation
          }
       } );
    }
+   
+   /**
+    * Moves the specified stack
+    * 
+    * The stack will attempt to move to a new square that is as close as possible
+    * to it's preferred distance from it's target. 
+    */
+   private void moveStack2D( int index )
+   {
+      ShipStack mover = stacks[index];
+      ShipStack target = mover.target;
+
+      int originalDistance = distanceBetween(mover,target); 
+
+      // These two arrays specify where to move relative to current location
+      int[] yOffsets = { 0,  0, -1, -1, -1,  1, 1, 1 };
+      int[] xOffsets = { 1, -1, -1,  0,  1, -1, 0, 1 };
+      
+      int dd = Integer.MAX_VALUE;		// best range found so far 
+      int xOffset = 0;					// where to move for best range
+      int yOffset = 0;
+      
+      for (int n = 0; n < 8; n++)
+      {
+         // Can't move off edge of battle board
+         if (mover.xpos+xOffsets[n] < 1) continue;
+         if (mover.xpos+xOffsets[n] > 10) continue;
+         if (mover.ypos+yOffsets[n] < 1) continue;
+         if (mover.ypos+yOffsets[n] > 10) continue;
+         
+         // Get the range if we moved here
+         int dn = distanceBetween( mover, target, xOffsets[n], yOffsets[n] );
+         
+         // How far out is this from preferred range
+         int ddn = Math.abs( dn - mover.preferredRange );
+                  
+         if (ddn < dd)
+         {
+            // This is the best we have found so far
+            dd = ddn;
+            xOffset = xOffsets[n];
+            yOffset = yOffsets[n];
+         }
+      }
+
+      // Move stack to new location
+      mover.xpos += xOffset;
+      mover.ypos += yOffset;
+      
+      // Count the move in case we are trying to disengage
+      mover.movesMade++;
+
+      // Have we moved towards or away from the target ?
+      int newDistance = distanceBetween(mover,target);
+      String directionStr = " ";
+      if (newDistance > originalDistance) 
+      {
+         directionStr = " away ";
+      }
+      else if (newDistance < originalDistance)
+      {
+         directionStr = " forward ";
+      }
+
+      statusUpdate( stacks[index].toString() + " moves" + directionStr + "to " + mover.xpos + "," + mover.ypos + " (range " + distanceBetween(mover,target) + ")");
+   }
 
    /**
-    * Move the specified stack towards it's target 
+    * Move the specified stack towards it's target
+    * 
+    * @deprecated useStack2D has replaced this  
     */
    private void moveStack( int index )
    {
@@ -293,12 +369,42 @@ public class OneOnOneBattle extends BattleSimulation
    /**
     * Return the distance between two stacks
     */
-   private int distanceBetween( ShipStack stack1, ShipStack stack2 )
+   public int distanceBetween( ShipStack stack1, ShipStack stack2 )
    {
-      // This only works because both stacks have same ypos
-      return Math.abs( stack1.xpos - stack2.xpos );
+      return distanceBetween( stack1, stack2, 0, 0 );
    }
-   
+
+   /**
+    * Returns the distance between two stacks if one of them moves slightly  
+    */
+   public int distanceBetween( ShipStack stack1, ShipStack stack2, int xOffset, int yOffset )
+   {
+      int dx = Math.abs( (stack1.xpos + xOffset) - stack2.xpos );
+      int dy = Math.abs( (stack1.ypos + yOffset) - stack2.ypos );
+
+      // Use a distance table lookup for distances.
+      // This limits the number of expensive Math.sqrt calls to 100.
+      // Will only make a difference in large battles.
+      
+      if (distanceTable == null)
+      {
+         distanceTable = new int[10][10];
+         for (int x = 0; x < 10; x++)
+         {
+            for (int y = 0; y < 10; y++)
+            {
+               int d =  (int)Math.round( Math.floor( Math.sqrt( x * x + y * y ) ) );
+               distanceTable[x][y] = d;
+            }
+         }
+      }
+      
+      return distanceTable[dx][dy];
+   }
+      
+   /**
+    * Check whether any stacks have managed to disengage 
+    */
    private void checkForDisengage()
    {
       for (int n = 0; n < stackCount; n++)
@@ -307,6 +413,12 @@ public class OneOnOneBattle extends BattleSimulation
       }
    }
    
+   /**
+    * Check whether a stack has managed to disengage
+    * <p>
+    * A stack disengages if it's orders are to disengage and if it has
+    * moved a certain number of times  
+    */
    private void checkForDisengage(ShipStack stack)
    {
       if (stack.battleOrders == ShipStack.ORDERS_DISENGAGE)
@@ -488,25 +600,40 @@ public class OneOnOneBattle extends BattleSimulation
    private int applyArmourDamage(int armourDamage, ShipStack target, int maxKills)
    {
       int kills;
+      
       // How much damage has each ship sustained so far ?
-      int damagePerShip = target.damage / target.shipCount;
+      int damagePerShip = target.damage / target.shipCount;            
       int remainingArmourPerShip = target.design.getArmour() - damagePerShip;
       
-      // How many ships have we killed ?  Do floating point math then round down
-      kills = (int)Math.floor( 1.0 * armourDamage / remainingArmourPerShip );
-               
-      // If this is a torp/missile salvo there may be a cap on the number of kills
-      if (kills > maxKills) kills = maxKills;
-      
-      // We can't kill more ships than there are in the stack
-      if (kills > target.shipCount) kills = target.shipCount;
-      
-      // How much damage is left over after killing ships
-      int killDamage = kills * remainingArmourPerShip;         
-      int damageRemainder = armourDamage - killDamage;
-      
-      target.shipCount -= kills;         
-      target.damage = damagePerShip * target.shipCount + damageRemainder;
+      if (armourDamage > (remainingArmourPerShip * target.shipCount))
+      {
+         // Damage overwhelms all remaining ship armour
+         kills = target.shipCount;
+         target.shipCount = 0;
+      }
+      else
+      {      
+	      // How many ships have we killed ?  Do floating point math then round down
+	      kills = (int)Math.floor( 1.0 * armourDamage / remainingArmourPerShip );
+	               
+	      // If this is a torp/missile salvo there may be a cap on the number of kills
+	      if (kills > maxKills) kills = maxKills;
+	      
+	      // We can't kill more ships than there are in the stack
+	      if (kills > target.shipCount) kills = target.shipCount;
+	      
+	      if (kills < 0)
+	      {
+	         statusUpdate("Error - kills = " + kills);
+	      }
+	      
+	      // How much damage is left over after killing ships
+	      int killDamage = kills * remainingArmourPerShip;         
+	      int damageRemainder = armourDamage - killDamage;
+	      
+	      target.shipCount -= kills;         
+	      target.damage = damagePerShip * target.shipCount + damageRemainder;
+      }
       
       return kills;
    }
@@ -567,6 +694,13 @@ public class OneOnOneBattle extends BattleSimulation
       statusUpdate( status );
    }
    
+   /**
+    * Returns the adjusted accuracy level of a weapon
+    * <p>
+    * This takes into account and computers on the attacker and any jammers on the defender.
+    * <p>
+    * @param baseAccuracy is the basic accuracy level of the weapon
+    */
    public static double getFinalAccuracy( double baseAccuracy, ShipDesign attacker, ShipDesign defender )
    {
       int jamming = defender.getJamming();

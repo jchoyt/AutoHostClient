@@ -73,6 +73,8 @@ public abstract class BattleSimulation
          { 3,	2,	3,	2,	3,	2,	3,	2 }			// 2.5
    };
    
+   protected static int[][] distanceTable = null;
+   
    /**
     * Returns the number of times a ship with the specified speed can move in a particular round
     * <p>

@@ -22,6 +22,7 @@ import stars.ahc.ShipDesign;
 import stars.ahc.Weapon;
 import stars.ahc.plugins.battlesim.BattleSimulation;
 import stars.ahc.plugins.battlesim.OneOnOneBattle;
+import stars.ahc.plugins.battlesim.ShipStack;
 import stars.ahc.plugins.battlesim.StatusListener;
 
 /**
@@ -149,6 +150,8 @@ public class BattleSimulatorTest extends TestCase
    {
       BattleSimulation battle = new OneOnOneBattle( rabidDog, 7, ccc, 14 );
 
+      //battle.addStatusListener( consoleStatusListener );
+      
       battle.simulate();
       
       //
@@ -157,7 +160,7 @@ public class BattleSimulatorTest extends TestCase
       
       // CCC stack is undamaged
       assertEquals( 14, battle.getStack("CCC").shipCount );
-      assertEquals( 0, battle.getStack("CCC").getDamagePercent() );
+      assertTrue( "CCC stack undamaged or lightly damaged", battle.getStack("CCC").getDamagePercent() < 5 );
       
       // Rabid Dog stack is wiped out
       assertEquals( 0, battle.getStack("Rabid Dog").shipCount );
@@ -221,7 +224,7 @@ public class BattleSimulatorTest extends TestCase
    {
       BattleSimulation battle = new OneOnOneBattle( rabidDog, 20, armBB, 4 );
 
-      battle.addStatusListener( consoleStatusListener );
+      //battle.addStatusListener( consoleStatusListener );
       
       battle.simulate();
       
@@ -241,20 +244,61 @@ public class BattleSimulatorTest extends TestCase
       
    }
    
+   /**
+    * Test the two dimensional distance calculator
+    */
+   public void testDistanceBetween()
+   {
+      OneOnOneBattle battle = new OneOnOneBattle();
+      
+      ShipStack s1 = new ShipStack(null,1);
+      ShipStack s2 = new ShipStack(null,2);
+
+      s1.setPos( 3, 4 );
+      s2.setPos( 3, 4 );      
+      assertEquals( 0, battle.distanceBetween(s1,s2) );
+      
+      s1.setPos( 3, 4 );
+      s2.setPos( 4, 4 );      
+      assertEquals( 1, battle.distanceBetween(s1,s2) );
+
+      s1.setPos( 3, 4 );
+      s2.setPos( 3, 5 );      
+      assertEquals( 1, battle.distanceBetween(s1,s2) );
+      
+      s1.setPos( 3, 4 );
+      s2.setPos( 4, 5 );      
+      assertEquals( 1, battle.distanceBetween(s1,s2) );
+      
+      s1.setPos( 3, 4 );
+      s2.setPos( 4, 6 );      
+      assertEquals( 2, battle.distanceBetween(s1,s2) );
+      
+      s1.setPos( 3, 4 );
+      s2.setPos( 7, 5 );      
+      assertEquals( 4, battle.distanceBetween(s1,s2) );
+
+      s1.setPos( 5, 3 );
+      s2.setPos( 8, 4 );      
+      assertEquals( 3, battle.distanceBetween(s1,s2) );
+
+      s1.setPos( 0, 4 );
+      s2.setPos( 5, 7 );      
+      assertEquals( 5, battle.distanceBetween(s1,s2) );
+   }
+   
    public void testDisengageOne()
    {
-      // This won't work until I get 2D battle-board movement working
+      ShipStack cynic = new ShipStack( cynicDD, 1 );
+      cynic.battleOrders = ShipStack.ORDERS_DISENGAGE;
       
-//      ShipStack cynic = new ShipStack( cynicDD, 1 );
-//      cynic.battleOrders = ShipStack.ORDERS_DISENGAGE;
-//      
-//      ShipStack staz = new ShipStack( interceptor2, 3 );
-//      
-//      BattleSimulation battle = new OneOnOneBattle( cynic, staz );
-//
-//      battle.addStatusListener( consoleStatusListener );
-//      
-//      battle.simulate();
+      ShipStack staz = new ShipStack( interceptor2, 3 );
       
+      BattleSimulation battle = new OneOnOneBattle( cynic, staz );
+
+      battle.addStatusListener( consoleStatusListener );
+      
+      battle.simulate();
    }
+   
 }

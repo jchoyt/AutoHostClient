@@ -74,4 +74,12 @@ public class ShipStack
       int damagePerShip = (shipCount == 0) ? 0 : damage / shipCount;
       return 100 * damagePerShip / design.getArmour();
    }
+
+   /**
+    */
+   public void setPos(int x, int y)
+   {
+      xpos = x;
+      ypos = y;
+   }
 }
