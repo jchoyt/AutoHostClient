@@ -42,6 +42,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -354,9 +355,14 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
      */
     private void setApplicationIcon()
     {
+       setWindowIcon( this );
+    }
+    
+    public static void setWindowIcon( JFrame frame )
+    {
        URL iconURL = findImage("stars32.gif");
        Image img = Toolkit.getDefaultToolkit().createImage(iconURL);
-       setIconImage( img );
+       frame.setIconImage( img );
     }
 
 

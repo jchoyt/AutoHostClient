@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import stars.ahc.Game;
+import stars.ahcgui.AhcFrame;
 
 /**
  * @author Steve Leach
@@ -56,6 +57,8 @@ public class GameObjectEditor extends JFrame
       setTitle( "Planet/fleet editor for " + game.getName() );
       setLocation( 40, 40 );
       setSize( 620, 400 );
+      
+      AhcFrame.setWindowIcon(this);
       
       JTabbedPane tabsPane = new JTabbedPane();
       

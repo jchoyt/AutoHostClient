@@ -45,6 +45,7 @@ import javax.swing.JTextArea;
 import stars.ahc.Game;
 import stars.ahc.Log;
 import stars.ahc.Utils;
+import stars.ahcgui.AhcFrame;
 import stars.ahcgui.pluginmanager.PlugInManager;
 
 /**
@@ -113,6 +114,8 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
       setLocation( 20, 20 );
       setTitle( "Analyzing " + game.getName() + " (" + game.getCurrentYear() + ") " );
       getContentPane().setLayout( new BorderLayout() );
+      
+      AhcFrame.setWindowIcon(this);
    }
 
    private void setupReports()

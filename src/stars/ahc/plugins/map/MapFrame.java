@@ -71,6 +71,7 @@ import stars.ahc.GamesProperties;
 import stars.ahc.Planet;
 import stars.ahc.Race;
 import stars.ahc.Utils;
+import stars.ahcgui.AhcFrame;
 import stars.ahcgui.ColorRenderer;
 import stars.ahcgui.pluginmanager.ConfigurablePlugIn;
 import stars.ahcgui.pluginmanager.MapLayer;
@@ -203,6 +204,8 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       int width = GamesProperties.getIntProperty( base+".width", 580 );
       setBounds( x, y, width, height );
       setTitle( "Map for " + game.getName() + " (" + game.getCurrentYear() + ")" );
+      
+      AhcFrame.setWindowIcon(this);
       
       getContentPane().setLayout(new BorderLayout());
    }
