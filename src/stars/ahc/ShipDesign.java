@@ -47,9 +47,14 @@ public class ShipDesign
    public static final int SUPER_COMPUTER = 102;
    public static final int BATTLE_NEXUS = 103;
 
-   private static final int MAX_WEAPON_SLOTS = 12;
+   private static final int MAX_WEAPON_SLOTS = 20;
    
    private static final int[] hullWeaponSlots = { 1, 1, 3, 3, 6, 9, 20, 0, 12 };
+
+//   private static String[] names = {
+//         "Unknown",
+//         "Scout", "Frigate", "Destroyer", "Cruiser", "BattleCruiser", "Battleship", "Dreadnaught", "Nubian"
+//   };
    
    private int hullType = HULLTYPE_UNKNOWN;
    private String name = "";
@@ -80,18 +85,25 @@ public class ShipDesign
    private int bc = 0;
    private int bsc = 0;
    private int nexus = 0;
+   private boolean isStarbase = false;
    private int boraniumCost = 1;		// for attractiveness calculations
    private int resourceCost = 1;		// for attractiveness calculations
    
    public ShipDesign( int hullType, String name )
-   {
-   
+   {   
       this.hullType = hullType;
       this.name = name;
       
       setupWeaponSlots();
    }
    
+   public ShipDesign( ShipHull hullType, String name )
+   {
+      this.hullType = hullType.index;
+      this.name = name;
+      
+      setupWeaponSlots();
+   }
 
    public ShipDesign()
    {
@@ -230,9 +242,19 @@ public class ShipDesign
    {
       return weaponCategory[slot];
    }
+   /**
+    * Returns the range of the weapon in the specified slot
+    * <p>
+    * If the design is a starbase then the range is automatically increased by 1
+    */
    public int getWeaponRange(int slot)
    {
-      return weaponRange[slot];
+      int range = weaponRange[slot];
+      if (isStarbase)
+      {
+         range += 1;
+      }
+      return range;
    }
    public double getWeaponAccuracy(int slot)
    {
@@ -245,15 +267,6 @@ public class ShipDesign
    public void setOwner(String owner)
    {
       this.owner = owner;
-   }
-
-   public static String[] getHullTypeNames()
-   {
-      String[] names = {
-            "Unknown",
-            "Scout", "Frigate", "Destroyer", "Cruiser", "BattleCruiser", "Battleship", "Dreadnaught", "Nubian"
-      };
-      return names;
    }
 
    /**
@@ -269,7 +282,7 @@ public class ShipDesign
       
       if (hullType > HULLTYPE_UNKNOWN)
       {
-         properties.setProperty( base+".hull", getHullTypeNames()[hullType] );
+         properties.setProperty( base+".hull", getHullName() );
       }
       
       properties.setProperty( base+".mass", ""+mass );
@@ -339,8 +352,17 @@ public class ShipDesign
    public void setHullType(int typeCode)
    {
       this.hullType = typeCode;
+      this.isStarbase = ShipHull.hullTypes[typeCode].isBase;
       setupWeaponSlots();
    }   
+   
+   public void setHullType( ShipHull hullType )
+   {
+      this.hullType = hullType.index;
+      this.isStarbase = hullType.isBase;
+      setupWeaponSlots();
+   }
+   
    public int getHullType()
    {
       return hullType;
@@ -441,7 +463,7 @@ public class ShipDesign
       {
          if (weaponRange[n] > maxRange)
          {
-            maxRange = weaponRange[n];
+            maxRange = getWeaponRange(n);
          }
       }
       
@@ -474,7 +496,7 @@ public class ShipDesign
          s += owner + " ";
       }
       s += name + " "; 
-      s += "(" + getHullTypeNames()[hullType] + ")\n";
+      s += "(" + getHullName() + ")\n";
       s += "amour=" + armour + ", shields=" + shields;      
       s += (regenShields) ? " (regen)\n" : "\n";
       s += "speed=" + speed4/4.0 + ", initative=" + initiative + "\n";
@@ -545,7 +567,7 @@ public class ShipDesign
       {
          if (weaponRange[n] < shortest)
          {
-            shortest = weaponRange[n];
+            shortest = getWeaponRange(n);
          }
       }
       
@@ -558,6 +580,16 @@ public class ShipDesign
     */
    public String getHullName()
    {
-      return getHullTypeNames()[ getHullType() ];
+      return ShipHull.hullTypes[hullType].name;
+   }
+   
+   public void setStarbase( boolean isStarbase )
+   {
+      this.isStarbase = isStarbase;
+   }
+   
+   public boolean isStarbase()
+   {
+      return isStarbase();
    }
 }

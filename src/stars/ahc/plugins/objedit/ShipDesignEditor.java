@@ -30,6 +30,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 
 import stars.ahc.ShipDesign;
+import stars.ahc.ShipHull;
 import stars.ahc.Utils;
 import stars.ahc.Weapon;
 
@@ -105,7 +106,7 @@ public class ShipDesignEditor extends JPanel
       
       gbc.gridx++;     
       gbc.gridwidth = 4;
-      hullTypeField = new JComboBox(ShipDesign.getHullTypeNames());
+      hullTypeField = new JComboBox(ShipHull.getTypeNames());
       fieldPanel.add( hullTypeField, gbc );
 
       gbc.gridy++;
@@ -225,8 +226,13 @@ public class ShipDesignEditor extends JPanel
       gbc.gridx++;      
       gbc.gridwidth = 1;
       fieldPanel.add( computersPanel, gbc );
+
+      gbc.gridx = 20;     
+      gbc.weightx = 1;
+      fieldPanel.add( new JLabel(""), gbc );
       
       add( fieldPanel, BorderLayout.NORTH );
+      
       
       add( getWeaponsBox(), BorderLayout.CENTER );      
    }
@@ -264,6 +270,10 @@ public class ShipDesignEditor extends JPanel
       weaponsTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
       weaponsTable.setRowHeight( 22 );
 
+      weaponsTable.setAutoResizeMode( JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS );
+      weaponsTable.getColumnModel().getColumn(0).setWidth( 30 );
+      weaponsTable.getColumnModel().getColumn(1).setWidth( 200 );
+      
       JComboBox weaponTypeSelector = new JComboBox();
       for (int n = 0; n < Weapon.getAllWeapons().length; n++)
       {
@@ -346,103 +356,104 @@ public class ShipDesignEditor extends JPanel
       
       design.setComputers( bcomp, bsc, nexus );
    }
-}
-
-class ShipWeaponsTableModel extends AbstractTableModel
-{
-   public static final int COL_SLOT = 0;
-   public static final int COL_TYPE = 1;
-   public static final int COL_COUNT = 2;
-   private static final int COLCOUNT = 3;
    
-   private ShipDesign design = new ShipDesign();
+   private class ShipWeaponsTableModel extends AbstractTableModel
+   {
+      public static final int COL_SLOT = 0;
+      public static final int COL_TYPE = 1;
+      public static final int COL_COUNT = 2;
+      private static final int COLCOUNT = 3;
+      
+      private ShipDesign design = new ShipDesign();
 
-   public ShipWeaponsTableModel( ShipDesign design )
-   {
-      this.design = design;
-   }
-   
-   public void setDesign( ShipDesign design )
-   {
-      this.design = design;
-      fireTableDataChanged();
-   }
-   
-   /* (non-Javadoc)
-    * @see javax.swing.table.TableModel#getColumnCount()
-    */
-   public int getColumnCount()
-   {
-      return COLCOUNT;
-   }
-
-   /* (non-Javadoc)
-    * @see javax.swing.table.TableModel#getRowCount()
-    */
-   public int getRowCount()
-   {
-      return design.getWeaponSlots();
-   }
-
-   /* (non-Javadoc)
-    * @see javax.swing.table.TableModel#getValueAt(int, int)
-    */
-   public Object getValueAt(int row, int col)
-   {
-      switch (col)
+      public ShipWeaponsTableModel( ShipDesign design )
       {
-         case COL_SLOT:		return "" + (row+1);
-         case COL_TYPE:		return design.getWeaponName(row);
-         case COL_COUNT:	return new Integer( design.getWeaponCount(row) );
-         default:			return "";
-      }
-   }
-   
-   public Class getColumnClass(int col)
-   {
-      switch (col)
-      {
-         case COL_SLOT:		return String.class;
-         case COL_TYPE: 	return String.class;
-         case COL_COUNT: 	return Integer.class;
-         default: 			return null;
-      }
-   }
-   
-   public boolean isCellEditable(int row, int col)
-   {
-      return (col >= COL_TYPE);
-   }
-   
-   
-   public void setValueAt(Object value, int row, int col)
-   {
-      if (design == null)
-      {
-         return;
+         this.design = design;
       }
       
-      switch (col)
+      public void setDesign( ShipDesign design )
       {
-         case COL_TYPE:
-            String newName = value.toString();
-            Weapon wpn = Weapon.getWeaponByName(newName);
-            design.setWeapon( row, design.getWeaponCount(row), wpn );
-            break;
-         case COL_COUNT:
-            int newCount = ((Integer)value).intValue();
-            design.setWeaponCount(row,newCount);
-            break;
+         this.design = design;
+         fireTableDataChanged();
       }
-   }
-   public String getColumnName(int col)
-   {
-      switch (col)
+      
+      /* (non-Javadoc)
+       * @see javax.swing.table.TableModel#getColumnCount()
+       */
+      public int getColumnCount()
       {
-         case COL_SLOT:		return "Slot";
-         case COL_TYPE: 	return "Weapon";
-         case COL_COUNT: 	return "Count";
-         default:			return null;
+         return COLCOUNT;
       }
-   }
+
+      /* (non-Javadoc)
+       * @see javax.swing.table.TableModel#getRowCount()
+       */
+      public int getRowCount()
+      {
+         return design.getWeaponSlots();
+      }
+
+      /* (non-Javadoc)
+       * @see javax.swing.table.TableModel#getValueAt(int, int)
+       */
+      public Object getValueAt(int row, int col)
+      {
+         switch (col)
+         {
+            case COL_SLOT:		return "" + (row+1);
+            case COL_TYPE:		return design.getWeaponName(row);
+            case COL_COUNT:	return new Integer( design.getWeaponCount(row) );
+            default:			return "";
+         }
+      }
+      
+      public Class getColumnClass(int col)
+      {
+         switch (col)
+         {
+            case COL_SLOT:		return String.class;
+            case COL_TYPE: 	return String.class;
+            case COL_COUNT: 	return Integer.class;
+            default: 			return null;
+         }
+      }
+      
+      public boolean isCellEditable(int row, int col)
+      {
+         return (col >= COL_TYPE);
+      }
+      
+      
+      public void setValueAt(Object value, int row, int col)
+      {
+         if (design == null)
+         {
+            return;
+         }
+         
+         switch (col)
+         {
+            case COL_TYPE:
+               String newName = value.toString();
+               Weapon wpn = Weapon.getWeaponByName(newName);
+               design.setWeapon( row, design.getWeaponCount(row), wpn );
+               break;
+            case COL_COUNT:
+               int newCount = ((Integer)value).intValue();
+               design.setWeaponCount(row,newCount);
+               break;
+         }
+      }
+      public String getColumnName(int col)
+      {
+         switch (col)
+         {
+            case COL_SLOT:		return "Slot";
+            case COL_TYPE: 	return "Weapon";
+            case COL_COUNT: 	return "Count";
+            default:			return null;
+         }
+      }
+   }   
 }
+

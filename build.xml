@@ -57,7 +57,11 @@
       <fileset dir="${build}" includes="**/Utils.class"/>
       <fileset dir="${build}" includes="**/AutoHostError.class"/>
       <fileset dir="${build}" includes="**/ShipDesign.class"/>
+      <fileset dir="${build}" includes="**/ShipDesignEditor.class"/>
+      <fileset dir="${build}" includes="**/ShipDesignEditor$*.class"/>
       <fileset dir="${build}" includes="**/Weapon.class"/>
+      <fileset dir="${build}" includes="**/ShipHull.class"/>
+      <fileset dir="html" includes="battlesim.htm"/>
    	  <manifest>
 	  		<attribute name="Main-Class" value="stars.ahc.plugins.battlesim.StandAloneBattleSimulator"/>
 	  </manifest>

@@ -1,0 +1,101 @@
+<html>
+	<head>
+		<title>The Stars! Battle Simulator</title>
+	</head>
+	<body>
+		<h1>The Stars! Battle Simulator</h1>
+		
+		<p>
+			First, a quick disclaimer:-
+			<br>
+			The Stars! battle engine is a complex system with several random elements, and it's behaviour
+			is not fully understood in several areas.  It is therefore impossible to create a simulator that
+			will 100% accurately reproduce the results of the battle engine.
+			<br>
+			The AHC battle simulator is a &quot;best efforts&quot; implementation that manages to get quite close
+			to real battle engine results in a lot of cases.  However, there are no guarantees and you use
+			it entirely at your own risk.  If you lose your main warfleet because the battle didn't go the
+			way the simulator said it would, don't blame us.
+		</p>
+
+		<h2>Installation</h2>		
+		<p>
+			The Battle Simulator is written in Java which means that it will require a Java Runtime Environment (JRE).
+			You can download a free JRE from the Java web site at <a href="http://www.java.com/">www.java.com</a>.
+		</p>
+		<p>
+			Next, download the BattleSimulator itself.  This is the file called &quot;BattleSim.jar&quot;. To start
+			the program you should be able to just double click on the jar file.  To start the program from the
+			command line, run &quot;java -jar battlesim.jar&quot;.
+		</p>
+		
+		<h2>Using the Battle Simulator</h2>
+		<p>
+			The following assumes you are familiar with Stars! terminology such as &quot;token&quot; and 
+			&quot;round&quot;.
+		</p>
+		<h3>Basic setup</h3>
+		<p>
+			Select &quot;File / New&quot; from the main menu to start a new simulation.  The next thing you need
+			to do is add some tokens to the battle.  A token (also known as a &quot;stack&quot;)
+			is a number of ships, each with the same design, and
+			from the same fleet. Each token also has a &quot;side&quot; - tokens on different sides will attack
+			each other.
+		</p>
+		<p>
+			You can add tokens using the &quot;Add&quot; button below the tokens list.  This adds a new, empty,
+			token to the list and then opens the ship design editor window.  Here you can enter the details of
+			the ship design.  It is best to copy the values directly from the ship design screen (F4) in the 
+			game.
+		</p>
+		<p>
+			Once you have specified the base values (armour, shields, speed, etc.) for the design you can add
+			weapons to it using the &quot;Add Weapon&quot; button.  It is important to note that you are actually
+			describing the design &quot;slots&quot; that contain weapons - there should be one entry in the weapon
+			slots table for each slot in the ship design that contains weapons.  For each weapon slot you specify
+			the type of weapon and how many there are.
+		</p>
+		<p>
+			For example, if you have a destroyer design with two colloidal phasers in the weapon slots and a
+			beta torpedo in the general purpose slot, you would have three rows in the weapon slots table. 
+		</p>
+		<p>
+			After you have specified the ship design, close the design editor and then enter the number of
+			ships in the token, as well as which side the token is on (just a number).  You will need at least
+			two stacks on different sides, with at least one of them having weapons, for a battle to take 
+			place.
+		</p>
+		<p>
+			Once you have specified the tokens that will participate in the battle it is a good idea to save
+			the simulation configuration.  You do this with the &quot;File / Save&quot; menu item.
+		</p>
+		<p>
+			You should now be ready to run the simulation.  To do this, click the &quot;Run&quot; button or
+			press the F5 key.
+		</p>
+		<p>
+			The results of the battle will now be diplayed in the main part of the window.  Assuming the
+			&quot;Show designs&quot; check box is checked the display will start with an outline of the
+			tokens that participate in the battle.
+		</p>
+		<p>
+			There will also be a line that says that the random number generator has been initialised with
+			a &quot;seed&quot; value.  You can enter a seed value in the control panel on the left before
+			running the simulation.  If the value of 0 is used then the battle will be different every time.
+			If a non-zero value is used then the same starting setup will always produce the same results,
+			for whatever seed value is specified.  
+		</p>
+		<p>
+			After this will come the results of the battle.  There will be a line of output for each time
+			that a token moves or fires it's weapons.
+		</p>
+		<p>
+			At the end of the display will be the final status of each token, showing how many ships 
+			survived (if any) and how much damage they took.
+		</p>
+		<hr>
+		<p>
+			Copyright (c) 2004, Steve Leach
+		</p>
+	</body>
+</html>

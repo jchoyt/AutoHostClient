@@ -51,6 +51,7 @@ import javax.swing.table.AbstractTableModel;
 
 import stars.ahc.Game;
 import stars.ahc.ShipDesign;
+import stars.ahc.ShipHull;
 import stars.ahc.Utils;
 import stars.ahc.Weapon;
 import stars.ahc.plugins.battlesim.BattleSimulator;
@@ -237,7 +238,7 @@ public class ShipDesignEditorPanel extends JPanel implements ObjectEditorTab
       
       gbc.gridx++;     
       gbc.gridwidth = 4;
-      hullTypeField = new JComboBox(ShipDesign.getHullTypeNames());
+      hullTypeField = new JComboBox(ShipHull.getTypeNames());
       fieldPanel.add( hullTypeField, gbc );
 
       gbc.gridy++;

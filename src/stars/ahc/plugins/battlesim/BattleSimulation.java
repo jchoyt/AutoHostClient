@@ -207,6 +207,8 @@ public class BattleSimulation
     */
    public void simulate() throws BattleSimulationError
    {
+      validate();
+      
       initialiseBattleBoard();
       
       statusUpdate( "Battle started" );
@@ -226,6 +228,14 @@ public class BattleSimulation
          showStackDetails();
       }
       statusUpdate( "Battle finished" );
+   }
+   
+   public void validate() throws BattleSimulationError
+   {
+      if (stackCount < 2)
+      {
+         throw new BattleSimulationError( "There must be at least 2 ship stacks in a battle" );
+      }
    }
 
    /**
@@ -342,6 +352,10 @@ public class BattleSimulation
       
       switch (races)
       {
+         case 0:
+            throw new BattleSimulationError( "No participants in battle" );
+         case 1:
+            throw new BattleSimulationError( "All participants are the same race" );
          case 2:
             positions = new Point[] { new Point(2,5), new Point(8,5) };
             break;
@@ -353,7 +367,7 @@ public class BattleSimulation
             break;
          // TODO: complete for 5 to 16 races
          default:
-            throw new BattleSimulationError( "Cannot handle more than 2 sides yet" );
+            throw new BattleSimulationError( "Cannot handle more than 2 races yet" );
       }
 
       for (int n = 0; n < stackCount; n++)

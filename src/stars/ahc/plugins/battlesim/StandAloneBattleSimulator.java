@@ -26,13 +26,21 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.net.URL;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Properties;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -67,7 +75,7 @@ import stars.ahc.plugins.objedit.ShipDesignEditor;
  */
 public class StandAloneBattleSimulator extends JFrame
 {
-   private static double version = 0.1;
+   private static double version = 0.15;
    private Action exitAction;
    private AbstractAction openAction;
    private AbstractAction runSimAction;
@@ -89,6 +97,8 @@ public class StandAloneBattleSimulator extends JFrame
    private File currentSimFile = null;
    private JCheckBox showDesignsField;
    private AbstractAction newFileAction;
+   private JFrame helpFrame = null;
+   private AbstractAction helpAction;
 
    public static void main( String[] args ) throws Exception
    {      
@@ -117,8 +127,6 @@ public class StandAloneBattleSimulator extends JFrame
    
    private void setupWindow()
    {
-      JFrame.setDefaultLookAndFeelDecorated(true);
-      
       setTitle( "Stars! Battle Simulator" );
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setLocation( 20, 20 );
@@ -187,6 +195,14 @@ public class StandAloneBattleSimulator extends JFrame
       };
       runSimAction.setEnabled( false );
       runSimAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0) );
+
+      helpAction = new AbstractAction("Documentation") {
+         public void actionPerformed(ActionEvent event)
+         {
+            showHelp();
+         }
+      };
+      helpAction.putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0) );
       
       aboutAction = new AbstractAction("About") {
          public void actionPerformed(ActionEvent event)
@@ -247,6 +263,8 @@ public class StandAloneBattleSimulator extends JFrame
       JMenu helpMenu = new JMenu("Help");
       mainMenu.add( helpMenu );
       
+      helpMenu.add( new JMenuItem(helpAction) );
+      helpMenu.addSeparator();
       helpMenu.add( new JMenuItem(aboutAction) );
       
       setJMenuBar( mainMenu );
@@ -482,7 +500,7 @@ public class StandAloneBattleSimulator extends JFrame
       {
          getFieldValues();
 
-         resultsArea.setText("Stars! Battle Simulator\n\n");
+         resultsArea.setText("Stars! Battle Simulator v"+version+"\n\n");
          
          sim.reset();
          
@@ -501,7 +519,7 @@ public class StandAloneBattleSimulator extends JFrame
       }
       catch (Throwable t)
       {
-         t.printStackTrace();
+         showError( t );
       }
    }
    
@@ -620,6 +638,15 @@ public class StandAloneBattleSimulator extends JFrame
       JOptionPane.showMessageDialog(this, text, title, JOptionPane.PLAIN_MESSAGE );
    }
    
+   private void showHelp()
+   {
+      if (helpFrame == null)
+      {
+         helpFrame = new HelpFrame();
+      }
+      helpFrame.show();
+   }
+   
    private void stackSelected()
    {
       int index = stacksTable.getSelectedRow();
@@ -669,34 +696,91 @@ public class StandAloneBattleSimulator extends JFrame
       
       editStack();
    }
+
+   private void logError( Throwable t)
+   {
+      PrintStream s;
+      try
+      {
+         s = new PrintStream( new FileOutputStream("battlesim.err") );
+
+         s.println( new Date() );
+         s.println( t.getMessage() );
+         
+         s.println( "---------------------------------" );
+         
+         Properties props = System.getProperties();
+         Enumeration keys = props.keys();
+         while (keys.hasMoreElements())
+         {
+            String key = keys.nextElement().toString();
+            String value = props.getProperty(key);
+            s.println( key + "=" + value );
+         }
+         
+         s.println( "---------------------------------" );
+         t.printStackTrace(s);
+         s.close();
+      }
+      catch (FileNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+   }
+   
+   private void showError( Throwable t )
+   {      
+      String title = "Stars! Battle Simulator v" + version;
+      String text = "Error: " + t.getMessage() + "\n";
+      
+      StackTraceElement[] stackTrace = t.getStackTrace();
+      for (int n = 0; n < stackTrace.length; n++)
+      {
+         if (stackTrace[n].getClassName().startsWith("stars."))
+         {
+            text += stackTrace[n].getClassName() + "." + stackTrace[n].getMethodName() +  
+         		" [" + stackTrace[n].getFileName() + ":" + stackTrace[n].getLineNumber() + "]\n";
+         }
+      }
+      
+      JOptionPane.showMessageDialog(this, text, title, JOptionPane.PLAIN_MESSAGE );
+   }
    
    private void editStack()
    {
-      if (stackEditor == null)
+      try
       {
-         stackEditor = new JFrame();         
-         stackEditor.getContentPane().setLayout( new BorderLayout() );
-         stackEditor.setTitle( "Stack Editor" );
-         stackEditor.setLocation( 80, 80 );
-         stackEditor.setSize( 600, 400 );
-         
-         stackEditor.addWindowListener( new WindowAdapter() {
-            public void windowClosing(WindowEvent e)
-            {
-               designEditor.getFieldValues();               
-               stackTableModel.fireTableDataChanged();
-               stacksTable.repaint();
-            }
-         });
-         
-         designEditor = new ShipDesignEditor();
-         designEditor.setupControls();
-         stackEditor.getContentPane().add( designEditor, BorderLayout.CENTER );
+	      if (stackEditor == null)
+	      {
+	         stackEditor = new JFrame();         
+	         stackEditor.getContentPane().setLayout( new BorderLayout() );
+	         stackEditor.setTitle( "Stack Editor" );
+	         stackEditor.setLocation( 80, 80 );
+	         stackEditor.setSize( 600, 400 );
+	         
+	         stackEditor.addWindowListener( new WindowAdapter() {
+	            public void windowClosing(WindowEvent e)
+	            {
+	               designEditor.getFieldValues();               
+	               stackTableModel.fireTableDataChanged();
+	               stacksTable.repaint();
+	            }
+	         });
+	         
+	         designEditor = new ShipDesignEditor();
+	         designEditor.setupControls();
+	         stackEditor.getContentPane().add( designEditor, BorderLayout.CENTER );
+	      }
+	      
+	      designEditor.setDesign( getSelectedStack(false).design );
+	      
+	      stackEditor.show();
       }
-      
-      designEditor.setDesign( getSelectedStack(false).design );
-      
-      stackEditor.show();
+      catch (Throwable t)
+      {
+         logError( t );
+         showError( t );
+      }
    }
 }
 
@@ -861,3 +945,36 @@ class StackTableModel extends AbstractTableModel
       }
    }
 }
+
+class HelpFrame extends JFrame
+{
+   public HelpFrame()
+   {
+      setTitle( "Help for Battle Simulator" );
+      setLocation( 20, 20 );
+      setSize( 600, 600 );
+      getContentPane().setLayout( new BorderLayout() );
+      setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+      
+      JEditorPane editor = null;
+      try
+      {
+         URL url = getClass().getClassLoader().getResource("battlesim.htm");
+         if (url == null)
+         {
+            File helpFile = new File( "html/battlesim.htm" );
+            url = helpFile.toURL();
+         }
+         editor = new JEditorPane(url);
+         editor.setEditable( false );
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+      
+      getContentPane().add( new JScrollPane(editor), BorderLayout.CENTER );
+   }
+}
+
+ 
