@@ -33,7 +33,7 @@ public class AutoHostClient extends java.lang.Object
     /**
      *  Description of the Field
      */
-    public static final String VERSION = "v1.1";
+    public final static String VERSION = "v1.1";
     static String propsFile = "ahclient.props";
 
 
@@ -56,14 +56,19 @@ public class AutoHostClient extends java.lang.Object
         {
             if ( args[j].startsWith( "-pf" ) )
             {
-                propsFile = args[++j];
+                try
+                {
+                    propsFile = args[++j];
+                }
+                catch ( Exception e )
+                {
+                    printUsage();
+                    return;
+                }
             }
-            else if ( args[j].equals( "-usage" ) )
-            {
-                printUsage();
-                return;
-            }
-            else if ( args[j].equals( "-?" ) )
+            else if ( args[j].equals( "-usage" ) ||
+                    args[j].equals( "--help" ) ||
+                    args[j].equals( "-?" ) )
             {
                 printUsage();
                 return;
@@ -75,8 +80,8 @@ public class AutoHostClient extends java.lang.Object
             }
             if ( args[j].equals( "-testing" ) || args[j].equals( "-t" ) )
             {
-                GamesProperties.AUTOHOST = "file:///D|/devel/autohostclient/";
-                logLevel=Log.DEBUG;
+                GamesProperties.AUTOHOST = "file:///devel/autohostclient/ahclone/";
+                logLevel = Log.DEBUG;
                 System.out.println( GamesProperties.AUTOHOST );
             }
         }
@@ -100,7 +105,6 @@ public class AutoHostClient extends java.lang.Object
      */
     public static void printUsage()
     {
-        //TODO:  fill this out
         StringBuffer ret = new StringBuffer();
         ret.append( "Usage: " );
         ret.append( "\njava[w] -jar ahclient.jar [-usage | -? | -d] [-pf propsfile] [-testing | -t]" );
