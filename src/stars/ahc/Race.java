@@ -355,4 +355,14 @@ public class Race
    {
       return getUserIntProperty( "growthRate", 0 );
    }
+   
+   public void setTeam( int team )
+   {
+      setUserProperty( "team", ""+team );
+   }
+   
+   public int getTeam()
+   {
+      return getUserIntProperty( "team", 0 );
+   }
 }

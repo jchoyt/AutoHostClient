@@ -31,12 +31,15 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -129,7 +132,9 @@ class GameOptionPane extends AbstractOptionPane implements PropertyChangeListene
     String playerList;
     ArrayList playerPanesList = new ArrayList();
     JPanel playerPanesPanel = new JPanel();
-    JCheckBox sahHosted = new JCheckBox( "Game hosted on AutoHost", true );
+    //JCheckBox sahHosted = new JCheckBox( "Game hosted on AutoHost", true );
+    
+    JComboBox controllerList;
 
 
     /**
@@ -171,7 +176,14 @@ class GameOptionPane extends AbstractOptionPane implements PropertyChangeListene
         gameName.setMinimumSize( new Dimension( 200, 5 ) );
         addComponent( "Game name: ", gameName );
         addComponent( "Game files location: ", gameFileLocation );
-        addComponent( sahHosted );
+        //addComponent( sahHosted );
+        
+        Vector controllerNames = new Vector();
+        controllerNames.add( "Autohost" );
+        controllerNames.add( "Local" );
+        controllerList = new JComboBox( controllerNames ); 
+        addComponent( new JLabel("Game type:"), controllerList );
+        
         addBlankSpace();
 
         Player[] players = game.getPlayers();
@@ -208,7 +220,8 @@ class GameOptionPane extends AbstractOptionPane implements PropertyChangeListene
                 file = file.getParentFile();
                 gameLoc = file.getCanonicalPath();
                 gameFileLocation.setText( gameLoc.replace( '\\', '/' ) );
-                sahHosted.setSelected( game.getSahHosted().equals( "true" ) );
+                //sahHosted.setSelected( game.getSahHosted().equals( "true" ) );
+                refreshGameType();
             }
             catch ( Exception e )
             {
@@ -228,13 +241,24 @@ class GameOptionPane extends AbstractOptionPane implements PropertyChangeListene
 
 
     /**
+    * 
+    */
+   private void refreshGameType()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+
+   /**
      *  Description of the Method
      */
     protected void _save()
     {
         game.setDirectory( gameFileLocation.getText() );
         game.setName( gameName.getText() );
-        game.setSahHosted( sahHosted.isSelected() ? "true" : "false" );
+        //game.setSahHosted( sahHosted.isSelected() ? "true" : "false" );
+        game.initController( controllerList.getSelectedItem().toString() + " controller" );
         for ( int i = 0; i < playerPanesList.size(); i++ )
         {
             ( ( PlayerPane ) playerPanesList.get( i ) )._save();

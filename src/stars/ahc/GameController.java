@@ -115,5 +115,15 @@ public interface GameController
      * Gets the status properties for the game
      */
     public void loadStatusProperties( Properties statusProperties );
+    
+    /**
+     * @return the name of this controller
+     */
+    public String getControllerName();
+    
+    /**
+     * Forces an immediate poll, if the controller supports this functionality 
+     */
+    public int pollNow();
 }
 

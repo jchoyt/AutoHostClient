@@ -320,5 +320,23 @@ public class AutoHostGameController implements GameController
             Log.log( Log.ERROR, this, e );
         }
     }
+
+
+   /* (non-Javadoc)
+    * @see stars.ahc.GameController#getControllerName()
+    */
+   public String getControllerName()
+   {
+      return "Autohost controller";
+   }
+
+
+   /* (non-Javadoc)
+    * @see stars.ahc.GameController#pollNow()
+    */
+   public int pollNow()
+   {
+      return AHPoller.POLL_NOT_DONE;
+   }
 }
 

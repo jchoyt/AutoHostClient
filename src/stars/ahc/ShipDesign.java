@@ -18,6 +18,7 @@
  */
 package stars.ahc;
 
+import java.util.ArrayList;
 import java.util.Properties;
 
 /**
@@ -297,6 +298,9 @@ public class ShipDesign
       properties.setProperty( base+".jamming", ""+jamming );
       properties.setProperty( base+".resourceCost", ""+resourceCost );
       properties.setProperty( base+".boraniumCost", ""+boraniumCost );
+      properties.setProperty( base+".battleComputers", ""+bc );
+      properties.setProperty( base+".superComputers", ""+bsc );
+      properties.setProperty( base+".battleNexi", ""+nexus );
       
       properties.setProperty( base+".weaponSlots.count", ""+getWeaponSlots() );
       
@@ -329,7 +333,11 @@ public class ShipDesign
       jamming = Utils.safeParseInt( properties.getProperty( base + ".jamming" ), 0 );
       resourceCost = Utils.safeParseInt( properties.getProperty( base + ".resourceCost" ), 0 );
       boraniumCost = Utils.safeParseInt( properties.getProperty( base + ".boraniumCost" ), 0 );
-      
+
+      bc = Utils.safeParseInt( properties.getProperty( base + ".battleComputers" ), 0 );
+      bsc = Utils.safeParseInt( properties.getProperty( base + ".superComputers" ), 0 );
+      nexus = Utils.safeParseInt( properties.getProperty( base + ".battleNexi" ), 0 );
+
       String s = ""+properties.getProperty( base + ".regenShields" );
       regenShields = s.equals("true");
 
@@ -591,5 +599,12 @@ public class ShipDesign
    public boolean isStarbase()
    {
       return isStarbase();
+   }
+   
+   public String[] getDesignErrors()
+   {
+      ArrayList errors = new ArrayList();
+      
+      return (String[])errors.toArray( new String[0] );
    }
 }

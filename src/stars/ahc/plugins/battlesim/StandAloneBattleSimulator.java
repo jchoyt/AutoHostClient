@@ -81,7 +81,7 @@ import stars.ahc.plugins.objedit.ShipDesignEditor;
  */
 public class StandAloneBattleSimulator extends JFrame
 {
-   private static double version = 0.18;
+   private static double version = 0.19;
    private Action exitAction;
    private AbstractAction openAction;
    private AbstractAction runSimAction;

@@ -229,6 +229,19 @@ public class GamePanel extends JPanel implements PropertyChangeListener
            gridbag.setConstraints( b1, c );
            add( b1 );
         }
+        else
+        {
+           Action pollNowAction = new AbstractAction("Poll now") {
+            public void actionPerformed(ActionEvent event)
+            {
+               pollImmediately();
+            }
+           };
+           
+           JButton pollNowButton = new JButton(pollNowAction);
+           gridbag.setConstraints( pollNowButton, c );
+           add( pollNowButton );           
+        }
         
         /*
          *  Add remove game button
@@ -249,7 +262,15 @@ public class GamePanel extends JPanel implements PropertyChangeListener
 
     }
 
-    private void generateNextTurn()
+    /**
+    * 
+    */
+   protected void pollImmediately()
+   {
+      game.pollImmediately();
+   }
+
+   private void generateNextTurn()
     {
        try
       {

@@ -365,7 +365,7 @@ public class BattleSimulation
          case 1:
             throw new BattleSimulationError( "All participants are the same race" );
          case 2:
-            positions = new Point[] { new Point(2,5), new Point(8,5) };
+            positions = new Point[] { new Point(2,5), new Point(9,5) };
             break;
          case 3:
             positions = new Point[] { new Point(5,2), new Point(2,9), new Point(9,9) };
@@ -1456,7 +1456,7 @@ public class BattleSimulation
 
       DamageRecord damageRec = new DamageRecord();
       
-      int weaponCount = design.getWeaponCount(slot);
+      int weaponCount = design.getWeaponCount(slot) * stack.getShipCount();
       
       for (int n = 0; n < weaponCount; n++)
       {

@@ -388,7 +388,8 @@ public class GamesProperties
                 for ( int i = 0; i < gameNames.length; i++ )
                 {
                     String gameDirectory = props.getProperty( gameNames[i] + ".GameDir" );
-                    currentGame = new Game( gameNames[i], gameDirectory );
+                    String controller = props.getProperty( gameNames[i] + ".Controller" );                    
+                    currentGame = new Game( gameNames[i], gameDirectory, controller );
                     currentGame.setDirectory( gameDirectory );
 
                     // Note - this lot can be moved into game.parseProperties() [SL, 2 Nov 04]

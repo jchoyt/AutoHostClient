@@ -27,11 +27,12 @@ import java.util.Properties;
  *@author     jchoyt
  *@created    November 27, 2002
  */
-public class LocalGameController implements GameController, GameTurnGenerator
+public class LocalGameController implements GameController
 {
     private PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
     protected Game game;
     protected long nextGen = 0;
+    protected int prevYear = -1;
 
 
     /**
@@ -204,11 +205,7 @@ public class LocalGameController implements GameController, GameTurnGenerator
     {
         if( System.currentTimeMillis() > nextGen )
         {
-            Log.log( Log.NOTICE, this, "Polling local game " + game.getName() );
-            /* TODO : do polling here */
-            Log.log(Log.NOTICE,this,"OK, not really - it hasn't been implemented yet.");
-            nextGen = System.currentTimeMillis() + getPollInterval();
-            return AHPoller.POLL_SUCCESSFUL;
+            return pollNow();
         }
         else
         {
@@ -217,7 +214,52 @@ public class LocalGameController implements GameController, GameTurnGenerator
     }
 
 
-    /**
+    public int pollNow()
+   {
+      Log.log( Log.NOTICE, this, "Polling local game " + game.getName() );
+      
+      Player player = (Player)game.players.get(0);
+      int year = Utils.safeParseInt( getFileYear( player.id, "m" ) );
+      
+      if ((year >= 2400) && (year != prevYear))
+      {
+         File gameDir = new File( game.getDirectory() );
+         int playerCount = game.players.size();
+         
+         for (int n = 0; n < playerCount; n++)
+         {
+            player = (Player)game.players.get(n);
+            
+	         try
+	         {
+	            Utils.genPxxFiles( game, player.getId(), player.getStarsPassword(), gameDir );
+	         }
+	         catch (IOException e)
+	         {
+	            // TODO Auto-generated catch block
+	            e.printStackTrace();
+	         }
+         }
+         
+         try
+         {
+            game.loadReports();
+         }
+         catch (ReportLoaderException e)
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+         
+         prevYear = year;
+      }
+      
+      nextGen = System.currentTimeMillis() + getPollInterval();
+      
+      return AHPoller.POLL_SUCCESSFUL;
+   }
+
+   /**
      *  Sets the playerTurnStatus attribute of the LocalGameController object
      *
      *@param  playerNum  The new playerTurnStatus value
@@ -333,6 +375,15 @@ public class LocalGameController implements GameController, GameTurnGenerator
    {
       return new File(game.directory + File.separator + game.name + ".hst").exists();
    }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.GameController#getControllerName()
+    */
+   public String getControllerName()
+   {
+      return "Local controller";
+   }
+
 }
 
 

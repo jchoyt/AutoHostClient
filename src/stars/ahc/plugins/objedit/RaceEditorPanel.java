@@ -68,6 +68,7 @@ public class RaceEditorPanel extends JPanel implements ObjectEditorTab, ListSele
    private HabEditor gravEditor;
    private HabEditor tempEditor;
    private HabEditor radEditor;
+   private JTextField teamField;
 
    public RaceEditorPanel( Game game )
    {
@@ -167,6 +168,15 @@ public class RaceEditorPanel extends JPanel implements ObjectEditorTab, ListSele
       gbc.gridx++;
       gbc.gridwidth = 4;
       editPanel.add( raceNameField, gbc );
+
+      
+      gbc.gridy++;
+      gbc.gridx = 1;
+      editPanel.add( new JLabel("Team:"), gbc );
+      
+      gbc.gridx++;
+      teamField = new JTextField( 2 );
+      editPanel.add( teamField, gbc );
       
       gbc.gridy++;
       gbc.gridx = 1;
@@ -270,8 +280,10 @@ public class RaceEditorPanel extends JPanel implements ObjectEditorTab, ListSele
    {
       Race race = getSelectedRace();
       
-      // Set color
       raceNameField.setText( race.getRaceName() );
+      teamField.setText( ""+race.getTeam() );
+      
+      // Set color
       colorField.setText( Utils.getColorStr(race.getColor()) );
       colorField.setBackground( race.getColor() );
       
@@ -324,6 +336,8 @@ public class RaceEditorPanel extends JPanel implements ObjectEditorTab, ListSele
    {
       Race race = getSelectedRace();
       
+      race.setTeam( Utils.safeParseInt( teamField.getText(), 0 ) );
+      
       //
       // Save hab ranges
       //
@@ -356,6 +370,7 @@ public class RaceEditorPanel extends JPanel implements ObjectEditorTab, ListSele
          }
       }
       
+      game.saveUserDefinedProperties();
       game.notifyUpdateListeners( race );
    }
    
