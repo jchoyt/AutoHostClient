@@ -55,6 +55,7 @@ import stars.ahc.Game;
 import stars.ahc.GamesProperties;
 import stars.ahc.Log;
 import stars.ahc.NotificationListener;
+import stars.ahcgui.pluginmanager.BasePlugIn;
 import stars.ahcgui.pluginmanager.PlugIn;
 import stars.ahcgui.pluginmanager.PlugInManager;
 import stars.ahcgui.pluginmanager.PluginLoadError;
@@ -299,7 +300,16 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
         contentPane.add( buildStatusPane(), BorderLayout.SOUTH );
         Log.log( Log.MESSAGE, this, "GUI built and ready." );
         AhcGui.setStatus( "GUI built and ready." );
-        /*
+        
+        startAHPoller();    
+    }
+
+    /**
+    * 
+    */
+   private void startAHPoller()
+   {
+      /*
          *  The line below sets how often AHC checks AH for updated files.
          *  DO NOT MODIFY THIS NUMBER.  Ron has graciously agreed to allow me to write this
          *  to make our lives a little easier.  If you abuse this, I will request that Ron
@@ -307,10 +317,21 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
          *  AutoHost.
          */
         GamesProperties.UPTODATE = true;
-        timer.schedule( new AHPoller(), 10 * 60 * 1000, 10 * 60 * 1000 ); //10 minutes
-    }
+        
+        AHPoller poller = new AHPoller();
+        
+        BasePlugIn p = PlugInManager.getPluginManager().getBasePlugin("System tray icon manager");
+        
+        if (p != null)
+        {
+           poller.addNotificationListener( (NotificationListener)p );
+        }
+        
+        timer.schedule( poller, 10 * 60 * 1000, 10 * 60 * 1000 ); //10 minutes
+   }
 
-    /**
+
+   /**
     * 
     */
     private void setExitHandler()
@@ -497,17 +518,24 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
     */
    public void addHideButton()
    {
-      JButton hideButton = new JButton("Hide");
+      PlugInManager manager = PlugInManager.getPluginManager();
+      BasePlugIn plugin = manager.getBasePlugin("System tray icon manager");
       
-      hideButton.addActionListener( new ActionListener() {
-         public void actionPerformed(ActionEvent e)
-         {
-            AhcFrame.this.setVisible(false);
-         }
-      });
-      
-      int index = toolbar.getComponentCount(); 
-      toolbar.add( hideButton, index-1 );
+      if ((plugin != null) && (plugin.isEnabled()))
+      {  
+         
+         JButton hideButton = new JButton("Hide");
+         
+         hideButton.addActionListener( new ActionListener() {
+            public void actionPerformed(ActionEvent e)
+            {
+               AhcFrame.this.setVisible(false);
+            }
+         });
+         
+         int index = toolbar.getComponentCount(); 
+         toolbar.add( hideButton, index-1 );
+      }
    }
 }
 

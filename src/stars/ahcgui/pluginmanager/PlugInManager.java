@@ -228,15 +228,6 @@ public class PlugInManager
          plugins.add( pluginClass );
          
          PlugIn plugin = (PlugIn)pluginClass.newInstance();
-
-//         if (plugin instanceof GamePanelButtonPlugin)
-//         {
-//            gamePanelButtons.add( pluginClass );
-//         }
-//         else if (plugin instanceof MapLayer)
-//         {
-//            mapLayers.add( pluginClass );
-//         }
       }
       catch (ClassNotFoundException e)
       {
@@ -276,7 +267,10 @@ public class PlugInManager
    {
       return getPlugins( PlugIn.class );
    }
-   
+
+   /**
+    * Initialize all plugins that implement the BasePlugIn interface. 
+    */
    public void installBasePlugins( JFrame appWindow )
    {
       ArrayList baseClasses = getPlugins( BasePlugIn.class );
@@ -293,12 +287,10 @@ public class PlugInManager
          }
          catch (InstantiationException e)
          {
-            // TODO Auto-generated catch block
             e.printStackTrace();
          }
          catch (IllegalAccessException e)
          {
-            // TODO Auto-generated catch block
             e.printStackTrace();
          }
       }
@@ -313,6 +305,9 @@ public class PlugInManager
       }
    }
    
+   /**
+    * Searches for, and returns, a BasePlugin with the specified name.
+    */
    public BasePlugIn getBasePlugin( String name )
    {
       for (int n = 0; n < basePlugins.size(); n++)

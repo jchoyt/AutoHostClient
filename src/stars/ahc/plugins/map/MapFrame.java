@@ -20,8 +20,14 @@ package stars.ahc.plugins.map;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +37,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -40,6 +47,9 @@ import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
+
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 import stars.ahc.Game;
 import stars.ahc.GamesProperties;
@@ -167,8 +177,14 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       JPanel toolbar = new JPanel( new FlowLayout(FlowLayout.LEFT) );
       getContentPane().add( toolbar, BorderLayout.NORTH );
       
-      JButton btn = new JButton( "Test" );
+      JButton btn = new JButton( "Save Image" );
       btn.setSelected( true );
+      btn.addActionListener( new ActionListener() {
+         public void actionPerformed(ActionEvent event)
+         {
+            doSave();
+         }
+      });
       toolbar.add( btn );
       
       mapPanel = new MapPanel( game, config );
@@ -229,6 +245,37 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       controlPanel.add( Box.createGlue() );
       
       getContentPane().add( controlPanel, BorderLayout.EAST );
+   }
+   
+   private void doSave()
+   {
+      JFileChooser chooser = new JFileChooser();
+      int rc = chooser.showSaveDialog( this );
+      
+      if (rc != JFileChooser.APPROVE_OPTION )
+      {
+         return;
+      }
+      
+      File file = chooser.getSelectedFile();
+      
+      BufferedImage img = new BufferedImage( mapPanel.getHeight(), mapPanel.getWidth(), BufferedImage.TYPE_INT_RGB );
+      Graphics g = img.getGraphics();
+      
+      mapPanel.paint( g );
+
+//    Encode as a JPEG
+      try
+      {
+	      FileOutputStream fos = new FileOutputStream(file);
+	      JPEGImageEncoder jpeg = JPEGCodec.createJPEGEncoder(fos);
+	      jpeg.encode(img);
+	      fos.close();
+      }
+      catch (Throwable t)
+      {
+         t.printStackTrace();
+      }
    }
    
    public void redrawMap()

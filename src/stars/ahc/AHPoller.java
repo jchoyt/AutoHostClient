@@ -42,6 +42,7 @@ public class AHPoller extends TimerTask
    //
    
    private ArrayList notificationListeners = new ArrayList();
+   public static final int BALLOON_NOTIFICATION = 99;
    
     /**
      *  Constructor for the AHPoller object

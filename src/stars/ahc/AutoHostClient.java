@@ -144,7 +144,6 @@ public class AutoHostClient extends java.lang.Object
       URL[] urls = (URL[])urlList.toArray( new URL[0] );
       
       URLClassLoader loader = new URLClassLoader( urls );
-      System.out.println( loader );
       
       Thread.currentThread().setContextClassLoader( loader );
    }

@@ -8,8 +8,12 @@ package stars.ahcgui.pluginmanager;
 import javax.swing.JFrame;
 
 /**
+ * Base plugins are loaded when the application starts.
+ * <p>
+ * There is only one copy of each base plugin, as opposed to other plugins where there is one
+ * instance per game.
+ * 
  * @author Steve Leach
- *
  */
 public interface BasePlugIn extends PlugIn
 {
