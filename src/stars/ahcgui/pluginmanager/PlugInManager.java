@@ -26,6 +26,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -124,38 +125,67 @@ public class PlugInManager
       {
          JarFile jar = new JarFile( file );
 
+         //
+         // New method - look for entries with extension .ahplugin
+         //
+         
+         Enumeration entries = jar.entries();
+         while (entries.hasMoreElements())
+         {
+            JarEntry entry = (JarEntry)entries.nextElement();
+            
+            if (entry.getName().endsWith(".ahcplugin"))
+            {
+               processPluginDescriptor(file, jar, entry);
+            }
+         }
+         
+         //
+         // Old method - look for explicit name plugin.data
+         //
+         
          JarEntry entry = jar.getJarEntry( "plugin.data" );
 
-         if (entry == null)
+         if (entry != null)
          {
-            throw new PluginLoadError( "Jar file contains no plugin data" );
-         }
-
-         BufferedReader reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry)));
-
-         URLClassLoader loader = registerClassLoader( file );
-
-         String line;
-
-         while ((line = reader.readLine()) != null)
-         {
-            String[] tokens = line.split("=");
-            if (tokens.length < 2)
-            {
-               throw new PluginLoadError( "Plugin data not valid: '" + line + "' in " + file.getName() );
-            }
-            String key = tokens[0];
-            String value = tokens[1];
-
-            if (key.equals("plugin"))
-            {
-               processPlugIn( file, value, loader );
-            }
-         }
+            processPluginDescriptor(file, jar, entry);
+         }         
       }
       catch (IOException e)
       {
          throw new PluginLoadError( "IO error loading plugin: " + file.getName(), e );
+      }
+   }
+
+   /**
+    * @param file
+    * @param jar
+    * @param entry
+    * @throws IOException
+    * @throws PluginLoadError
+    */
+   private void processPluginDescriptor(File file, JarFile jar, JarEntry entry) throws IOException, PluginLoadError
+   {
+      BufferedReader reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry)));
+
+      URLClassLoader loader = registerClassLoader( file );
+
+      String line;
+
+      while ((line = reader.readLine()) != null)
+      {
+         String[] tokens = line.split("=");
+         if (tokens.length < 2)
+         {
+            throw new PluginLoadError( "Plugin data not valid: '" + line + "' in " + file.getName() );
+         }
+         String key = tokens[0];
+         String value = tokens[1];
+
+         if (key.equals("plugin"))
+         {
+            processPlugIn( file, value, loader );
+         }
       }
    }
 
