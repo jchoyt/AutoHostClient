@@ -387,9 +387,15 @@ public class Utils
     */
    public static int safeParseInt(String value, int defaultValue)
    {
+   	  int numberInt;
       try
       {
-         return Integer.parseInt( value );
+        // Converts to double then to Int. This is good in case the stringed number was in decimal format.
+        // Theorectially should wor keven if the number WAS NOT in decimal for to begin with.
+        // I.E. it was already int
+      	double numberDouble = Double.valueOf(value.trim()).doubleValue();
+      	return numberInt = (int)numberDouble; 
+      	//return Integer.parseInt( numberInt );
       }
       catch (Throwable t)
       {

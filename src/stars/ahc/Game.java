@@ -676,9 +676,15 @@ public class Game extends Object
      */
     public Color getRaceColor( String raceName )
     {
-        Race race = getRace( raceName, true );
-
-        return race.getColor();
+    	if( Utils.empty(raceName))
+    	{
+    		return Color.WHITE;
+    	}
+    	else
+    	{
+    	Race race = getRace( raceName, true );
+    	return race.getColor();
+    	}
     }
 
 

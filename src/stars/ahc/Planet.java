@@ -124,6 +124,11 @@ public class Planet implements MapObject
    {
       return getValue(PLANET_OWNER);
    }
+   
+   public String getDefence()
+   {
+      return getValue(PLANET_DEFENCE);
+   }
 
    /* (non-Javadoc)
     * @see stars.ahc.MapObject#getX()
