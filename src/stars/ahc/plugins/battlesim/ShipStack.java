@@ -32,8 +32,12 @@ import stars.ahc.Utils;
  */
 public class ShipStack
 {
-   public static final int ORDERS_MAX_RATIO = 1;
-   public static final int ORDERS_DISENGAGE = 2;
+   public static final int ORDERS_MAX_RATIO = 1;	// Maximize damage ratio
+   public static final int ORDERS_DISENGAGE = 2;	// Disengage
+   public static final int ORDERS_MIN_TO_SELF = 3;	// Minimize damage to self
+   public static final int ORDERS_MAX_NET = 4;		// Maximize net damage
+   public static final int ORDERS_MAX = 5;			// Maximize damage
+   public static final int ORDERS_DIS_CHAL = 6;		// Disengage if challenged
    
    public int shipCount = 0;
    public ShipDesign design = null;
@@ -115,6 +119,11 @@ public class ShipStack
       ypos = 0;
       escaped = false;
       movesMade = 0;
+      
+      if (design.getWeaponSlots() == 0)
+      {
+         battleOrders = ORDERS_DISENGAGE;
+      }
    }
    
    /**

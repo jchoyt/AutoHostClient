@@ -79,13 +79,14 @@ public class BattleSimulation
    /**
     * The number of moves a stack must make before disengaging
     */
-   // TODO: check whether this should be 7 or 8
-   public static final int DISENGAGE_MOVES = 7;
+   public static final int DISENGAGE_MOVES = 8;		// The manual (and battle viewer) are wrong about this
    
    public static final int BBOARD_MIN_X = 1;
    public static final int BBOARD_MAX_X = 10;
    public static final int BBOARD_MIN_Y = 1;
    public static final int BBOARD_MAX_Y = 10;
+   
+   public boolean showFinalSummary = true;
    
    /**
     * The seed for the random number generator.
@@ -197,7 +198,7 @@ public class BattleSimulation
    {
       if (speed4 == 0) return 0;
       if (round > 8) round -= 8;
-      return movement[speed4-1][round-1];
+      return movement[speed4-2][round-1];
    }
 
    /**
@@ -218,7 +219,10 @@ public class BattleSimulation
       }
       
       // Show the results of the battle
-      showStackDetails();
+      if (showFinalSummary)
+      {
+         showStackDetails();
+      }
       statusUpdate( "Battle finished" );
    }
 
@@ -448,6 +452,8 @@ public class BattleSimulation
    public boolean stillFighting()
    {
       int stacksFighting = 0;
+   
+      // TODO: there have to be at least 2 _sides_ still fighting, not 2 stacks
       
       for (int n = 0; n < stackCount; n++)
       {
@@ -566,7 +572,7 @@ public class BattleSimulation
    /**
     * Calculate the range at which the stack would like to fight, based on battle orders 
     */
-   protected void calculatePreferredRange(ShipStack stack)
+   protected void _calculatePreferredRange(ShipStack stack)
    {
       ShipDesign design = stack.design;
       ShipDesign target = stack.target.design;
@@ -762,7 +768,8 @@ public class BattleSimulation
    {
       for (int n = 0; n < stackCount; n++)
       {
-         if (movesInRound(stacks[n].design.getSpeed4(),round) >= threshold)
+         int moves = movesInRound(stacks[n].design.getSpeed4(),round); 
+         if (moves >= threshold)
          {
             if (stacks[n].battleOrders == ShipStack.ORDERS_DISENGAGE)
             {
@@ -774,59 +781,6 @@ public class BattleSimulation
             }
          }
       }      
-   }
-
-   /**
-    * Calculates the number of ships killed
-    * <p>
-    * Important - the target stack is updated (damage and shipcount) as a side effect
-    * 
-    */
-   protected int applyArmourDamage(int armourDamage, ShipStack target, int maxKills)
-   {
-      int kills;
-      
-      // TODO: armour damage should be handled in units of 1/500 of the total for the stack
-      
-      // How much damage has each ship sustained so far ?
-      int damagePerShip = target.damage / target.shipCount;            
-      int remainingArmourPerShip = target.design.getArmour() - damagePerShip;
-      
-      if (armourDamage > (remainingArmourPerShip * target.shipCount))
-      {
-         // Damage overwhelms all remaining ship armour
-         kills = target.shipCount;
-         
-         // We can't kill more ships than there are in the stack
-         if (kills > maxKills) kills = maxKills;
-         
-         target.shipCount -= kills;
-      }
-      else
-      {      
-         // How many ships have we killed ?  Do floating point math then round down
-         kills = (int)Math.floor( 1.0 * armourDamage / remainingArmourPerShip );
-                  
-         // If this is a torp/missile salvo there may be a cap on the number of kills
-         if (kills > maxKills) kills = maxKills;
-         
-         // We can't kill more ships than there are in the stack
-         if (kills > target.shipCount) kills = target.shipCount;
-         
-         if (kills < 0)
-         {
-            statusUpdate("Error - kills = " + kills);
-         }
-         
-         // How much damage is left over after killing ships
-         int killDamage = kills * remainingArmourPerShip;         
-         int damageRemainder = armourDamage - killDamage;
-         
-         target.shipCount -= kills;         
-         target.damage = damagePerShip * target.shipCount + damageRemainder;
-      }
-            
-      return kills;
    }
 
    /**
@@ -885,7 +839,7 @@ public class BattleSimulation
          {
             if (stacks[n].shipCount > 0)
             {
-	            if (distanceBetween(stack,stacks[n]) < range)
+	            if (distanceBetween(stack,stacks[n]) <= range)
 	            {
 	               if ((isSapper == false) || (stacks[n].shields > 0))
 	               {
@@ -921,84 +875,6 @@ public class BattleSimulation
       				+ " [" + (slot+1) + "] at " + target.design.getName() + " doing " + shieldDamage + " damage to shields and " 
       				+ armourDamage + " to armour (" + kills + " kills)";
       statusUpdate( notification );
-   }
-
-   /**
-    * Simulates firing torpedos and missiles 
-    * 
-    * @throws BattleSimulationError
-    * @deprecated - use fireTorpedoKotk() instead
-    */
-   private void fireTorpedo(ShipStack stack, int slot) throws BattleSimulationError
-   {
-      ShipDesign design = stack.design;		// for convenience      
-      ShipStack target = stack.target;
-   
-      int range = distanceBetween( stack, target );
-   
-      // Are we out of range ?
-      if (range > design.getWeaponRange(slot))
-      {
-         return;
-      }
-
-      // Is the target stack dead already ?
-      // TODO: pick another target if it is
-      if (stack.target.shipCount <= 0)
-      {
-         return;
-      }
-      
-      int numShots = design.getWeaponCount(slot) * stack.shipCount;
-      
-      double accuracy = design.getWeaponAccuracy(slot);
-      
-      accuracy = getFinalAccuracy( accuracy, design, target.design );
-
-      // How many actually hit ?
-      int numHits = 0;
-      for (int n = 0; n < numShots; n++)
-      {
-         if (getRandomFloat() < accuracy)
-         {
-            numHits++;
-         }
-      }
-   
-      int totalPower = numHits * design.getWeaponPower(slot);
-      
-      if ((target.shields == 0) && (design.getWeaponType(slot) == Weapon.TYPE_MISSILE))
-      {
-         // Capital ship missile and target has no shields - double damage
-         totalPower *= 2;
-      }
-   
-      // TODO: find out exactly what order the various affects are applied
-      
-      int shieldDamage = Math.min( target.shields, totalPower / 2 );
-      int armourDamage = totalPower - shieldDamage;
-      
-      int kills = applyArmourDamage( armourDamage, target, numHits );
-   
-      // Torps that miss do 1/8 damage to shields only
-      int numMisses = numShots - numHits;
-      int missDamage = numMisses * design.getWeaponPower(slot) / 8;
-      
-      shieldDamage += missDamage;
-      
-      if (shieldDamage > target.shields)
-      {
-         shieldDamage = target.shields;
-      }
-      
-      target.shields -= shieldDamage;
-
-      if (target.shipCount == 0)
-      {         
-         pickTarget( stack );  // If we have killed all ships in the target stack, pick another
-      }
-      
-      sendShotNotification( stack, slot, shieldDamage, armourDamage, kills, target );
    }
    
    /**
@@ -1679,5 +1555,141 @@ public class BattleSimulation
       {
          stacks[n] = new ShipStack( props, n );         
       }
+   }
+
+   /**
+    * Returns a stack from the simulation 
+    * 
+    * @param n - 0 based index of required stack
+    * @return
+    */
+   public ShipStack getStack(int index)
+   {
+      return stacks[index];
+   }
+   
+   /**
+    * Calculates the preferred range for a ship stack
+    * <p>
+    * Takes into account the damage that the stack can do to it's target, the damage it
+    * will take from it's target, and the stack's battle orders. 
+    */
+   private void calculatePreferredRange( ShipStack stack )
+   {
+      ShipStack target = stack.target;
+      
+      int maxRange = stack.design.getMaxRange();
+      int shortestRange = stack.design.getShortestRange();
+      
+      double bestRatio = 0;
+      double bestDamage = 0;
+      int minToSelf = Integer.MAX_VALUE;
+      int bestRange = 0;	// the range with the highest attractiveness
+      
+      for (int range = maxRange; range >= 0; range--)
+      {
+         int gives = getDamageEstimate( stack, target, range );	// how much damage we will do
+         int takes = getDamageEstimate( target, stack, range );	// how much damage we will take
+
+         switch (stack.battleOrders)
+         {
+            case ShipStack.ORDERS_DISENGAGE:
+               bestRange = maxRange;
+               break;
+               
+            case ShipStack.ORDERS_MAX:
+            case ShipStack.ORDERS_DIS_CHAL:
+               if (gives > bestDamage)
+               {
+                  bestDamage = gives;
+                  bestRange = range;
+               }
+               break;
+               
+            case ShipStack.ORDERS_MIN_TO_SELF:
+               if (gives > 0) // first, we have to do at least some damage
+               {
+	               if (takes <= minToSelf)	// then we try and minimize the damage we take
+	               {
+	                  if (gives > bestDamage) // then we try and maximize the damage ratio
+	                  {
+	                     minToSelf = takes;
+	                     bestDamage = gives;
+	                     bestRange = range; 
+	                  }
+	               }
+               }
+               break;
+               
+            case ShipStack.ORDERS_MAX_NET:
+               if (range <= shortestRange)	// get in range with all weapons
+               {
+                  double ratio = (takes > 0) ? gives / takes : gives * 100000;	// avoid divide by zero
+                  if (ratio > bestRatio)
+                  {
+                     bestRatio = ratio;
+                     bestRange = range;
+                  }
+               }
+               break;
+            
+            case ShipStack.ORDERS_MAX_RATIO:
+            default:
+               double ratio = (takes > 0) ? gives / takes : gives * 100000; // avoid divide by zero
+               if (ratio > bestRatio)
+               {
+                  bestRatio = ratio;
+                  bestRange = range;
+               }
+               break;
+         }
+      }
+      
+      stack.preferredRange = bestRange;
+   }
+   
+   /**
+    * Estimates the damage that an attacker can do against a defender at the specified range.
+    * <p>  
+    * This takes into account all the attacker's weapons and
+    * any other battle devices.
+    */
+   private int getDamageEstimate( ShipStack attacker, ShipStack defender, int range )
+   {
+      int estimate = 0;		// Accumulates the estimate of the total damage that the attacker can do
+      
+      ShipDesign design = attacker.design;
+      
+      for (int slot = 0; slot < design.getWeaponSlots(); slot++)
+      {
+         if (range <= design.getWeaponRange(slot))
+         {
+            int damage = design.getWeaponCount(slot) * design.getWeaponPower(slot);
+            
+	         switch (design.getWeaponType(slot))
+	         {
+	            case Weapon.TYPE_BEAM:
+	            case Weapon.TYPE_GATTLING:
+	            case Weapon.TYPE_SAPPER:
+	               damage *= getCapacitorMultiplier(attacker.design);
+	               damage *= getDeflectorMultiplier(defender.design);
+	               damage *= getRangeMultiplier( range, design.getWeaponRange(slot) );
+	               estimate += damage; 
+	               break;
+	            
+	            case Weapon.TYPE_MISSILE:
+	            case Weapon.TYPE_TORPEDO:
+	               damage *= getFinalAccuracy( design.getWeaponAccuracy(slot), attacker.design, defender.design );
+	               if ((design.getWeaponType(slot) == Weapon.TYPE_MISSILE) && (defender.shields == 0))
+	               {
+	                  damage *= 2;
+	               }
+	               estimate += damage;
+	               break;
+	         }
+         }
+      }
+      
+      return estimate;
    }
 }

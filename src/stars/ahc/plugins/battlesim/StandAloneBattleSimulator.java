@@ -239,16 +239,46 @@ public class StandAloneBattleSimulator extends JFrame
       try
       {
          setStatus( "Running simulation..." );
-         resultsArea.setText("");
+         resultsArea.setText("Stars! Battle Simulator\n\n");
+         
+         sim.showFinalSummary = false;
          
          sim.simulate();
          
+         showResults();
          setStatus( "Simulation complete" );
       }
       catch (Throwable t)
       {
          t.printStackTrace();
       }
+   }
+   
+   private void showResults()
+   {
+      String text = "\n\n";
+      
+      for (int n = 0; n < sim.stackCount; n++)
+      {
+         ShipStack stack = sim.getStack(n);
+         text += stack.owner + " ";
+         text += stack.design.getName() + " : ";
+         
+         if (stack.shipCount == 0)
+         {
+            text += "*dead*";
+         }
+         else
+         {
+            text += stack.shipCount + " left, ";
+            text += stack.getDamagePercent() + "% damage, ";
+            text += stack.shields + " shields left";
+         }
+         
+         text += "\n";
+      }
+      
+      resultsArea.setText( resultsArea.getText() + text );
    }
    
    private void copyToClipboard()

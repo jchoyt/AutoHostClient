@@ -278,6 +278,9 @@ public class ShipDesign
       properties.setProperty( base+".speed4", ""+speed4 );
       properties.setProperty( base+".initiative", ""+initiative );
       properties.setProperty( base+".regenShields", ""+regenShields );
+      properties.setProperty( base+".capacitors", ""+capacitors );
+      properties.setProperty( base+".deflectors", ""+deflectors );
+      properties.setProperty( base+".computing", ""+computing );
       properties.setProperty( base+".jamming", ""+jamming );
       properties.setProperty( base+".resourceCost", ""+resourceCost );
       properties.setProperty( base+".boraniumCost", ""+boraniumCost );
@@ -307,6 +310,9 @@ public class ShipDesign
       shields = Utils.safeParseInt( properties.getProperty( base + ".shields" ), 0 );
       initiative = Utils.safeParseInt( properties.getProperty( base + ".initiative" ), 0 );
       speed4 = Utils.safeParseInt( properties.getProperty( base + ".speed4" ), 0 );
+      capacitors = Utils.safeParseInt( properties.getProperty( base + ".capacitors" ), 0 );
+      deflectors = Utils.safeParseInt( properties.getProperty( base + ".deflectors" ), 0 );
+      computing = Utils.safeParseInt( properties.getProperty( base + ".computing" ), 0 );
       jamming = Utils.safeParseInt( properties.getProperty( base + ".jamming" ), 0 );
       resourceCost = Utils.safeParseInt( properties.getProperty( base + ".resourceCost" ), 0 );
       boraniumCost = Utils.safeParseInt( properties.getProperty( base + ".boraniumCost" ), 0 );
@@ -424,6 +430,9 @@ public class ShipDesign
       computing = 100 - comp;
    }
    
+   /**
+    * Gets the maximum range of any weapon on this design 
+    */
    public int getMaxRange()
    {
       int maxRange = 0;
@@ -520,5 +529,26 @@ public class ShipDesign
          }
       }
       return slot;
+   }
+
+
+   /**
+    * Returns the range of the shortest range weapon on the design
+    */
+   public int getShortestRange()
+   {
+      if (weaponSlotsUsed == 0) return 0;
+      
+      int shortest = Integer.MAX_VALUE;
+      
+      for (int n = 0; n < weaponSlotsUsed; n++)
+      {
+         if (weaponRange[n] < shortest)
+         {
+            shortest = weaponRange[n];
+         }
+      }
+      
+      return shortest;
    }
 }
