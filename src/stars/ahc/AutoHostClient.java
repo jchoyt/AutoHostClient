@@ -33,7 +33,7 @@ public class AutoHostClient extends java.lang.Object
     /**
      *  Description of the Field
      */
-    public final static String VERSION = "v2.1";
+    public final static String VERSION = "v2.11";
     static String propsFile = "ahclient.props";
 
 

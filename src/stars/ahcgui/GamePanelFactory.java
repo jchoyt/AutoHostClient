@@ -70,7 +70,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
     TitledBorder nameBorder;
     private GridBagConstraints c;
     private GridBagLayout gridbag;
-
+    private StatusJLabel inLabel, outLabel, deadLabel;
 
     /**
      *  Constructor for the GamePanel object
@@ -121,6 +121,11 @@ class GamePanel extends JPanel implements PropertyChangeListener
                 setVisible( false );
             }
         }
+        Properties playersByStatus = game.getPlayersByStatus();
+        inLabel.setText( playersByStatus.getProperty( "in" ) );
+        outLabel.setText( playersByStatus.getProperty( "out" ) );
+        deadLabel.setText( playersByStatus.getProperty( "dead" ) );
+
         statusLabel.setText( "<html>" + game.getStatus() + "</html>" );
         nameBorder.setTitle( game.getLongName() + " ( year " + game.getGameYear() + " )" );
     }
@@ -137,9 +142,25 @@ class GamePanel extends JPanel implements PropertyChangeListener
         c.gridwidth = 4;
         c.anchor = GridBagConstraints.CENTER;
         Properties playersByStatus = game.getPlayersByStatus();
-        addStatusLabel( "In", playersByStatus.getProperty( "in" ), "green" );
-        addStatusLabel( "Out", playersByStatus.getProperty( "out" ), "blue" );
-        addStatusLabel( "Dead or Inactive", playersByStatus.getProperty( "dead" ), "gray" );
+        inLabel = new StatusJLabel( "In", "green" );
+        c.gridx = 0;
+        c.gridy++;
+        gridbag.setConstraints( inLabel, c );
+        add( inLabel );
+        inLabel.setText( playersByStatus.getProperty( "in" ) );
+
+        outLabel = new StatusJLabel( "Out", "blue" );
+        c.gridy++;
+        gridbag.setConstraints( outLabel, c );
+        add( outLabel );
+        outLabel.setText( playersByStatus.getProperty( "out" ) );
+
+        deadLabel = new StatusJLabel( "Dead or Inactive", "gray" );
+        c.gridy++;
+        gridbag.setConstraints( deadLabel, c );
+        add( deadLabel );
+        deadLabel.setText( playersByStatus.getProperty( "dead" ) );
+
         c.gridwidth = oldGridwidth;
     }
 
@@ -277,44 +298,6 @@ class GamePanel extends JPanel implements PropertyChangeListener
         }
         c.gridx = 0;
         c.gridwidth = oldGridwidth;
-    }
-
-
-    /**
-     *  Adds a feature to the StatusLabel attribute of the GamePanel object
-     *
-     *@param  status  The feature to be added to the StatusLabel attribute
-     *@param  list    The feature to be added to the StatusLabel attribute
-     *@param  color   The feature to be added to the StatusLabel attribute
-     */
-    private void addStatusLabel( String status, String list, String color )
-    {
-        /*
-         *  Check to see if there are any in the list, if not, return
-         */
-        if ( list.equals( "null" ) || list.length() == 0 )
-        {
-            return;
-        }
-        /*
-         *  add status label
-         */
-        StringBuffer ret = new StringBuffer();
-        ret.append( "<html>" );
-        ret.append( status );
-        ret.append( ":  " );
-        ret.append( "<font color=\"" );
-        ret.append( color );
-        ret.append( "\">" );
-        ret.append( list );
-        ret.append( "</font>" );
-        ret.append( "</html>" );
-
-        JLabel b = new JLabel( String.valueOf( ret ) );
-        c.gridx = 0;
-        c.gridy++;
-        gridbag.setConstraints( b, c );
-        this.add( b );
     }
 }
 
@@ -593,6 +576,44 @@ class LaunchGameButton extends JButton implements ActionListener
     }
 }
 
+class StatusJLabel extends JLabel
+{
+    String color, status;
+
+    public StatusJLabel(String status, String color)
+    {
+        this.status = status;
+        this.color = color;
+    }
+
+    /**
+     *  Constructor for the setText object
+     */
+    public void setText(String list)
+    {
+        /*
+         *  Check to see if there are any in the list, if not, return
+         */
+        if ( list.equals( "null" ) || list.length() == 0 )
+        {
+            super.setText("none");
+        }
+
+        StringBuffer ret = new StringBuffer();
+        ret.append( "<html>" );
+        ret.append( status );
+        ret.append( ":  " );
+        ret.append( "<font color=\"" );
+        ret.append( color );
+        ret.append( "\">" );
+        ret.append( list );
+        ret.append( "</font>" );
+        ret.append( "</html>" );
+
+        super.setText(  String.valueOf( ret ) );
+    }
+
+}
 /**
  *  Description of the Class
  *
