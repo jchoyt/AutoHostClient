@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import junit.framework.TestCase;
 import stars.ahcgui.pluginmanager.MapLayer;
+import stars.ahcgui.pluginmanager.PlugIn;
 import stars.ahcgui.pluginmanager.PlugInManager;
 import stars.ahcgui.pluginmanager.PluginLoadError;
 
@@ -43,5 +44,15 @@ public class PluginManagerTest extends TestCase
       {
          assertTrue( "Item " + n + " is maplayer", MapLayer.class.isAssignableFrom((Class)mapLayers.get(n)) );
       }
+      
+      ArrayList plugins = plugInManager.getAllPlugins();
+      
+      assertTrue( "Got some plugins", plugins.size() > 0 );
+      
+      for (int n = 0; n < plugins.size(); n++)
+      {
+         assertTrue( "Item " + n + " is plug-in", PlugIn.class.isAssignableFrom((Class)plugins.get(n)) );
+      }
+      
    }
 }

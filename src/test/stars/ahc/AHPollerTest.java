@@ -1,8 +1,8 @@
 package test.stars.ahc;
 
-import java.io.*;
-import junit.framework.*;
-import stars.ahc.AHPoller;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 import stars.ahc.Game;
 import stars.ahc.Player;
 

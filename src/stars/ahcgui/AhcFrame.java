@@ -54,6 +54,7 @@ import stars.ahc.AutoHostClient;
 import stars.ahc.Game;
 import stars.ahc.GamesProperties;
 import stars.ahc.Log;
+import stars.ahc.NotificationListener;
 import stars.ahcgui.pluginmanager.PlugIn;
 import stars.ahcgui.pluginmanager.PlugInManager;
 import stars.ahcgui.pluginmanager.PluginLoadError;
@@ -64,7 +65,7 @@ import stars.ahcgui.pluginmanager.PluginLoadError;
  *@author     jchoyt
  *@created    December 30, 2002
  */
-public class AhcFrame extends javax.swing.JFrame
+public class AhcFrame extends javax.swing.JFrame implements NotificationListener
 {
     static JLabel status = new JLabel();
     /**
@@ -108,6 +109,7 @@ public class AhcFrame extends javax.swing.JFrame
             ret.add( GamePanelFactory.createPanel( games[i] ), games[i].getName() );
             addBlankSpace(ret);
         }
+        
         JPanel scrollRet = new JPanel();
         JScrollPane scrollPane = new JScrollPane(
                 ret,
@@ -441,5 +443,30 @@ public class AhcFrame extends javax.swing.JFrame
         Component blank = Box.createVerticalStrut( 20 );
         panel.add( blank );
     }
+
+
+   /* (non-Javadoc)
+    * @see stars.ahc.NotificationListener#receiveNotification(java.lang.Class, int, java.lang.String)
+    */
+   public void receiveNotification(Object source, int severity, String message)
+   {
+      switch (severity)
+      {
+         case NotificationListener.SEV_STATUS:
+         case NotificationListener.SEV_WARNING:
+            AhcGui.setStatus( message );
+            break;
+            
+         case NotificationListener.SEV_ERROR:
+         case NotificationListener.SEV_CRITICAL:
+            AhcGui.setStatus( message );
+		      JOptionPane.showInternalMessageDialog(
+		            AhcGui.mainFrame.getContentPane(),
+		            message,
+		            "Error",
+		            JOptionPane.ERROR_MESSAGE );
+         	break;
+      }
+   }
 }
 

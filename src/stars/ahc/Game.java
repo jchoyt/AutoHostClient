@@ -463,9 +463,10 @@ public class Game extends Object
         {
             Utils.getFileFromAutohost( name, getStatusFileName(), directory );
         }
-        catch ( Exception e )
+        catch ( AutoHostError e )
         {
             Log.log( Log.ERROR, this, e );
+            
             return false;
         }
         /*

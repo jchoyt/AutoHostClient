@@ -35,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
+import stars.ahc.AutoHostError;
 import stars.ahc.EssaiPostURLConnection;
 import stars.ahc.Game;
 import stars.ahc.GamesProperties;
@@ -466,6 +467,16 @@ class DownloadButton extends JButton implements ActionListener
         {
             success = false;
             Log.log( Log.MESSAGE, this, ioe );
+            JOptionPane.showInternalMessageDialog(
+                    AhcGui.mainFrame.getContentPane(),
+                    "Couldn't complete download and report generation. See the log tab for details.",
+                    "Connection Trouble",
+                    JOptionPane.INFORMATION_MESSAGE );
+        }
+        catch ( AutoHostError ahe )
+        {
+            success = false;
+            Log.log( Log.MESSAGE, this, ahe );
             JOptionPane.showInternalMessageDialog(
                     AhcGui.mainFrame.getContentPane(),
                     "Couldn't complete download and report generation. See the log tab for details.",

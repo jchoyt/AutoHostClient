@@ -428,12 +428,22 @@ public class GamesProperties
      */
     private static void refreshGamesProperties()
     {
+       String gameNames = "";
+       
        for ( int i = 0; i < games.size(); i++ )
        {
           Game game = (Game)games.get(i);
+       
+          if (Utils.empty(gameNames) == false)
+          {
+             gameNames += ",";
+          }
+          gameNames += game.name;
           
           game.setProperties( props );
        }
+       
+       setProperty( "Games", gameNames );
     }
 
     /**

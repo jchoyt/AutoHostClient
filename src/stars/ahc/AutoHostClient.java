@@ -34,6 +34,8 @@ public class AutoHostClient extends java.lang.Object
      */
     public final static String VERSION = "v2.11";
     static String propsFile = "ahclient.props";
+   private static AhcFrame mainFrame;
+   private static AHPoller poller;
 
 
     /**
@@ -94,12 +96,26 @@ public class AutoHostClient extends java.lang.Object
 
         GamesProperties.init( propsFile );
         Log.log( Log.MESSAGE, AutoHostClient.class, "Properties file loaded and parsed" );
+        
         showGui();
-        new AHPoller().run();
+        
+        startPoller();
     }
 
 
     /**
+    * 
+    */
+   private static void startPoller()
+   {
+      poller = new AHPoller();
+      poller.addNotificationListener( mainFrame );
+      
+      poller.run();
+   }
+
+
+   /**
      *  Sends a copy of the usage to the command line.
      */
     public static void printUsage()
@@ -126,7 +142,7 @@ public class AutoHostClient extends java.lang.Object
      */
     public static void showGui()
     {
-        AhcFrame mainFrame = new AhcFrame();
+        mainFrame = new AhcFrame();
         mainFrame.pack();
         mainFrame.setVisible( true );
     }

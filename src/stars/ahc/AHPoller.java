@@ -19,10 +19,10 @@ package stars.ahc;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.TimerTask;
-import stars.ahcgui.AhcGui;
 /**
  *  Description of the Class
  *
@@ -31,7 +31,18 @@ import stars.ahcgui.AhcGui;
  */
 public class AHPoller extends TimerTask
 {
-
+   //
+   // Updated 12 Oct 2004, Steve Leach
+   // Removed references to the GUI from this non-GUI code.  All references
+   // were for status updating and error reporting, so I implemented a 
+   // listener system instead.  The GUI now registers itself as a listener
+   // for notifications from the AHPoller.
+   //
+   // Also changed the static methods to non-static.
+   //
+   
+   private ArrayList notificationListeners = new ArrayList();
+   
     /**
      *  Constructor for the AHPoller object
      */
@@ -48,8 +59,7 @@ public class AHPoller extends TimerTask
      *@return                  Description of the Return Value
      *@exception  IOException  Description of the Exception
      */
-    public static boolean mFileIsNewer( Player player )
-        throws IOException
+    public  boolean mFileIsNewer( Player player ) throws IOException
     {
         String dateOnAh = "";
         File localMfile = player.getLocalMfile();
@@ -87,7 +97,7 @@ public class AHPoller extends TimerTask
      *@param  mFile  Description of the Parameter
      *@return        The dateOfFile value
      */
-    protected static String getYearOfFile( File mFile )
+    protected String getYearOfFile( File mFile )
     {
         try
         {
@@ -99,7 +109,8 @@ public class AHPoller extends TimerTask
         catch ( FileNotFoundException e )
         {
             Log.log( Log.MESSAGE, AHPoller.class, "Couldn't find file " + mFile.getAbsolutePath() );
-            AhcGui.setStatus( "Couldn't find file " + mFile.getAbsolutePath() );
+            //AhcGui.setStatus( "Couldn't find file " + mFile.getAbsolutePath() );
+            sendNotification( this, NotificationListener.SEV_ERROR, "Couldn't find file " + mFile.getAbsolutePath() );
         }
         catch ( Exception e )
         {
@@ -116,7 +127,9 @@ public class AHPoller extends TimerTask
     {
         Game[] games = GamesProperties.getGames();
         boolean success = true;
-        AhcGui.setStatus( "Polling AutoHost - wait for the update." );
+        //AhcGui.setStatus( "Polling AutoHost - wait for the update." );
+        sendNotification( this, NotificationListener.SEV_STATUS, "Polling AutoHost - wait for the update." );
+        
         for ( int i = 0; i < games.length; i++ )
         {
             success = success && games[i].poll();
@@ -131,14 +144,43 @@ public class AHPoller extends TimerTask
         }
         if ( success )
         {
-            AhcGui.setStatus( "All player stati updated." );
+           sendNotification( this, NotificationListener.SEV_STATUS, "All player stati updated." );
+            //AhcGui.setStatus( "All player stati updated." );
             GamesProperties.UPTODATE = true;
             GamesProperties.writeProperties();
         }
         else
         {
-            AhcGui.setStatus( "There was a problem checking the stati.  Please check the log and and report any errors to jchoyt@users.sourceforge.net." );
+           sendNotification( this, NotificationListener.SEV_ERROR, "There was a problem checking the stati.  Please check the log and and report any errors to jchoyt@users.sourceforge.net." );
+           
+            //AhcGui.setStatus( "There was a problem checking the stati.  Please check the log and and report any errors to jchoyt@users.sourceforge.net." );
         }
     }
+
+
+   /**
+    * Register a class that wishes to be notified of events
+    * 
+    * @author Steve Leach
+    */
+   public void addNotificationListener(NotificationListener listener)
+   {
+      notificationListeners.add( listener );      
+   }
+   
+   /**
+    * Send a notification to all registered listeners
+    *   
+    * @author Steve Leach
+    */
+   private void sendNotification( Object source, int severity, String message )
+   {
+      for (int n = 0; n < notificationListeners.size(); n++)
+      {
+         NotificationListener listener = (NotificationListener)notificationListeners.get(n);
+         listener.receiveNotification( source, severity, message );
+      }
+   }
+   
 }
 

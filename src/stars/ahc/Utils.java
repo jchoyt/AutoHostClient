@@ -66,8 +66,9 @@ public class Utils
      *  Sets up the backup and staging directories if they don't already exist.
      *
      *@param  currentGame  Description of the Parameter
+    * @throws AutoHostError
      */
-    public static void setupDirs( Game currentGame )
+    public static void setupDirs( Game currentGame ) throws AutoHostError
     {
         try
         {
@@ -97,6 +98,10 @@ public class Utils
                 Utils.getFileFromAutohost( currentGame.getName(), currentGame.getName() + ".xy", currentGame.getDirectory() );
             }
         }
+        catch ( AutoHostError e )
+        {
+           throw e;
+        }
         catch ( Exception e )
         {
             e.printStackTrace();
@@ -111,7 +116,7 @@ public class Utils
      *@param  destination  Description of the Parameter
      *@param  fileName     Description of the Parameter
      */
-    public static void getFileFromAutohost( String gameName, String fileName, String destination )
+    public static void getFileFromAutohost( String gameName, String fileName, String destination ) throws AutoHostError
     {
         try
         {
@@ -143,12 +148,18 @@ public class Utils
         }
         catch ( IOException e )
         {
-            JOptionPane.showInternalMessageDialog(
-                    AhcGui.mainFrame.getContentPane(),
-                    fileName + " couldn't be retrieved from AutoHost",
-                    "Retrieval problem",
-                    JOptionPane.INFORMATION_MESSAGE );
-            return;
+           // This utility code shouldn't really be displaying errors; that should be left
+           // to the GUI code.
+           // Steve Leach, 12 Oct 2004
+           
+//            JOptionPane.showInternalMessageDialog(
+//                    AhcGui.mainFrame.getContentPane(),
+//                    fileName + " couldn't be retrieved from AutoHost",
+//                    "Retrieval problem",
+//                    JOptionPane.INFORMATION_MESSAGE );
+//            return;
+           
+           throw new AutoHostError( fileName + " couldn't be retrieved from AutoHost", e );
         }
     }
 

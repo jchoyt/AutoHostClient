@@ -83,19 +83,42 @@ public class GameTest extends TestCase
      */
     public void testGetReportFile()
     {
-        int reportType = Game.REPORTTYPE_MAP;
-        int player = 16;
-        int year = 2012;
-        File mapFile = game.getReportFile( reportType, player, year );
-        assertEquals( mapFile.getAbsolutePath(), "/Jeff's~1/stars/mover/mover.map", mapFile.getAbsolutePath() );
-        mapFile = game.getReportFile( reportType, player, 0 );
-        assertEquals( mapFile.getAbsolutePath(), "/Jeff's~1/stars/mover/mover.map", mapFile.getAbsolutePath() );
-        reportType = Game.REPORTTYPE_FLEET;
-        mapFile = game.getReportFile( reportType, player, year );
-        assertEquals( mapFile.getAbsolutePath(), "/Jeff's~1/stars/mover/backup/mover.2012.f16", mapFile.getAbsolutePath() );
-        reportType = Game.REPORTTYPE_PLANET;
-        mapFile = game.getReportFile( reportType, player, year );
-        assertEquals( mapFile.getAbsolutePath(), "/Jeff's~1/stars/mover/backup/mover.2012.p16", mapFile.getAbsolutePath() );
+//        int reportType = Game.REPORTTYPE_MAP;
+//        int player = 16;
+//        int year = 2012;
+//        	File mapFile = game.getReportFile( reportType, player, year );        
+//        assertEquals( mapFile.getAbsolutePath(), "/Jeff's~1/stars/mover/mover.map", mapFile.getAbsolutePath() );
+//        mapFile = game.getReportFile( reportType, player, 0 );
+//        assertEquals( mapFile.getAbsolutePath(), "/Jeff's~1/stars/mover/mover.map", mapFile.getAbsolutePath() );
+//        reportType = Game.REPORTTYPE_FLEET;
+//        mapFile = game.getReportFile( reportType, player, year );
+//        assertEquals( mapFile.getAbsolutePath(), "/Jeff's~1/stars/mover/backup/mover.2012.f16", mapFile.getAbsolutePath() );       
+        //assertEquals( mapFile.getAbsolutePath(), "/Jeff's~1/stars/mover/backup/mover.2012.p16", mapFile.getAbsolutePath() );
+
+      	File mapFile;
+        
+        mapFile = game.getReportFile( Game.REPORTTYPE_PLANET, 16, 2012 );
+        assertNotNull( "Planet report file returned", mapFile );
+        assertTrue( "File name contains year and player number (planet)", mapFile.getPath().endsWith( "mover.2012.p16"));
+        assertTrue( "File is in backup directory", mapFile.getParent().endsWith( "backup") );
+
+        mapFile = game.getReportFile( Game.REPORTTYPE_FLEET, 1, 2415 );
+        assertNotNull( "Fleet report file returned", mapFile );
+        assertTrue( "File name contains year and player number (fleet)", mapFile.getPath().endsWith( "mover.2415.f1"));
+        assertTrue( "File is in backup directory", mapFile.getParent().endsWith( "backup") );
+
+        mapFile = game.getReportFile( Game.REPORTTYPE_MAP, 3, 2501 );
+        assertNotNull( "Map file returned", mapFile );
+        assertTrue( "File name does not contain year or player number", mapFile.getPath().endsWith( "mover.map"));
+        assertTrue( "File is not in backup directory", mapFile.getParent().endsWith( "backup") == false);
+        
+        mapFile = game.getReportFile( 53543, 3, 2501 );
+        assertNull( "Unknown file type: no file returned", mapFile );
+
+        mapFile = game.getReportFile( Game.REPORTTYPE_FLEET, 10, 0 );
+        assertNotNull( "Fleet report file returned", mapFile );
+        assertTrue( "File name contains default year and player number (fleet)", mapFile.getPath().endsWith( "mover.2012.f10"));
+        assertTrue( "File is in backup directory", mapFile.getParent().endsWith( "backup") );
     }
 
 

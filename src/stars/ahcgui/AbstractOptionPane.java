@@ -220,7 +220,7 @@ public abstract class AbstractOptionPane extends JPanel implements ActionListene
         c.gridy++;
         c.gridheight = 1;
         //c.gridwidth = 1;
-        c.gridwidth = c.REMAINDER;
+        c.gridwidth = GridBagConstraints.REMAINDER;
         c.gridx = 0;
         c.weightx = 0.0f;
         c.insets = new Insets( 1, 1, 1, 0 );

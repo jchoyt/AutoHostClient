@@ -14,13 +14,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package stars.ahc;
-import java.io.*;
-import java.util.Date;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.Writer;
 import java.util.StringTokenizer;
 
-import javax.swing.text.*;
-
-import stars.ahc.Utils;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
+import javax.swing.text.PlainDocument;
 
 /**
  *  This class provides methods for logging events. It has the same purpose as

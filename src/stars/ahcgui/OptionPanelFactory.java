@@ -37,10 +37,12 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
+import stars.ahc.AutoHostError;
 import stars.ahc.Game;
 import stars.ahc.GamesProperties;
 import stars.ahc.Log;
@@ -563,10 +565,18 @@ class NewGamePane extends GameOptionPane
         if ( evt.getActionCommand().equals( SAVE ) )
         {
             save();
-            addGame();
             try
             {
+               addGame();            
                 GamesProperties.writeProperties();
+            }
+            catch (AutoHostError e)
+            {
+             JOptionPane.showInternalMessageDialog(
+                   AhcGui.mainFrame.getContentPane(),
+                   "Error contacting AutoHost",
+                   "Retrieval problem",
+                   JOptionPane.INFORMATION_MESSAGE );
             }
             catch ( Exception e )
             {
@@ -614,8 +624,9 @@ class NewGamePane extends GameOptionPane
 
     /**
      *  Adds a feature to the Game attribute of the NewGamePane object
+    * @throws AutoHostError
      */
-    protected void addGame()
+    protected void addGame() throws AutoHostError
     {
         game.setDirectory( gameFileLocation.getText() );
         game.setName( gameName.getText() );
@@ -624,6 +635,7 @@ class NewGamePane extends GameOptionPane
         AhcGui.getGameCards().add( GamePanelFactory.createPanel( game ), game.getName() );
         AhcGui.addOption( game.getName(), OptionPanelFactory.createPanel( game ) );
         mainParent.dispose();
+        
         Utils.setupDirs( game );
     }
 
