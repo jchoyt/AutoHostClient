@@ -335,7 +335,7 @@ public class BattleSimulation
          }
          catch (Throwable t)
          {
-            // protect the simulation from buggy status listeners
+            t.printStackTrace();
          }
       }
    }
@@ -640,7 +640,7 @@ public class BattleSimulation
    }
 
    /**
-    * Simulates firing beam weapons 
+    * Simulates firing beam weapons
     */
    private void fireBeamWeapon(ShipStack stack, int slot)
    {

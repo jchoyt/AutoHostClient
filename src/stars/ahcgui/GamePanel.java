@@ -691,19 +691,20 @@ class PluginButton extends JButton implements ActionListener
 }
 
 
+/**
+ * Label that contains a fixed prompt in black followed a colored status string   
+ *
+ */
 class StatusJLabel extends JLabel
 {
-    String color, status;
+    String color = null, status;
 
     public StatusJLabel(String status, String color)
     {
         this.status = status;
-        this.color = color;
+        this.color = color;        
     }
 
-    /**
-     *  Constructor for the setText object
-     */
     public void setText(String list)
     {
         /*
@@ -718,11 +719,19 @@ class StatusJLabel extends JLabel
         ret.append( "<html>" );
         ret.append( status );
         ret.append( ":  " );
-        ret.append( "<font color=\"" );
-        ret.append( color );
-        ret.append( "\">" );
+        if (color != null)
+        {
+           ret.append( "<font color=\"" );
+           	ret.append( color );
+           	ret.append( "\">" );
+        }
+        
         ret.append( list );
-        ret.append( "</font>" );
+        
+        if (color != null)
+        {
+           ret.append( "</font>" );
+        }
         ret.append( "</html>" );
 
         super.setText(  String.valueOf( ret ) );
@@ -731,16 +740,14 @@ class StatusJLabel extends JLabel
 }
 
 /**
- *  Description of the Class
+ *  Label control for displaying the status of a Stars! player
  *
  *@author     jchoyt
  *@created    January 3, 2003
  */
 class PlayerJLabel extends JLabel implements PropertyChangeListener
 {
-
-
-    Player player;
+    private Player player = null;
 
 
     /**
@@ -757,9 +764,9 @@ class PlayerJLabel extends JLabel implements PropertyChangeListener
 
 
     /**
-     *  Description of the Method
+     * Reacts to property change events by updating the text
      *
-     *@param  evt  Description of the Parameter
+     *@param  evt  Description of the event
      */
     public void propertyChange( PropertyChangeEvent evt )
     {
@@ -768,10 +775,15 @@ class PlayerJLabel extends JLabel implements PropertyChangeListener
 
 
     /**
-     *  Constructor for the setText object
+     *  Updates the text of the label
      */
     private void setText()
     {
+       if (player == null)
+       {
+          return;
+       }
+       
        try
        {
           setText( "<html>" + player.getRaceName() + ": " + getStatusString( player ) + "</html>" );
@@ -785,13 +797,11 @@ class PlayerJLabel extends JLabel implements PropertyChangeListener
 
 
     /**
-     *  Gets the attribute of the GamePanelFactory object
-     *
-     *@param  player  Description of the Parameter
-     *@return         The String value
      */
     private String getStatusString( Player player )
     {
+       if (player == null) return "";
+       
         return player.getAhStatus();
     }
 }
