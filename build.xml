@@ -29,10 +29,14 @@
     </jar>
   </target>
 
-  <target name="jar-map" description="Rebuild the map plugin file">
-    <jar jarfile="plugins/map.jar" manifest="META-INF/MANIFEST.MF" description="rebuild the map plugin jarfile">
+  <target name="jar-plugins" description="Rebuild the plugins">
+    <jar jarfile="plugins/map.jar" description="rebuild the map plugin jarfile">
       <fileset dir="." includes="map.ahcplugin"/>
       <fileset dir="${build}" includes="**/plugins/map/**" />
+    </jar>
+    <jar jarfile="plugins/analyzer.jar" description="rebuild the analyzer plugin jarfile">
+      <fileset dir="." includes="analyzer.ahcplugin"/>
+      <fileset dir="${build}" includes="**/plugins/analyzer/**" />
     </jar>
   </target>
 

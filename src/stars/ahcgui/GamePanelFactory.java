@@ -83,7 +83,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
     TitledBorder nameBorder;
     private GridBagConstraints c;
     private GridBagLayout gridbag;
-    private static final int GRID_COLS = 5;
+    private int gridCols = 5;
     private StatusJLabel inLabel, outLabel, deadLabel;
 
     /**
@@ -100,6 +100,8 @@ class GamePanel extends JPanel implements PropertyChangeListener
         c.gridx = 0;
         c.gridy = 0;
 
+        gridCols = 4 + countPluginButtons();
+        
         addGameData( game );
         addBlankSpace();
         addPlayerList( game );
@@ -123,6 +125,17 @@ class GamePanel extends JPanel implements PropertyChangeListener
 
 
     /**
+    * @return the number of GamePanel plugin buttons that are registered
+    */
+   private int countPluginButtons()
+   {
+      PlugInManager manager = PlugInManager.getPluginManager();
+      ArrayList plugins = manager.getPlugins( GamePanelButtonPlugin.class );
+      return plugins.size();
+   }
+
+
+   /**
      *  Description of the Method
      *
      *@param  evt  Description of the Parameter
@@ -155,7 +168,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
     private void addAllStati( Game game )
     {
         int oldGridwidth = c.gridwidth;
-        c.gridwidth = GRID_COLS;
+        c.gridwidth = gridCols;
         c.anchor = GridBagConstraints.CENTER;
         Properties playersByStatus = game.getPlayersByStatus();
         inLabel = new StatusJLabel( "In", "green" );
@@ -188,7 +201,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
     private void addBlankSpace()
     {
         Component blank = Box.createVerticalStrut( 20 );
-        c.gridwidth = GRID_COLS;
+        c.gridwidth = gridCols;
         c.gridx = 0;
         c.gridy++;
         gridbag.setConstraints( blank, c );
@@ -285,7 +298,7 @@ class GamePanel extends JPanel implements PropertyChangeListener
      */
     private void addGameData( Game game )
     {
-        c.gridwidth = GRID_COLS;
+        c.gridwidth = gridCols;
         /*
          *  titleYear = new JLabel( "<html><font size=+1><i>Game: " + game.getLongName() + " ( year " + game.getGameYear() + " )</i></html>", JLabel.RIGHT );
          *  gridbag.setConstraints( titleYear, c );

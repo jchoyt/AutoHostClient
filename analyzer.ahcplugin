@@ -1,0 +1,2 @@
+plugin=stars.ahc.plugins.analyzer.GamePanelAnalyzeButton
+plugin=stars.ahc.plugins.analyzer.reports.TestReport
