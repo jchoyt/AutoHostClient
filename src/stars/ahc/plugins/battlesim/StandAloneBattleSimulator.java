@@ -76,7 +76,7 @@ import stars.ahc.plugins.objedit.ShipDesignEditor;
  */
 public class StandAloneBattleSimulator extends JFrame
 {
-   private static double version = 0.16;
+   private static double version = 0.17;
    private Action exitAction;
    private AbstractAction openAction;
    private AbstractAction runSimAction;
@@ -528,6 +528,7 @@ public class StandAloneBattleSimulator extends JFrame
 
          resultsArea.setText("Stars! Battle Simulator v"+version+"\n\n");
          
+         sim.reinit();
          sim.reset();
          
          if (showDesignsField.isSelected())
@@ -545,11 +546,20 @@ public class StandAloneBattleSimulator extends JFrame
       }
       catch (Throwable t)
       {
+         addErrorToResults( t );
          logError( t );
          showError( t );
       }
    }
    
+   /**
+    */
+   private void addErrorToResults(Throwable t)
+   {
+      String text = "\n\nError: " + t.getMessage() + "\nSee battlesim.err for details\n\n";
+      resultsArea.setText( resultsArea.getText() + text );
+   }
+
    public void showDesigns()
    {
       String text = "";
@@ -660,7 +670,6 @@ public class StandAloneBattleSimulator extends JFrame
       String text = "An Open Source Project\n" + 
       				"Lead developer: Steve Leach\n" +
       				"Assistance from: LEit, Kotk, mazda, Ptolemy, Micha, et.al.\n" +
-      				"Testing by: Fescar\n\n" +
       				"Visit the Academy forum at \n    http://starsautohost.org/sahforum/ \n\n" +
       				"Copyright (c) 2004, Steve Leach";   
       JOptionPane.showMessageDialog(this, text, title, JOptionPane.PLAIN_MESSAGE );

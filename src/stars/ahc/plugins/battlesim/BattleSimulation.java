@@ -1339,7 +1339,7 @@ public class BattleSimulation
       }
       mod = (int)Math.floor( mod / 10 );      
 
-      return mod / 100;
+      return mod / 100.0;
    }
 
    /**
@@ -1357,7 +1357,7 @@ public class BattleSimulation
       }
       mod = (int)Math.floor( mod / 10 );      
 
-      return mod / 100;
+      return mod / 100.0;
    }
    
    /**
@@ -1712,7 +1712,9 @@ public class BattleSimulation
    }
 
    /**
-    * 
+    * Use reset to set the sim back to it's starting state between successive runs.
+    * <p>
+    * Use reinit() if the underlying ship designs have changed. 
     */
    public void reset()
    {
@@ -1720,5 +1722,17 @@ public class BattleSimulation
       {
          stacks[n].reset();
       }
+   }
+   
+   /**
+    * Updates the simulation to reflect changes in underlying ship designs 
+    */
+   public void reinit()
+   {
+      for (int n = 0; n < stackCount; n++)
+      {
+         stacks[n].reinit();
+         stacks[n].reset();
+      }      
    }
 }

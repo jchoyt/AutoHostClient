@@ -107,6 +107,16 @@ public class ShipStack
    }
    
    /**
+    * Re-initialises the stack
+    * <p>
+    * This should be called if the underlying ship design changes for an existing stack
+    */
+   public void reinit()
+   {
+      this.owner = design.getOwner();
+   }
+   
+   /**
     * Reset the stack back to it's starting values 
     */
    public void reset()

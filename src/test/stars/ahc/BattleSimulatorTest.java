@@ -545,14 +545,70 @@ public class BattleSimulatorTest extends TestCase
       grn.setResourceCost(65);
       
       BattleSimulation sim = new BattleSimulation();
-      sim.addNewStack( hip, 1, 1 );
+      ShipStack hipStack = sim.addNewStack( hip, 1, 1 );
       sim.addNewStack( ddx, 9, 2 );
       sim.addNewStack( ddx, 3, 2 );
-      sim.addNewStack( grn, 8, 2 );
-      sim.addNewStack( grn, 10, 2 );
+      ShipStack grn1 = sim.addNewStack( grn, 8, 2 );
+      ShipStack grn2 = sim.addNewStack( grn, 10, 2 );
       
-      sim.addStatusListener( consoleStatusListener );
+      //sim.addStatusListener( consoleStatusListener );
       
       sim.simulate();
+      
+      assertEquals( "Starbase is dead", hipStack.getShipCount(), 0 );
+      assertTrue( "Most Green Destroyers still alive", grn1.getShipCount()+grn2.getShipCount() > 15 );
+   }
+   
+   public void testHulls() throws Exception
+   {
+      ShipDesign ff = new ShipDesign();
+      ff.setName("FF");
+      ff.setBattleSpeed(2);
+      ff.setInitiative(4);
+      ff.setArmour( 45 );
+      ff.setShields( 1000 );
+      ff.addWeapon( Weapon.AMP, 3 );
+      
+      ShipDesign cc = new ShipDesign();
+      cc.setName("CC");
+      cc.setBattleSpeed(2);
+      cc.setInitiative(5);
+      cc.setArmour( 700 );
+      cc.setShields( 2000 );
+      cc.addWeapon( Weapon.AMP, 2 );
+      cc.addWeapon( Weapon.AMP, 2 );
+      cc.addWeapon( Weapon.AMP, 2 );
+
+      ShipDesign bb = new ShipDesign();
+      bb.setName("BB");
+      bb.setBattleSpeed(2);
+      bb.setInitiative(10);
+      bb.setArmour( 2000 );
+      bb.setShields( 4000 );
+      bb.setCapacitors(6);
+//      bb.setDeflectors(6);
+      bb.addWeapon( Weapon.AMP, 6 );
+      bb.addWeapon( Weapon.AMP, 6 );
+      
+      BattleSimulation sim = new BattleSimulation();
+      
+      ShipStack ffs = sim.addNewStack( ff, 77 );
+      ffs.owner = "A";
+      ffs.side = 1;
+      
+//      ShipStack ccs = sim.addNewStack( cc, 34 );
+//      ccs.owner = "B";
+//      ccs.side = 2;
+      
+      ShipStack bbs = sim.addNewStack( bb, 16 );
+      bbs.owner = "B";
+      bbs.side = 2;
+      
+      sim.addStatusListener( consoleStatusListener );
+
+      sim.saveTo( System.getProperty("user.home") + File.separator +  "bb_cc_ff.sim" );
+      
+      sim.simulate();
+      
    }
 }

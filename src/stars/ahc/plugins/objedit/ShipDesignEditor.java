@@ -57,6 +57,8 @@ public class ShipDesignEditor extends JPanel
    private JTextField nexusField;
    private JTable weaponsTable;
    private ShipDesign design = new ShipDesign();
+   private JTextField boraniumField;
+   private JTextField resourcesField;
 
    public ShipDesignEditor()
    {
@@ -227,6 +229,28 @@ public class ShipDesignEditor extends JPanel
       gbc.gridwidth = 1;
       fieldPanel.add( computersPanel, gbc );
 
+      gbc.gridy++;
+      gbc.gridx = 1;
+      gbc.gridwidth = 1;
+      fieldPanel.add( new JLabel("Boranium:"), gbc );
+      
+      gbc.gridx++;      
+      gbc.gridwidth = 1;
+      boraniumField = new JTextField(4);
+      boraniumField.setToolTipText( "Boranium cost of this design" );
+      fieldPanel.add( boraniumField, gbc );
+
+      gbc.gridx++;
+      gbc.gridwidth = 1;
+      fieldPanel.add( new JLabel("Resources:"), gbc );
+      
+      gbc.gridx++;      
+      gbc.gridwidth = 1;
+      resourcesField = new JTextField(4);
+      resourcesField.setToolTipText( "Resource cost of this design" );
+      fieldPanel.add( resourcesField, gbc );
+
+      
       gbc.gridx = 20;     
       gbc.weightx = 1;
       fieldPanel.add( new JLabel(""), gbc );
@@ -256,6 +280,8 @@ public class ShipDesignEditor extends JPanel
       bcompField.setText( ""+design.getComputers(ShipDesign.BATTLE_COMPUTER) );
       bscField.setText( ""+design.getComputers(ShipDesign.SUPER_COMPUTER) );
       nexusField.setText( ""+design.getComputers(ShipDesign.BATTLE_NEXUS) );
+      boraniumField.setText( ""+design.getBoraniumCost() );
+      resourcesField.setText( ""+design.getResourceCost() );
                   
       weaponsTable.repaint();
    }
@@ -346,6 +372,9 @@ public class ShipDesignEditor extends JPanel
       design.setCapacitors( Utils.safeParseInt(capacitorsField.getText()) );
       design.setDeflectors( Utils.safeParseInt(deflectorsField.getText()) );
       design.setJamming( Utils.safeParseInt(jammersField.getText()) );
+      
+      design.setBoraniumCost( Utils.safeParseInt(boraniumField.getText()) );
+      design.setResourceCost( Utils.safeParseInt(resourcesField.getText()) );
 
       int bcomp = Utils.safeParseInt(bcompField.getText());
       int bsc = Utils.safeParseInt(bscField.getText());
