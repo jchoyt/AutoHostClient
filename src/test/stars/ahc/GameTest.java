@@ -15,9 +15,11 @@
  */
 package test.stars.ahc;
 
-import java.io.*;
+import java.io.File;
+import java.util.Properties;
 import junit.framework.*;
-import stars.ahc.*;
+import stars.ahc.Game;
+import stars.ahc.Player;
 
 /**
  *  Description of the Class
@@ -59,48 +61,50 @@ public class GameTest extends TestCase
     /**
      *  A unit test for JUnit
      */
-    public void testToString()
+    public void testGetPFileName()
     {
-        String value = "Game=mover" +
-                lineEnding + "mover.player1.lastUpload=1039721561160" +
-                lineEnding + "mover.player1.StarsPassword=" +
-                lineEnding + "mover.player1.UploadPassword=v0e4" +
-                lineEnding + "mover.player1.upload=true" +
-                lineEnding + "mover.player2.lastUpload=1039721561160" +
-                lineEnding + "mover.player2.StarsPassword=" +
-                lineEnding + "mover.player2.UploadPassword=null" +
-                lineEnding + "mover.player2.upload=false" +
-                lineEnding + "mover.GameDir=D:/Jeff's~1/stars/mover" +
-                lineEnding + "mover.PlayerNumbers=1,2" + lineEnding;
-        assertEquals( value, game.toString() );
+        String name = game.getPFileName( "1" );
+        assertEquals( "mover.p1", name );
     }
 
 
     /**
      *  A unit test for JUnit
      */
-    public void testWriteProperties()
+    public void testGetFFileName()
     {
-        String value = "mover.player1.lastUpload=1039721561160" +
-                lineEnding + "mover.player1.StarsPassword=" +
-                lineEnding + "mover.player1.UploadPassword=v0e4" +
-                lineEnding + "mover.player1.upload=true" +
-                lineEnding + "mover.player2.lastUpload=1039721561160" +
-                lineEnding + "mover.player2.StarsPassword=" +
-                lineEnding + "mover.player2.UploadPassword=null" +
-                lineEnding + "mover.player2.upload=false" +
-                lineEnding + "mover.GameDir=D:/Jeff's~1/stars/mover" +
-                lineEnding + "mover.PlayerNumbers=1,2" + lineEnding;
-        StringWriter out = new StringWriter();
-        try
-        {
-            game.writeProperties( out );
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
-        assertEquals( value, out.toString() );
+        String name = game.getFFileName( "1" );
+        assertEquals( "mover.f1", name );
+    }
+
+
+    /**
+     *  A unit test for JUnit
+     */
+    public void testGetReportFile()
+    {
+        int reportType = Game.REPORTTYPE_MAP;
+        int player = 16;
+        int year = 2012;
+        File mapFile = game.getReportFile( reportType, player, year );
+        assertEquals( mapFile.getAbsolutePath(), "/Jeff's~1/stars/mover/mover.map", mapFile.getAbsolutePath() );
+        mapFile = game.getReportFile( reportType, player, 0 );
+        assertEquals( mapFile.getAbsolutePath(), "/Jeff's~1/stars/mover/mover.map", mapFile.getAbsolutePath() );
+        reportType = Game.REPORTTYPE_FLEET;
+        mapFile = game.getReportFile( reportType, player, year );
+        assertEquals( mapFile.getAbsolutePath(), "/Jeff's~1/stars/mover/backup/mover.2012.f16", mapFile.getAbsolutePath() );
+        reportType = Game.REPORTTYPE_PLANET;
+        mapFile = game.getReportFile( reportType, player, year );
+        assertEquals( mapFile.getAbsolutePath(), "/Jeff's~1/stars/mover/backup/mover.2012.p16", mapFile.getAbsolutePath() );
+    }
+
+
+    /**
+     *  A unit test for JUnit
+     */
+    public void testFake()
+    {
+        assertTrue( true );
     }
 
 
@@ -128,7 +132,10 @@ public class GameTest extends TestCase
         players[1] = player;
         game.setPlayers( players );
         game.setName( "mover" );
-        game.setDirectory( "D:/Jeff's~1/stars/mover" );
+        game.setDirectory( "/Jeff's~1/stars/mover" );
+        Properties props = new Properties();
+        props.setProperty( "game-year", "2012" );
+        game.setAhStatus( props );
     }
 
 

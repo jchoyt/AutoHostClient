@@ -18,8 +18,8 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -39,8 +39,8 @@ public class Game extends Object
     PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
     ArrayList players;
     private PlanetList planets = new PlanetList();
-    
-    
+
+
     /**
      *  Constructor for the Game object
      */
@@ -186,6 +186,54 @@ public class Game extends Object
 
 
     /**
+     *  Gets the fFileName attribute of the Game object
+     *
+     *@param  playerNumber  Description of the Parameter
+     *@return               The fFileName value
+     */
+    public String getFFileName( String playerNumber )
+    {
+        return getName() + ".f" + playerNumber;
+    }
+
+
+    /**
+     *  Gets the fFileName attribute of the Game object
+     *
+     *@param  playerNumber  Description of the Parameter
+     *@return               The fFileName value
+     */
+    public String getFFileName( int playerNumber )
+    {
+        return getName() + ".f" + playerNumber;
+    }
+
+
+    /**
+     *  Gets the pFileName attribute of the Game object
+     *
+     *@param  playerNumber  Description of the Parameter
+     *@return               The pFileName value
+     */
+    public String getPFileName( String playerNumber )
+    {
+        return getName() + ".p" + playerNumber;
+    }
+
+
+    /**
+     *  Gets the pFileName attribute of the Game object
+     *
+     *@param  playerNumber  Description of the Parameter
+     *@return               The pFileName value
+     */
+    public String getPFileName( int playerNumber )
+    {
+        return getName() + ".p" + playerNumber;
+    }
+
+
+    /**
      *  Gets the players attribute of the Game object
      *
      *@return    The players value
@@ -287,6 +335,18 @@ public class Game extends Object
         return ahStatus.getProperty( "status" );
     }
 
+
+    /**
+     *  Sets the ahStatus attribute of the Game object
+     *
+     *@param  props  The new ahStatus value
+     */
+    public void setAhStatus( Properties props )
+    {
+        ahStatus = props;
+    }
+
+
     /**
      *  Gets the statusFileName attribute of the Game object
      *
@@ -297,22 +357,46 @@ public class Game extends Object
         return getName() + ".status";
     }
 
+
     /*
-     * Constants for use with getReportFile()
+     *  Constants for use with getReportFile()
      */
-    public static final int REPORTTYPE_MAP = 1;
-    public static final int REPORTTYPE_PLANET = 2;
-    public static final int REPORTTYPE_FLEET = 3;
-    
+    public final static int REPORTTYPE_MAP = 1;
+    public final static int REPORTTYPE_PLANET = 2;
+    public final static int REPORTTYPE_FLEET = 3;
+
+
     /**
-     * 
+     *@param  reportType  Description of the Parameter
+     *@param  player      Description of the Parameter
+     *@param  year        Description of the Parameter
+     *@return             The reportFile value
      */
-    private File getReportFile( int reportType, int player, int year )
+    public File getReportFile( int reportType, int player, int year )
     {
-       // TODO: implement this
-       return null;
+        if ( year == 0 )
+        {
+            year = Integer.parseInt( getGameYear() );
+        }
+        File ret;
+        switch ( reportType )
+        {
+            case REPORTTYPE_MAP:
+                ret = new File( getDirectory(), getName() + ".map" );
+                break;
+            case REPORTTYPE_PLANET:
+                ret = new File( getDirectory() + "/backup", Utils.createBackupFileName( new File( getPFileName( player ) ), Integer.toString( year ) ) );
+                break;
+            case REPORTTYPE_FLEET:
+                ret = new File( getDirectory() + "/backup", Utils.createBackupFileName( new File( getFFileName( player ) ), Integer.toString( year ) ) );
+                break;
+            default:
+                return null;//not sure what you want to do here
+        }
+        return ret;
     }
-    
+
+
     /**
      *  Adds a feature to the Player attribute of the Game object
      *
@@ -462,66 +546,111 @@ public class Game extends Object
     {
         ahStatus.setProperty( "player" + playerNum + "-turn", value );
     }
-    
+
+
+    /**
+     *  Gets the year attribute of the Game object
+     *
+     *@return    The year value
+     */
     public int getYear()
     {
-       return Integer.parseInt( getCurrentYear() );
+        return Integer.parseInt( getCurrentYear() );
     }
 
     // Pass-through functions for planet list
-    
-    public Planet getPlanet( String planetName )
-    {
-       return planets.getPlanet( planetName, getYear() );
-    }    
-    
-    public Planet getPlanet( String planetName, int year )
-    {
-       return planets.getPlanet( planetName, year );
-    }
-    
-    public int getPlanetCount()
-    {
-       return planets.getPlanetCount();
-    }
-    
-    /**
-     * @param index (starts at 1)
-     * @return
-     */
-    public Planet getPlanet( int index )
-    {       
-       return planets.getPlanet( index, getYear() );
-    }
-    
-    public Planet getPlanet( int index, int year )
-    {
-       return planets.getPlanet( index, year );
-    }
 
     /**
-     * Returns the planets list
+     *  Gets the planet attribute of the Game object
+     *
+     *@param  planetName  Description of the Parameter
+     *@return             The planet value
+     */
+    public Planet getPlanet( String planetName )
+    {
+        return planets.getPlanet( planetName, getYear() );
+    }
+
+
+    /**
+     *  Gets the planet attribute of the Game object
+     *
+     *@param  planetName  Description of the Parameter
+     *@param  year        Description of the Parameter
+     *@return             The planet value
+     */
+    public Planet getPlanet( String planetName, int year )
+    {
+        return planets.getPlanet( planetName, year );
+    }
+
+
+    /**
+     *  Gets the planetCount attribute of the Game object
+     *
+     *@return    The planetCount value
+     */
+    public int getPlanetCount()
+    {
+        return planets.getPlanetCount();
+    }
+
+
+    /**
+     *@param  index  (starts at 1)
+     *@return
+     */
+    public Planet getPlanet( int index )
+    {
+        return planets.getPlanet( index, getYear() );
+    }
+
+
+    /**
+     *  Gets the planet attribute of the Game object
+     *
+     *@param  index  Description of the Parameter
+     *@param  year   Description of the Parameter
+     *@return        The planet value
+     */
+    public Planet getPlanet( int index, int year )
+    {
+        return planets.getPlanet( index, year );
+    }
+
+
+    /**
+     *  Returns the planets list
+     *
+     *@return    The planets value
      */
     public PlanetList getPlanets()
     {
-       return planets;
+        return planets;
     }
-    
-    public void loadMapFile() throws ReportLoaderException
+
+
+    /**
+     *  Description of the Method
+     *
+     *@exception  ReportLoaderException  Description of the Exception
+     */
+    public void loadMapFile()
+        throws ReportLoaderException
     {
-       String mapName = getDirectory() + "/" + getName() + ".map";
-       
-       File mapFile = new File( mapName );
-       
-       if (mapFile.exists())
-       {
-          planets.loadMapFile( mapFile );
-       }
-       else
-       {
-          throw new ReportLoaderException( "Map file not found: " + mapName, null  );
-       }
-       
+        String mapName = getDirectory() + "/" + getName() + ".map";
+
+        File mapFile = new File( mapName );
+
+        if ( mapFile.exists() )
+        {
+            planets.loadMapFile( mapFile );
+        }
+        else
+        {
+            throw new ReportLoaderException( "Map file not found: " + mapName, null );
+        }
+
     }
 }
 
