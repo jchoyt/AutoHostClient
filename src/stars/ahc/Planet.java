@@ -105,7 +105,6 @@ public class Planet implements MapObject
    private int getIntValue( int index, int defaultValue )
    {
       String value = getValue(index);
-      System.out.println( value );
             
       if (value != null)
       {
@@ -115,7 +114,6 @@ public class Planet implements MapObject
          }
          value.replaceAll( "[%]", "" ).trim();
       }
-      System.out.println( value );
       return Utils.safeParseInt( value, defaultValue );
    }
    

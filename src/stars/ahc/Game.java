@@ -43,6 +43,7 @@ public class Game extends Object
     PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
     ArrayList players;    
     private PlanetList planets;
+    private FleetList fleets;
     private ArrayList races = new ArrayList();
     private Properties userDefinedProperties = new Properties();
 
@@ -68,6 +69,7 @@ public class Game extends Object
        name = shortName.toString();
        players = new ArrayList();
        planets = new PlanetList( this );
+       fleets = new FleetList( this );
        this.directory = directory;
        loadProperties();      
        loadUserDefinedProperties();
@@ -678,7 +680,16 @@ public class Game extends Object
             
       if ((reportFile != null) && reportFile.exists())
       {
-         planets.loadPlanetReport( reportFile, year );
+         switch (reportType)
+         {
+            case REPORTTYPE_PLANET:
+               planets.loadPlanetReport( reportFile, year );
+               break;
+            case REPORTTYPE_FLEET:
+               fleets.loadFleetReport( reportFile, year );
+               break;
+         }
+         
       }
    }
    
@@ -873,6 +884,26 @@ public class Game extends Object
       {
          e.printStackTrace();
       }
+   }
+   
+   public Fleet getFleet( int year, int index )
+   {
+      return fleets.getFleet( year, index );
+   }
+   
+   public Fleet getFleet( int index )
+   {
+      return fleets.getFleet( index );
+   }
+   
+   public int getFleetCount( int year )
+   {
+      return fleets.getFleetCount( year );
+   }
+   
+   public int getFleetCount()
+   {
+      return fleets.getFleetCount( getYear() );
    }
 }
 
