@@ -19,6 +19,8 @@
 package stars.ahc;
 
 /**
+ * Stores information about a specific planet in a specific year
+ * 
  * @author Steve Leach
  */
 public class PlanetData

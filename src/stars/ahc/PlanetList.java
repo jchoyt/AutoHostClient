@@ -67,6 +67,9 @@ public class PlanetList
    
    /**
     * Returns the latest planet data up to the specified year 
+    * <p>
+    * If there is no data for the specified year, search back through time until
+    * we find some.
     */
    private PlanetData getLatestData( String planetName, int year )
    {
@@ -92,20 +95,24 @@ public class PlanetList
    public Planet getPlanet( int index, int year )
    {
       String planetName = planetNames[index];
-//      String hashValue = planetDataHashValue( planetName, year );
-//      PlanetData data = (PlanetData)planetData.get( hashValue );
       PlanetData data = getLatestData( planetName, year );
       Point position = (Point)planetPositions.get( planetName );
       
       return new Planet(planetName,year,position,data,game);       
    }
 
+   /**
+    * Returns a unique key for the data for this planet and year
+    * <p>
+    * The key can be used to store this data in a Map, and to retrieve it again later 
+    */
    private String planetDataHashValue( String planetName, int year )
    {
       return planetName + " - " + year;
    }
 
    /**
+    * Returns the number of planets in the list
     */
    public int getPlanetCount()
    {
@@ -113,25 +120,33 @@ public class PlanetList
    }
 
    /**
-	Few change Made here to allow for testing and allowing duplicate values of Planet scans if they are newer than an existing report
-	Bryan Wiegand
+    * Adds more planet data to the list
+    * <p>
+    * The new data is only added if it is more authoritative than any existing data for the same
+    * planet and year. 
     */
-   public void addPlanetData(String name, int year, String[] values)    
+   public void addPlanetData(String planetName, int year, String[] values)    
    {
-   		PlanetData data = new PlanetData();       
-   		data.year = year;       
-   		data.name = name;       
-   		data.values = values;       
-   		data.age = Utils.safeParseInt(values[Planet.PLANET_REPORTAGE],0);
-   		
-   		String hashString = planetDataHashValue( name, year );  
+      // Create a new PlanetData structure to store the information in
+      PlanetData newPlanetData = new PlanetData();       
+      newPlanetData.year = year;       
+      newPlanetData.name = planetName;       
+      newPlanetData.values = values;       
+      newPlanetData.age = Utils.safeParseInt(values[Planet.PLANET_REPORTAGE],0);
+      
+      String hashString = planetDataHashValue( planetName, year );
+      
+      // Get any existing data for this planet/year
+      PlanetData existingPlanetData = (PlanetData)planetData.get( hashString ); 
 
-   		PlanetData existingPlanetData = (PlanetData)planetData.get( hashString ); 
-   		
-   		if (data.isMoreReliableThan(existingPlanetData))
-   		{
-   		   planetData.put( hashString, data );
-   		}   		
+  	  // Few change Made here to allow for testing and allowing duplicate values of Planet scans if they are newer than an existing report
+      // Bryan Wiegand
+      
+      if (newPlanetData.isMoreReliableThan(existingPlanetData))
+      {
+         // The new data is the best we have, so add it
+         planetData.put( hashString, newPlanetData );
+      }   		
    }
 
    /**
@@ -239,7 +254,14 @@ public class PlanetList
       
       Iterator positions = planetPositions.keySet().iterator();
 
-      double min = Double.MAX_VALUE;     
+      // Note:-
+      // Because the sqrt() function is quite expensive, and getting the distance
+      // between 2 points requires using sqrt(), we do all distance comparisons
+      // on distance squared.  Avoiding sqrt() also means we can use integer
+      // arithmatic rather than floating point.
+      
+      long minSquared = Long.MAX_VALUE;     
+      long thresholdSquared = threshold * threshold;
 
       while (positions.hasNext())
       {
@@ -252,13 +274,13 @@ public class PlanetList
          
          if ((dx <= threshold) && (dy <= threshold))
          {
-            double dist = Math.sqrt( dx*dx + dy*dy );
+            long distSquared = dx*dx + dy*dy;
             
-            if (dist < threshold)
+            if (distSquared < thresholdSquared)
             {
-               if (dist < min)
+               if (distSquared < minSquared)
                {
-                  min = dist;
+                  minSquared = distSquared;
                   matchingName = name;
                }
             }
