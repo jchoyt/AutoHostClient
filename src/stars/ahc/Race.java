@@ -57,7 +57,7 @@ public class Race
    /**
     * 
     */
-   private void pickRandomColor()
+   public void pickRandomColor()
    {
       Random rnd = new Random();
       
@@ -134,5 +134,29 @@ public class Race
       {
          pickRandomColor();
       }
+   }
+
+   private String getUserDefinedPropertyFullName( String shortName )
+   {
+      return "Races." + getRaceName().replaceAll(" ","_") + "." + shortName;
+   }
+   
+   /**
+    */
+   public String getUserProperty(String property)
+   {
+      String propertyName = getUserDefinedPropertyFullName( property );
+      return game.getUserDefinedProperty( propertyName );
+   }
+   
+   public void setUserProperty( String property, String value )
+   {
+      String propertyName = getUserDefinedPropertyFullName( property );
+      game.setUserDefinedProperty( propertyName, value );
+   }
+   
+   public void save()
+   {
+      GamesProperties.writeProperties();
    }
 }

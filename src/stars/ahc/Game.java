@@ -945,5 +945,14 @@ public class Game extends Object
    {
       return fleets.getFleetCount( getYear() );
    }
+
+
+   /**
+    * Returns the number of races in the game
+    */
+   public int getRaceCount()
+   {
+      return races.size();
+   }
 }
 

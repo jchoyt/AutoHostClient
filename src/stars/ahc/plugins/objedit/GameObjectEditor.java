@@ -55,13 +55,13 @@ public class GameObjectEditor extends JFrame
    {
       setTitle( "Planet/fleet editor for " + game.getName() );
       setLocation( 40, 40 );
-      setSize( 520, 400 );
+      setSize( 620, 400 );
       
       JTabbedPane tabsPane = new JTabbedPane();
       
       tabsPane.addTab( "Planets", new PlanetEditorPanel(game) );
       tabsPane.addTab( "Fleets", new JPanel() );
-      tabsPane.addTab( "Races", new JPanel() );
+      tabsPane.addTab( "Races", new RaceEditorPanel(game) );
       
       getContentPane().add( tabsPane );
    }
