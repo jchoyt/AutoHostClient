@@ -1,8 +1,8 @@
 package stars.ahcgui;
 
-import java.util.*;
-import stars.ahc.*;
-import javax.swing.table.AbstractTableModel;
+import java.util.List;
+
+import stars.ahc.Fleet;
 /**
  *  Gives a table of fleetname, location, cloak level, ship count, Speed,
  *  warship count, utility count, bomber count
@@ -47,7 +47,7 @@ public class CloakedFleetTableModel extends FleetTabTableModel
         {
             throw new RuntimeException( "Cloak value must be between 0 and 98, inclusive" );
         }
-        this.cloakLimit = cloakLimit;
+        CloakedFleetTableModel.cloakLimit = cloakLimit;
         fireTableDataChanged();
     }
 

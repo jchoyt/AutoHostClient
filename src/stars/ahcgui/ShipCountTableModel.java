@@ -1,7 +1,9 @@
 package stars.ahcgui;
 
-import java.util.*;
-import stars.ahc.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import javax.swing.table.AbstractTableModel;
 /**
  *  Gives a table of fleetname, location, cloak level, ship count, Speed,

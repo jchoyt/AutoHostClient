@@ -4,8 +4,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Collections;
 import java.util.List;
+
 import javax.swing.JCheckBox;
-import stars.ahc.*;
 /**
  *  Gives a table of fleetname, location, cloak level, ship count, Speed,
  *  warship count, utility count, bomber count for the n biggest warfleets

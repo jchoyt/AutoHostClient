@@ -16,8 +16,8 @@
 package stars.ahcgui;
 
 import java.util.Comparator;
-import stars.ahc.*;
-import stars.ahcgui.*;
+
+import stars.ahc.Fleet;
 
 /**
  *  Description of the Class
