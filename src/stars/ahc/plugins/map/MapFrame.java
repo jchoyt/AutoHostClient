@@ -20,9 +20,11 @@ package stars.ahc.plugins.map;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -46,6 +48,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -54,6 +57,8 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
 import stars.ahc.Game;
@@ -73,7 +78,7 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
  * 
  * @author Steve Leach
  */
-public class MapFrame extends JFrame implements MapConfigChangeListener, WindowListener
+public class MapFrame extends JFrame implements MapConfigChangeListener, WindowListener, MapMouseMoveListener
 {
    protected Game game = null;
    protected MapConfig config = null;
@@ -86,6 +91,10 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    private JButton prevYearButton;
    private JButton nextYearButton;
    private JLabel yearLabel;
+   private JPanel layerControlParent;
+   private JLabel layerControlEmptyLabel;
+   private JTable layerTable;
+   private JLabel statusLabel;
    
    /**
     * Other classes should use viewGameMap() instead of the constructor.
@@ -221,6 +230,8 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       mapPanel = new MapPanel( game, config );
       
       mapPanel.addMapLayers( layers );
+      
+      mapPanel.addMapMouseMoveListener( this );
 
       getContentPane().add( mapPanel, BorderLayout.CENTER );
       
@@ -301,6 +312,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       playerTable.setRowHeight(20);
       playerTable.getColumnModel().getColumn(0).setMaxWidth( 20 );
       playerTable.setShowGrid(false);
+      playerTable.setSelectionMode( ListSelectionModel.SINGLE_SELECTION  );
       
       playersPanel.add( playerTable );
       
@@ -312,20 +324,58 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       layersPanel.setBorder( createStandardBorder("Layers") );
       
       LayerTableModel layerModel = new LayerTableModel( this );
-      JTable layerTable = new JTable( layerModel );      
+      layerTable = new JTable( layerModel );      
       layerTable.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
       layerTable.setRowHeight(20);
       layerTable.getColumnModel().getColumn(0).setMaxWidth( 20 );
       layerTable.setShowGrid(false);
+      layerTable.setSelectionMode( ListSelectionModel.SINGLE_SELECTION  );
+
+      layerTable.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
+         public void valueChanged(ListSelectionEvent event)
+         {
+            layerSelected();
+         }
+       });
       
       layersPanel.add( layerTable );
       controlPanel.add( layersPanel );
       
       //===============
       
+      layerControlParent = new JPanel();
+      layerControlParent.setBorder( createStandardBorder("Layer controls") );
+      
+      layerControlEmptyLabel = new JLabel("No controls for this layer");
+      layerControlParent.add( layerControlEmptyLabel );
+      
+      controlPanel.add( layerControlParent );
+      
+      //===============
+      
       controlPanel.add( Box.createGlue() );
       
       getContentPane().add( controlPanel, BorderLayout.EAST );
+      
+      //===============
+      
+      Box statusBar = Box.createHorizontalBox();
+      statusBar.setBorder( BorderFactory.createBevelBorder(BevelBorder.LOWERED) );
+
+      statusLabel = new JLabel("Ready");
+      
+      statusBar.add( statusLabel );
+      statusBar.add( Box.createHorizontalGlue() );
+      
+      getContentPane().add( statusBar, BorderLayout.SOUTH );
+   }
+   
+   /**
+    * Sets the text in the status bar at the bottom of the map window
+    */
+   public void setStatus( String message )
+   {
+      statusLabel.setText( message );
    }
    
    /**
@@ -378,6 +428,39 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
          t.printStackTrace();
       }
    }
+
+   /**
+    * Called when a map layer has been selected from the list 
+    */
+   private void layerSelected()
+   {
+      // Clear any existing controls in the layer control panel
+      layerControlParent.removeAll();
+      
+      // Get the selected map layer
+      int layerIndex = layerTable.getSelectedRow();      
+      MapLayer layer = (MapLayer)layers.get(layerIndex);
+
+      if (layer != null)
+      {
+         // Get the controls for the selected map layer
+         Component controls = layer.getControls();
+         
+         if (controls == null)
+         {
+            // If there aren't any controls for the layer, display a simple message
+            layerControlParent.add( layerControlEmptyLabel );
+         }
+         else
+         {
+            // Otherwise display the controls
+            layerControlParent.add( controls );
+         }
+         
+         // Make the new controls visible
+         layerControlParent.revalidate();
+      }
+   }
    
    public void redrawMap()
    {
@@ -391,7 +474,8 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    {
       scaleSlider.setValue( (int)Math.round(config.mapScale * 100) );
       yearLabel.setText( " " + config.year + " " );
-      mapPanel.repaint();
+      
+      //mapPanel.repaint();
    }
    
    public MapLayer[] getMapLayers()
@@ -519,6 +603,14 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
             cp.saveConfiguration( properties );
          }
       }      
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.plugins.map.MapMouseMoveListener#mouseMovedOverMap(java.awt.Point)
+    */
+   public void mouseMovedOverMap(Point mapPos)
+   {
+      //setStatus( "Mouse over " + mapPos.x + "," + mapPos.y );
    }
 
 }

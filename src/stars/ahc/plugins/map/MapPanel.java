@@ -50,6 +50,7 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
    private boolean dragging = false;
    private Point prevMousePos = null;
    private ArrayList layers = new ArrayList();
+   private ArrayList mapMouseMoveListeners = new ArrayList();
    
    /**
     * Default constructor for MapPanel.
@@ -88,7 +89,17 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
 
             if (g2D != null)
             {
-               layer.draw( g2D );
+               try
+               {
+                  layer.draw( g2D );
+               }
+               catch (Throwable t)
+               {
+                  // TODO: handle this elegantly
+                  // We want to continue drawing the map (graceful degredation).
+                  // We also want to inform the user and/or log the error.
+                  // But we don't want thousands of messages if there are lots of redraws.
+               }
             }
          }
       }
@@ -178,10 +189,10 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
    /* (non-Javadoc)
     * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
     */
-   public void mouseMoved(MouseEvent arg0)
-   {
-      // TODO Auto-generated method stub
-      
+   public void mouseMoved(MouseEvent event)
+   {      
+      config.setHoverPos( event.getPoint() );
+      notifyMapMouseMoveListeners();
    }
 
    /* (non-Javadoc)
@@ -217,4 +228,19 @@ public class MapPanel extends JComponent implements MouseListener, MouseMotionLi
       this.layers.addAll( layers );
    }
 
+   public void addMapMouseMoveListener( MapMouseMoveListener listener )
+   {
+      mapMouseMoveListeners.add( listener );
+   }
+   
+   private void notifyMapMouseMoveListeners()
+   {
+      Point mapPos = new Point( config.hoverX, config.hoverY );
+      
+      for (int n = 0; n < mapMouseMoveListeners.size(); n++)
+      {
+         MapMouseMoveListener listener = (MapMouseMoveListener)mapMouseMoveListeners.get(n);
+         listener.mouseMovedOverMap( mapPos );
+      }
+   }
 }

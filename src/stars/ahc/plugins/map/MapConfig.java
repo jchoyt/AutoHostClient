@@ -34,27 +34,44 @@ import stars.ahc.Planet;
  */
 public class MapConfig
 {
-   public int year = 0;
-   public int mapXpos = 0;
+   public int year = 0;			// the game year for which the map is being displayed 
+   public int mapXpos = 0;		
    public int mapYpos = 0;
-   public int gameMinX = 0;
+   public int gameMinX = 0;	
    public int gameMinY = 0;
    public int gameMaxX = 0;
    public int gameMaxY = 0;
    public int centreX = 0;
    public int centreY = 0;
+   public int hoverX = 0;		// where the mouse is hovering (in game coords)
+   public int hoverY = 0;
    public double mapScale = 1.0;
    
    private Vector changeListeners = new Vector();
    
    /**
-    * Converts map coordinates into (untransformed) screen coordinates 
+    * Converts map co-ordinates into (untransformed) screen coordinates.
+    * <p>
+    * Note that the co-ordinates returned will not have been scaled and 
+    * transformed, as this is done using the transform matrix of the graphics
+    * device when rendering the map. 
     */
    public Point mapToScreen( Point mapPos )
    {
       Point screenPos = new Point( mapPos.x - centreX, centreY - mapPos.y );
 
       return screenPos;
+   }
+   
+   public void setHoverPos( Point screenPos )
+   {
+      // TODO: implement this properly
+      // We want to take the supplied screen co-ordinates and transform them
+      // into map co-ordinates.
+      // This must take into account the centre point and map scale/
+      
+      hoverX = screenPos.x + centreX;
+      hoverY = centreY - screenPos.y;
    }
    
    /**
