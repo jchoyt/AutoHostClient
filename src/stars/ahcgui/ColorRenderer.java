@@ -1,4 +1,10 @@
 /*
+ * This code comes directly from Sun's Swing tutorial examples at
+ * 
+ * http://java.sun.com/docs/books/tutorial/uiswing/components/example-1dot4/ColorRenderer.java
+ *
+ * The code there does not include a copyright notice.
+ * 
  */
 
 package stars.ahcgui;
