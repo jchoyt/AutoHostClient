@@ -27,9 +27,10 @@ public abstract class BattleSimulation
    protected boolean verbose = false;
    protected ShipStack[] stacks;
    protected int stackCount = 0;
-   public static final int MAX_ROUNDS = 8;
+   public static final int MAX_ROUNDS = 16;
    public static final int MAX_INITIATIVE = 40;
-   
+
+   // From the Stars! help file - may be slightly inaccurate
    protected static int[][] movement = {
          { 1,	0,	1,	0,	1,	0,	1,	0 },		// 0.5
          { 1,	1,	0,	1,	1,	1,	0,	1 },		// 0.75
@@ -44,19 +45,7 @@ public abstract class BattleSimulation
    
    protected int movesInRound( int speed4, int round )
    {
-      /*
-		Movement	1	2	3	4	5	6	7	8
-		.5			1	0	1	0	1	0	1	0
-		.75			1	1	0	1	1	1	0	1
-		1			1	1	1	1	1	1	1	1
-		1.25		2	1	1	1	2	1	1	1
-		1.5			2	1	2	1	2	1	2	1
-		1.75		2	2	1	2	2	2	1	2
-		2			2	2	2	2	2	2	2	2
-		2.25		3	2	2	2	3	2	2	2
-		2.5			3	2	3	2	3	2	3	2
-       */
-      
+      if (round > 8) round -= 8;
       return movement[speed4-1][round-1];
    }
 
@@ -92,7 +81,7 @@ public abstract class BattleSimulation
          }
       }
       
-      return (round < 8) && (stacksFighting > 1);
+      return (round < MAX_ROUNDS) && (stacksFighting > 1);
    }
 
    /**
