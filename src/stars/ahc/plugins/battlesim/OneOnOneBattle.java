@@ -383,22 +383,7 @@ public class OneOnOneBattle extends BattleSimulation
             armourDamage = 0;
          }
          
-         // How much damage has each ship sustained so far ?
-         int damagePerShip = target.damage / target.shipCount;
-         int remainingArmourPerShip = target.design.getArmour() - damagePerShip;
-         
-         // How many ships have we killed ?  Do floating point math then round down
-         kills = (int)Math.floor( 1.0 * armourDamage / remainingArmourPerShip );
-                  
-         // We can't kill more ships than there are in the stack
-         if (kills > target.shipCount) kills = target.shipCount;
-         
-         // How much damage is left over after killing ships
-         int killDamage = kills * remainingArmourPerShip;         
-         int damageRemainder = armourDamage - killDamage;
-         
-         target.shipCount -= kills;         
-         target.damage = damagePerShip * target.shipCount + damageRemainder;
+         kills = applyArmourDamage(armourDamage, target, target.shipCount);
       }
       
       String status = stack.toString() + " fires " + stack.design.getWeaponName(slot) 
@@ -409,6 +394,37 @@ public class OneOnOneBattle extends BattleSimulation
    }
    
    /**
+    * Calculates the number of ships killed
+    * <p>
+    * Important - the target stack is updated (damage and shipcount) as a side effect 
+    */
+   private int applyArmourDamage(int armourDamage, ShipStack target, int maxKills)
+   {
+      int kills;
+      // How much damage has each ship sustained so far ?
+      int damagePerShip = target.damage / target.shipCount;
+      int remainingArmourPerShip = target.design.getArmour() - damagePerShip;
+      
+      // How many ships have we killed ?  Do floating point math then round down
+      kills = (int)Math.floor( 1.0 * armourDamage / remainingArmourPerShip );
+               
+      // If this is a torp/missile salvo there may be a cap on the number of kills
+      if (kills > maxKills) kills = maxKills;
+      
+      // We can't kill more ships than there are in the stack
+      if (kills > target.shipCount) kills = target.shipCount;
+      
+      // How much damage is left over after killing ships
+      int killDamage = kills * remainingArmourPerShip;         
+      int damageRemainder = armourDamage - killDamage;
+      
+      target.shipCount -= kills;         
+      target.damage = damagePerShip * target.shipCount + damageRemainder;
+      
+      return kills;
+   }
+
+   /**
     * Simulates firing torpedos and missiles 
     */
    private void fireTorpedo( ShipStack stack, int slot )
@@ -417,20 +433,40 @@ public class OneOnOneBattle extends BattleSimulation
       ShipStack target = stack.target;
 
       int range = distanceBetween( stack, target );
-      
+
       // Are we out of range ?
-      if (range > stack.design.getWeaponRange(slot))
+      if (range > design.getWeaponRange(slot))
       {
          return;
       }
-
+      int numShots = design.getWeaponCount(slot);
+      
+      int totalPower = numShots * design.getWeaponPower(slot);
+      
       double accuracy = design.getWeaponAccuracy(slot);
       
       accuracy = getFinalAccuracy( accuracy, design, target.design );
       
+      totalPower = (int)Math.round( totalPower * accuracy / 100.0 );
       
+      if ((target.shields == 0) && (design.getWeaponType(slot) == Weapon.TYPE_MISSILE))
+      {
+         // Capital ship missile and target has no shields - double damage
+         totalPower *= 2;
+      }
+
+      int shieldDamage = Math.min( target.shields, totalPower / 2 );
+      int armourDamage = totalPower - shieldDamage;
       
-      statusUpdate( stack.toString() + " would fire " + stack.design.getWeaponName(slot) + " if I could handle torps" );
+      target.shields -= shieldDamage;
+      
+      int kills = applyArmourDamage( armourDamage, target, numShots );
+
+      String status = stack.toString() + " fires " + stack.design.getWeaponName(slot) 
+		+ " [" + (slot+1) + "] doing " + shieldDamage + " damage to shields and " 
+		+ armourDamage + " to armour (" + kills + " kills)";
+      
+      statusUpdate( status );
    }
    
    public static double getFinalAccuracy( double baseAccuracy, ShipDesign attacker, ShipDesign defender )

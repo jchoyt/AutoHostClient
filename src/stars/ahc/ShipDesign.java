@@ -380,4 +380,19 @@ public class ShipDesign
       
       computing = 100 - comp;
    }
+   
+   public int getMaxRange()
+   {
+      int maxRange = 0;
+      
+      for (int n = 0; n < weaponSlotsUsed; n++)
+      {
+         if (weaponRange[n] > maxRange)
+         {
+            maxRange = weaponRange[n];
+         }
+      }
+      
+      return maxRange;
+   }
 }
