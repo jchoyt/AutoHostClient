@@ -96,6 +96,10 @@ public class PlugInManager
     */
    private ArrayList basePlugins = new ArrayList();
 
+   /**
+    * List of all the specific instances of each plugin that have been created
+    */
+   private ArrayList instances = new ArrayList();
    
    /**
     * Registers a new plugin directory
@@ -343,5 +347,41 @@ public class PlugInManager
          }
       }
       return null;
+   }
+
+   /**
+    * Create a new instance of the specified plugin class.
+    * <p>
+    * The plugin manager keeps track of all the instances created; the full list
+    * can be queried with getPluginInstances().
+    * <p>
+    * If there is an error creating the instance then null is returned, but no
+    * exception is thrown.
+    * 
+    * @author Steve Leach
+    */
+   public PlugIn newInstance(Class pluginClass)
+   {
+      PlugIn plugin = null;
+      try
+      {
+         plugin = (PlugIn)pluginClass.newInstance();
+         
+         instances.add( plugin );
+      }
+      catch (Throwable t)
+      {
+         Log.log( Log.ERROR, this, "Could not create new instance of " + pluginClass.getName() );
+         t.printStackTrace();
+      }
+      return plugin;
+   }
+   
+   /**
+    * Returns a list of all the specific instances of plugins that have been created. 
+    */
+   public PlugIn[] getPluginInstances()
+   {
+      return (PlugIn[])instances.toArray( new PlugIn[0] );
    }
 }

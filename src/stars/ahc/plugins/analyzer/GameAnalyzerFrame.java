@@ -124,18 +124,9 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
       for (int n = 0; n < plugins.size(); n++)
       {
          Class reportClass = (Class)plugins.get(n);
-         
-         try
-         {
-            AnalyzerReport report = (AnalyzerReport)reportClass.newInstance();
-            reports.add( report );
-         }
-         catch (InstantiationException e)
-         {
-         }
-         catch (IllegalAccessException e)
-         {
-         }
+
+         AnalyzerReport report = (AnalyzerReport)PlugInManager.getPluginManager().newInstance(reportClass);
+         reports.add( report );         
       }
    }
    
@@ -143,7 +134,6 @@ public class GameAnalyzerFrame extends JFrame implements ActionListener
    {
       JPanel controlPanel = new JPanel();      
       
-      //controlPanel.setLayout( new BoxLayout(controlPanel,BoxLayout.X_AXIS) );
       controlPanel.setLayout( new FlowLayout(FlowLayout.LEFT) );
       
       JLabel label = new JLabel( "Report:" );

@@ -45,7 +45,6 @@ import stars.ahc.GamesProperties;
 import stars.ahc.Log;
 import stars.ahc.Player;
 import stars.ahc.Utils;
-import stars.ahcgui.pluginmanager.ConfigurablePlugIn;
 import stars.ahcgui.pluginmanager.GamePanelButtonPlugin;
 import stars.ahcgui.pluginmanager.PlugInManager;
 
@@ -229,46 +228,27 @@ public class GamePanel extends JPanel implements PropertyChangeListener
     }
 
     /**
-    * @param game
-    */
-   private void addPluginButtons(Game game)
-   {
-      JButton b1;
-      ArrayList pluginButtons = PlugInManager.getPluginManager().getPlugins( GamePanelButtonPlugin.class );
-
-        for (int n = 0; n < pluginButtons.size(); n++)
-        {
-
-             try
-             {
-                Class pluginClass = (Class)pluginButtons.get(n);
-                GamePanelButtonPlugin plug;
-                plug = (GamePanelButtonPlugin)pluginClass.newInstance();
-                plug.init( game );
-
-                if (plug instanceof ConfigurablePlugIn)
-                {
-                   GamesProperties.registerConfigurablePlugin( (ConfigurablePlugIn)plug );
-                }
-
-                b1 = new PluginButton( plug );
-                c.gridx++;
-                gridbag.setConstraints( b1, c );
-
-                this.add( b1 );
-             }
-             catch (InstantiationException e)
-             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-             }
-             catch (IllegalAccessException e)
-             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-             }
-        }
-   }
+     * @param game
+     */
+    private void addPluginButtons(Game game)
+    {
+       JButton b1;
+       ArrayList pluginButtons = PlugInManager.getPluginManager().getPlugins( GamePanelButtonPlugin.class );
+       
+       for (int n = 0; n < pluginButtons.size(); n++)
+       {
+          Class pluginClass = (Class)pluginButtons.get(n);
+          GamePanelButtonPlugin plug = (GamePanelButtonPlugin)PlugInManager.getPluginManager().newInstance(pluginClass);
+          
+          plug.init( game );
+          
+          b1 = new PluginButton( plug );
+          c.gridx++;
+          gridbag.setConstraints( b1, c );
+          
+          this.add( b1 );
+       }
+    }
 
    /**
      *  Adds the game information to the top of the game this

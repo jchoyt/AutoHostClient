@@ -27,6 +27,8 @@ import java.util.Properties;
 
 import stars.ahcgui.AhcGui;
 import stars.ahcgui.pluginmanager.ConfigurablePlugIn;
+import stars.ahcgui.pluginmanager.PlugIn;
+import stars.ahcgui.pluginmanager.PlugInManager;
 
 /**
  *  Description of the Class
@@ -472,7 +474,8 @@ public class GamesProperties
             //out.close();
            
            refreshGamesProperties();
-           refreshPluginConfig();
+           saveAllPluginSettings();
+           //refreshPluginConfig();
            
            FileOutputStream fos = new FileOutputStream( propsFile );
            props.store( fos, "AutoHostClient properties" );
@@ -557,6 +560,7 @@ public class GamesProperties
      * <p>
      * Will also load any saved configuration for the plugin.
      * 
+     * @deprecated - this is no longer required
      * @author Steve Leach 
      */
     public static void registerConfigurablePlugin( ConfigurablePlugIn plugin )
@@ -569,6 +573,7 @@ public class GamesProperties
     /**
      * Tells each registered plugin to save it's properties
      * 
+     * @deprecated - saveAllPluginSettings() is the new way of doing this
      * @author Steve Leach
      */
     private static void refreshPluginConfig()
@@ -615,6 +620,22 @@ public class GamesProperties
    public static String getProperty(String key)
    {
       return props.getProperty(key);
+   }
+   
+   /**
+    * Save configuration of all plugin instances 
+    */
+   public static void saveAllPluginSettings()
+   {
+      PlugIn[] plugins = PlugInManager.getPluginManager().getPluginInstances();
+      
+      for (int n = 0; n < plugins.length; n++)
+      {
+         if (plugins[n] instanceof ConfigurablePlugIn)
+         {
+            ((ConfigurablePlugIn)plugins[n]).saveConfiguration( props );
+         }
+      }
    }
 }
 

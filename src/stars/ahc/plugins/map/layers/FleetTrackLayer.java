@@ -31,7 +31,8 @@ import stars.ahc.plugins.map.AbstractMapLayer;
  */
 public class FleetTrackLayer extends AbstractMapLayer
 {
-
+   private boolean enabled = false;
+   
    /* (non-Javadoc)
     * @see stars.ahcgui.pluginmanager.PlugIn#getDescription()
     */
@@ -51,23 +52,20 @@ public class FleetTrackLayer extends AbstractMapLayer
       {
          Fleet fleet = game.getFleet( mapConfig.year, n );
 
-         if (Utils.empty(fleet.getValue(Fleet.PLANET)))
+         g.setColor( game.getRaceColor( fleet.getOwner() ) );
+         
+         Point prevPos = mapConfig.mapToScreen( fleet.getPosition() );
+         
+         for (int y = mapConfig.year-1; y > 2400; y--)
          {
-	         g.setColor( game.getRaceColor( fleet.getOwner() ) );
-	         
-	         Point prevPos = mapConfig.mapToScreen( fleet.getPosition() );
-	         
-	         for (int y = mapConfig.year-1; y > 2400; y--)
-	         {
-	            Fleet f = game.getFleetByID( y, fleet.getOwner(), fleet.getID() );
-	            
-	            if (f != null)
-	            {
-	               Point p = mapConfig.mapToScreen( f.getPosition() );
-	               g.drawLine( prevPos.x, prevPos.y, p.x, p.y );
-	               prevPos = p;
-	            }
-	         }
+            Fleet f = game.getFleetByID( y, fleet.getOwner(), fleet.getID() );
+            
+            if (f != null)
+            {
+               Point p = mapConfig.mapToScreen( f.getPosition() );
+               g.drawLine( prevPos.x, prevPos.y, p.x, p.y );
+               prevPos = p;
+            }
          }
       }
    }
@@ -80,4 +78,12 @@ public class FleetTrackLayer extends AbstractMapLayer
       return "Fleet tracks layer";
    }
 
+   public boolean isEnabled()
+   {
+      return enabled;
+   }
+   public void setEnabled(boolean enabled)
+   {
+      this.enabled = enabled;
+   }
 }

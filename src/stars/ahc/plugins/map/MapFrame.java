@@ -161,8 +161,8 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       {
          try
          {
-	         Class plugin = (Class)plugins.get(n);
-	         MapLayer layer = (MapLayer)plugin.newInstance();
+	         Class plugin = (Class)plugins.get(n);	         
+	         MapLayer layer = (MapLayer)PlugInManager.getPluginManager().newInstance( plugin );
 	         
 	         layer.initialize( game, config );
 	         
