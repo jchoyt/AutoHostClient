@@ -313,7 +313,7 @@ public class Utils
         {
             String[] cmds = new String[5];
             cmds[0] = starsExecutable.getCanonicalPath();
-            cmds[1] = "-dpf";
+            cmds[1] = "-dpfm";
             cmds[2] = game.getName() + ".m" + playerNumber;
             cmds[3] = "-p";
             cmds[4] = password;
@@ -465,5 +465,6 @@ public class Utils
          return defaultValue;
       }
    }
+   
 }
 

@@ -18,15 +18,16 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Properties;
 
 /**
- *  Description of the Class
+ * Manages a game that is not hosted on Autohost
  *
  *@author     jchoyt
  *@created    November 27, 2002
  */
-public class LocalGameController implements GameController
+public class LocalGameController implements GameController, GameTurnGenerator
 {
     private PropertyChangeSupport pcs = new PropertyChangeSupport( new Object() );
     protected Game game;
@@ -265,6 +266,49 @@ public class LocalGameController implements GameController
       
       return;
    }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.GameTurnGenerator#generateTurns(int)
+    */
+   public void generateTurns(int turnsToGenerate) throws TurnGenerationError
+   {
+      String starsExe = GamesProperties.getStarsExecutable();
+      
+      String hostFileName = game.directory + File.separator + game.name + ".hst";
+      
+      File gameDirectory = new File(game.getDirectory());
+
+      try
+      {
+          String[] cmds = new String[3];
+          cmds[0] = new File( starsExe ).getCanonicalPath();
+          cmds[1] = game.name + ".hst";
+          cmds[2] = "-g";
+          Process proc = Runtime.getRuntime().exec( cmds, null, gameDirectory );
+      }
+      catch ( IOException ioe )
+      {
+          Log.log( Log.WARNING, this, ioe );
+      }
+
+      Player[] players = game.getPlayers();
+      
+      for (int n = 0; n < players.length; n++)
+      {
+         Utils.genPxxFiles( game, players[n].id, players[n].getStarsPassword(), gameDirectory );
+      }
+      
+      game.loadProperties();
+   }
+
+   /* (non-Javadoc)
+    * @see stars.ahc.GameTurnGenerator#readyToGenerate()
+    */
+   public boolean readyToGenerate()
+   {
+      return new File(game.directory + File.separator + game.name + ".hst").exists();
+   }
+
 
 }
 

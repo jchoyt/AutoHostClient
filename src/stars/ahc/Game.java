@@ -1096,5 +1096,35 @@ public class Game extends Object
       return "true".equals( getSahHosted() );
    }
 
+
+   /**
+    * Returns true if game turns can be generated locally
+    */
+   public boolean canGenerate()
+   {
+      if (controller instanceof GameTurnGenerator)
+      {
+         return true;
+      }
+      
+      return false;
+   }
+
+   /**
+    * Generate the next game turn 
+    */
+   public void generateNextTurn() throws TurnGenerationError
+   {
+      GameTurnGenerator gen = (GameTurnGenerator)controller;
+      
+      if (gen.readyToGenerate())
+      {
+         gen.generateTurns(1);
+      }
+      else
+      {
+         throw new TurnGenerationError( "Not ready to generate" );
+      }
+   }
 }
 

@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -44,6 +46,7 @@ import stars.ahc.Game;
 import stars.ahc.GamesProperties;
 import stars.ahc.Log;
 import stars.ahc.Player;
+import stars.ahc.TurnGenerationError;
 import stars.ahc.Utils;
 import stars.ahcgui.pluginmanager.GamePanelButtonPlugin;
 import stars.ahcgui.pluginmanager.PlugInManager;
@@ -119,7 +122,7 @@ public class GamePanel extends JPanel implements PropertyChangeListener
      */
     public void propertyChange( PropertyChangeEvent evt )
     {
-        if ( evt.getPropertyName().equals( "game removed" ) )
+        if ( (evt != null) && evt.getPropertyName().equals( "game removed" ) )
         {
             Game p = ( Game ) evt.getOldValue();
             if ( p == game )
@@ -197,7 +200,7 @@ public class GamePanel extends JPanel implements PropertyChangeListener
         JButton b1;
         c.gridy++;
         
-        if (game.getSahHosted().equals("true"))
+        if (game.isAutohosted())
         {
 	        /*
 	         *  Add download button
@@ -213,6 +216,20 @@ public class GamePanel extends JPanel implements PropertyChangeListener
 	        gridbag.setConstraints( b1, c );
 	        this.add( b1 );
         }
+        else if (game.canGenerate())
+        {
+           Action generateAction = new AbstractAction("Generate") {
+            public void actionPerformed(ActionEvent event)
+            {
+               generateNextTurn();
+            }
+           };
+           
+           b1 = new JButton(generateAction);
+           gridbag.setConstraints( b1, c );
+           add( b1 );
+        }
+        
         /*
          *  Add remove game button
          */
@@ -232,6 +249,19 @@ public class GamePanel extends JPanel implements PropertyChangeListener
 
     }
 
+    private void generateNextTurn()
+    {
+       try
+      {
+         game.generateNextTurn();
+         propertyChange( null );
+      }
+      catch (TurnGenerationError e)
+      {
+         e.printStackTrace();
+      }
+    }
+    
     /**
      * @param game
      */
