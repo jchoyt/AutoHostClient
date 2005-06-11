@@ -483,7 +483,8 @@ class DownloadButton extends JButton implements ActionListener
         {
             for ( int i = 0; i < players.length; i++ )
             {
-                Utils.getFileFromAutohost( game.getName(), players[i].getTurnFileName(), stage );
+                Utils.downloadTurn( players[i].getTurnFileName(), players[i].getUploadPassword(), stage );
+                // Utils.getFileFromAutohost( game.getName(), players[i].getTurnFileName(), stage );
                 File stagedSrc = new File( stage, players[i].getTurnFileName() );
                 File backupDest = new File( backup, Utils.createBackupFileName( stagedSrc ) );
                 File playFile = new File( game.getDirectory(), players[i].getTurnFileName() );
@@ -671,9 +672,18 @@ class LaunchGameButton extends JButton implements ActionListener
            String starsExe = GamesProperties.getStarsExecutable();
             String[] cmds = new String[4];
             cmds[0] = new File( starsExe ).getCanonicalPath();
-            cmds[1] = player.getTurnFileName();
+            cmds[1] = new File( player.getGame().getDirectory(), player.getTurnFileName()).getCanonicalPath();
             cmds[2] = "-p";
             cmds[3] = player.getStarsPassword();
+            StringBuffer commands = new StringBuffer();
+            for (int i=0; i<cmds.length ; i++)
+            {
+                commands.append( cmds[i] );
+                commands.append( " " );
+            }
+            Log.log( Log.WARNING, Utils.class, "Running " + commands.toString() );
+            Log.log( Log.WARNING, Utils.class, "     from " + new File( player.getGame().getDirectory() ).getCanonicalPath());
+            
             Process proc = Runtime.getRuntime().exec( cmds, null, new File( player.getGame().getDirectory() ) );
         }
         catch ( IOException ioe )

@@ -256,7 +256,7 @@ public class AutoHostClient extends java.lang.Object
         {
             for ( int i = 0; i < players.length; i++ )
             {
-                Utils.getFileFromAutohost( game.getName(), players[i].getTurnFileName(), stage );
+                Utils.downloadTurn( players[i].getTurnFileName(), players[i].getUploadPassword(), stage );
                 File stagedSrc = new File( stage, players[i].getTurnFileName() );
                 File playFile = new File( game.getDirectory(), players[i].getTurnFileName() );
                 Utils.fileCopy( stagedSrc, playFile );

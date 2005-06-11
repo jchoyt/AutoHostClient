@@ -18,13 +18,14 @@ package stars.ahc;
 import java.awt.Color;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
@@ -103,6 +104,67 @@ public class Utils
         catch ( Exception e )
         {
             e.printStackTrace();
+        }
+    }
+
+
+    /**
+     *  Gets the allyTurnsFromAutohost attribute of the Utils class
+     *
+     *@param  gameName     Description of the Parameter
+     *@param  destination  Description of the Parameter
+     *@param  fileName     Description of the Parameter
+     */
+    public static void downloadTurn( String fileName, String password, String destination ) throws AutoHostError
+    {
+        try
+        {
+            //create destination if it doesn't exist
+            File dest = new File( destination );
+            if ( !dest.exists() )
+            {
+                dest.mkdirs();
+            }
+            //go get the files
+            URL servlet = new URL("http://starsautohost.org/cgi-bin/downloadturn.php?file=" + fileName );
+            Log.log( Log.DEBUG, Utils.class, "Going to http://starsautohost.org/cgi-bin/downloadturn.php?file=" + fileName );
+            URLConnection conn=servlet.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setUseCaches(false);
+            String boundary = EssaiPostURLConnection.boundary;
+            conn.setRequestProperty("Content-type","multipart/form-data; boundary=" + boundary);
+            conn.setRequestProperty( "Referer", "Stars!AutohostClient" );
+            conn.setRequestProperty("Cache-Control", "no-cache");
+             
+            DataOutputStream out = new DataOutputStream(conn.getOutputStream());
+            out.writeBytes("--" + boundary + "\r\n");
+            // EssaiPostURLConnection.writeParam("file", fileName, out, boundary);
+            // Log.log( Log.DEBUG, Utils.class, "file = " + fileName );
+            EssaiPostURLConnection.writeParam("password", password, out, boundary);
+            Log.log( Log.DEBUG, Utils.class, "password = "+ password );
+            out.flush();
+            out.close();
+            
+            InputStream stream = conn.getInputStream();
+            BufferedInputStream in = new BufferedInputStream(stream);
+            FileOutputStream file = new FileOutputStream( destination + "/" + fileName );
+            BufferedOutputStream fout = new BufferedOutputStream( file );
+            int loop;
+            while ( ( loop = in.read() ) != -1 )
+            {
+                fout.write( loop );
+            }
+            fout.flush();
+            fout.close();
+            file.close();
+            in.close();
+            stream.close();
+            Log.log( Log.DEBUG, Utils.class, "Done - successfully retrieved " + fileName );
+        }
+        catch ( IOException e )
+        {
+           throw new AutoHostError( fileName + " couldn't be retrieved", e );
         }
     }
 
@@ -348,9 +410,17 @@ public class Utils
             String[] cmds = new String[5];
             cmds[0] = starsExecutable.getCanonicalPath();
             cmds[1] = "-dpfm";
-            cmds[2] = game.getName() + ".m" + playerNumber;
+            cmds[2] = new File(workingDir, game.getName() + ".m" + playerNumber).getCanonicalPath();
             cmds[3] = "-p";
             cmds[4] = password;
+            StringBuffer commands = new StringBuffer();
+            for (int i=0; i<cmds.length ; i++)
+            {
+                commands.append( cmds[i] );
+                commands.append( " " );
+            }
+            Log.log( Log.WARNING, Utils.class, "Running: " + commands.toString() );
+            Log.log( Log.WARNING, Utils.class, "     from " + workingDir.getCanonicalPath());
             Process proc = Runtime.getRuntime().exec( cmds, null, workingDir );
 
             try

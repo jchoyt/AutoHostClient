@@ -39,7 +39,7 @@ public class GamesProperties
     /**
      *  Description of the Field
      */
-    public static String AUTOHOST = "ftp://starsautohost.org/starout/";
+    public static String AUTOHOST = "http://starsautohost.org/starout/";
     public static boolean UPTODATE = false;
     /**
      *  Description of the Field

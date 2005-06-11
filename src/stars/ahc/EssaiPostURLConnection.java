@@ -40,6 +40,7 @@ public class EssaiPostURLConnection
     /**
      *  Creates a new instance of EssaiPostURLConnection
      */
+    public static final String boundary = "-----ThAnKs-To-Ron-4-AuToHoSt";
     public EssaiPostURLConnection() { }
 
 
@@ -55,9 +56,8 @@ public class EssaiPostURLConnection
             conn.setDoOutput( true );
             conn.setDoInput( true );
             conn.setUseCaches( false );
-            String boundary = "-----ThAnKs-To-Ron-4-AuToHoSt";
             conn.setRequestProperty( "Content-type", "multipart/form-data; boundary=" + boundary );
-            //conn.setRequestProperty( "Referer", "Stars!AutohostClient" );
+            conn.setRequestProperty( "Referer", "Stars!AutohostClient" );
             conn.setRequestProperty( "Cache-Control", "no-cache" );
 
             DataOutputStream out = new DataOutputStream( conn.getOutputStream() );
@@ -163,7 +163,7 @@ public class EssaiPostURLConnection
      *@param  out       Description of the Parameter
      *@param  boundary  Description of the Parameter
      */
-    private static void writeParam( String name, String value, DataOutputStream out, String boundary )
+    public static void writeParam( String name, String value, DataOutputStream out, String boundary )
     {
         try
         {
