@@ -42,7 +42,17 @@ public class ShipDesign
    public static final int HULLTYPE_BATTLECRUISER = 5;
    public static final int HULLTYPE_BATTLESHIP = 6;
    public static final int HULLTYPE_DREADNAUGHT = 7;
-   public static final int HULLTYPE_NUBIAN = 8;
+   public static final int HULLTYPE_NUBIAN = 8;   
+   public static final int HULLTYPE_SMALLFREIGHTER = 9;
+   public static final int HULLTYPE_MEDIUMFREIGHTER = 10;
+   public static final int HULLTYPE_LARGEFREIGHTER = 11;
+   public static final int HULLTYPE_SUPERFREIGHTER = 12;
+   public static final int HULLTYPE_PRIVATEER = 13;
+   public static final int HULLTYPE_GALLEON = 14;
+   public static final int HULLTYPE_COLONYSHIP = 15;
+   public static final int HULLTYPE_MINIBOMBER = 16;
+   public static final int HULLTYPE_B17 = 17;
+   public static final int HULLTYPE_B52 = 18;
    
    public static final int BATTLE_COMPUTER = 101;
    public static final int SUPER_COMPUTER = 102;
@@ -50,7 +60,7 @@ public class ShipDesign
 
    private static final int MAX_WEAPON_SLOTS = 20;
    
-   private static final int[] hullWeaponSlots = { 1, 1, 3, 3, 6, 9, 20, 0, 12 };
+   private static final int[] hullWeaponSlots = { 1, 1, 3, 3, 6, 9, 20, 0, 12, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0 };
 
 //   private static String[] names = {
 //         "Unknown",
@@ -187,6 +197,11 @@ public class ShipDesign
    public void setShields(int shields)
    {
       this.shields = shields;
+   }
+   public void setShields(int shields, boolean isRegenerating )
+   {
+      this.shields = shields;
+      setRegenShields( isRegenerating );
    }
    public int getMass()
    {
@@ -606,5 +621,37 @@ public class ShipDesign
       ArrayList errors = new ArrayList();
       
       return (String[])errors.toArray( new String[0] );
+   }
+
+   public void removeWeaponSlot(int slot)
+   {
+      int max = getWeaponSlots();
+      
+      for (int n = slot+1; n < max; n++)
+      {
+         weaponCount[n-1] = weaponCount[n];
+         weaponRange[n-1] = weaponRange[n];
+         weaponCategory[n-1] = weaponCategory[n];
+         weaponPower[n-1] = weaponPower[n];
+         weaponAccuracy[n-1] = weaponAccuracy[n];
+         weaponInitiative[n-1] = weaponInitiative[n];
+         weaponName[n-1] = weaponName[n];         
+      }
+      
+      weaponCount[max-1] = 0;
+      weaponRange[max-1] = 0;
+      weaponCategory[max-1] = Weapon.TYPE_NONE;
+      weaponPower[max-1] = 0;
+      weaponAccuracy[max-1] = 0;
+      weaponInitiative[max-1] = 0;
+      weaponName[max-1] = null;         
+
+      weaponSlotsUsed--;
+   }
+
+   public void setCost(int bor, int res)
+   {
+      setResourceCost( res );
+      setBoraniumCost( bor );
    }
 }

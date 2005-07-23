@@ -512,6 +512,11 @@ public class Utils
    {
       return random.nextInt();
    }
+   
+   public static Random getRandomGenerator()
+   {
+      return random;
+   }
 
    /**
     * Returns a string representation of a color.

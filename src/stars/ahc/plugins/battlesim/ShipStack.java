@@ -19,6 +19,7 @@
 package stars.ahc.plugins.battlesim;
 
 import java.util.Properties;
+import java.util.Random;
 
 import stars.ahc.ShipDesign;
 import stars.ahc.Utils;
@@ -38,6 +39,15 @@ public class ShipStack
    public static final int ORDERS_MAX_NET = 4;		// Maximize net damage
    public static final int ORDERS_MAX = 5;			// Maximize damage
    public static final int ORDERS_DIS_CHAL = 6;		// Disengage if challenged
+
+   public static final String[] ORDERS_TEXT = {
+      "Maximize damage ratio", 
+      "Disengage",
+      "Minimize damage to self",
+      "Maximize net damage",
+      "Maximize damage",
+      "Disengage if challenged"
+   };
    
    private int shipCount = 0;
    public ShipDesign design = null;
@@ -65,6 +75,7 @@ public class ShipStack
    public int side = 0;
    public int originalShipCount = 0;
    public int firingOrderValue = 0;
+   private int initialDamage = 0;       // percent of initial damage
    
    // For storing results of multiple runs by the simulator
    public int cumulativeSimulations = 0;
@@ -116,24 +127,25 @@ public class ShipStack
       this.owner = design.getOwner();
    }
    
-   /**
-    * Reset the stack back to it's starting values 
-    */
    public void reset()
    {
+      reset( Utils.getRandomGenerator() );
+   }
+   
+   /**
+    * Reset the stack back to it's starting values.
+    * The random number generator supplied will be used to generate a random firing order. 
+    */
+   public void reset( Random randomGenerator )
+   {
       shipCount = originalShipCount;
-      damage = 0;		// TODO: ships don't necesarily start undamaged
+      damage = getInitialDamageTotal();		
       shields = design.getShields() * shipCount;
-      firingOrderValue = Utils.getRandomInt();
+      firingOrderValue = randomGenerator.nextInt();
       xpos = 0;
       ypos = 0;
       escaped = false;
       movesMade = 0;
-      
-      if (design.getWeaponSlots() == 0)
-      {
-         battleOrders = ORDERS_DISENGAGE;
-      }
    }
    
    /**
@@ -155,6 +167,13 @@ public class ShipStack
    {
       int damagePerShip = (shipCount == 0) ? 0 : damage / shipCount;
       return 100 * damagePerShip / design.getArmour();
+   }
+   
+   public int getInitialDamageTotal()
+   {
+      int totalArmour = design.getArmour() * shipCount;      
+      int initialDamageTotal = totalArmour * initialDamage / 100;
+      return initialDamageTotal;  
    }
 
    /**
@@ -214,6 +233,7 @@ public class ShipStack
       props.setProperty( base+".side", ""+side );
       props.setProperty( base+".orders", ""+battleOrders );
       props.setProperty( base+".naturalOrder", ""+naturalOrder );
+      props.setProperty( base+".initialDamage", ""+initialDamage );
       
       design.storeProperties( props, index );      
    }
@@ -237,6 +257,7 @@ public class ShipStack
       
       naturalOrder = Utils.safeParseInt( props.getProperty( base + ".naturalOrder" ) );
       battleOrders = Utils.safeParseInt( props.getProperty( base + ".orders" ) );
+      initialDamage = Utils.safeParseInt( props.getProperty( base + ".initialDamage" ) );
    }
    
    public void setShipCount( int ships )
@@ -253,5 +274,20 @@ public class ShipStack
    public void killShips(int kills)
    {
       shipCount -= kills;
+   }
+
+   public String getOrdersText()
+   {
+      return ORDERS_TEXT[battleOrders-1];
+   }
+   
+   public void setInitialDamagePercent( int damagePercent )
+   {
+      this.initialDamage = damagePercent;
+   }
+   
+   public int getInitialDamagePercent()
+   {
+      return initialDamage;
    }
 }

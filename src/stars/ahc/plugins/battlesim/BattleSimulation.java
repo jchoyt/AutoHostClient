@@ -1,7 +1,7 @@
 /*
  * Created on Oct 31, 2004
  *
- * Copyright (c) 2004, Steve Leach
+ * Copyright (c) 2004-2005, Steve Leach
  * 
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -90,6 +90,8 @@ public class BattleSimulation
    
    public boolean showFinalSummary = true;
    
+   private boolean isDampenerPresent = false;
+   
    /**
     * The seed for the random number generator.
     * <p>
@@ -105,7 +107,7 @@ public class BattleSimulation
    private Random randomNumberGenerator;
    
    private ArrayList statusListers = new ArrayList();
-
+   
    // From the Stars! help file - may be slightly inaccurate
    protected static int[][] movement = {
          { 1,	0,	1,	0,	1,	0,	1,	0 },		// 0.5
@@ -188,27 +190,57 @@ public class BattleSimulation
     */
    public ShipStack addNewStack( ShipDesign design, int count, int side )
    {
+      return addNewStack( design, count, side, 0, ShipStack.ORDERS_MAX_RATIO );
+   }
+
+   /**
+    * Adds a new ship stack, using the specified design, ship count, side and damage
+    * <p>
+    * @return a reference to the newly created stack 
+    */
+   public ShipStack addNewStack( ShipDesign design, int count, int side, int damagePercent )
+   {
+      return addNewStack( design, count, side, damagePercent, ShipStack.ORDERS_MAX_RATIO );
+   }
+   
+   public ShipStack addNewStack(ShipDesign design, int count, int side, int damagePercent, int orders)
+   {
       ShipStack stack = new ShipStack(design,count);
       stack.side = side;
+      stack.setInitialDamagePercent(damagePercent);
+      stack.battleOrders = orders;
       
       addStack( stack );
       
       return stack;
    }
-   
+
+
    /**
     * Returns the number of times a ship with the specified speed can move in a particular round
+    * <p>
+    * If an energy dampener is present, it's effects are included here.
     * <p>
     * @param speed4 is the battle speed multiplied by 4
     * @param round is the battle round concerned
     */
-   protected int movesInRound( int speed4, int round )
+   public int movesInRound( int speed4, int round )
    {
-      if (speed4 == 0) return 0;
+      if (isDampenerPresent())
+      {
+         speed4 -= 4;
+      }
+      
+      if (round < 1)
+      {
+         throw new InvalidParameterException("Round cannot be less than 1");
+      }
+      
+      if (speed4 <= 2) return 0;
       if (round > 8) round -= 8;
       return movement[speed4-2][round-1];
    }
-
+   
    /**
     * Run the simulation until one side is dead or 16 rounds are up
     * @throws BattleSimulationError
@@ -290,7 +322,7 @@ public class BattleSimulation
       
       for (int n = 0; n < stackCount; n++)
       {
-         stacks[n].reset();
+         stacks[n].reset(randomNumberGenerator);
       }
       
       setInitialPositions();
@@ -583,52 +615,51 @@ public class BattleSimulation
       for (int n = 0; n < stackCount; n++)
       {
          if (stacks[n].design.isRegenShields())
-         {
-            int beforeRegen = stacks[n].shields;
-            int originalShields = stacks[n].design.getShields() * stacks[n].getShipCount();
-            int regen = originalShields / 10;
-            
-            stacks[n].shields += regen;
-            if (stacks[n].shields > originalShields)
+         {            
+            if (stacks[n].shields > 0)      // dropped shields don't regen
             {
-               stacks[n].shields = originalShields;
-            }
-            
-            if (stacks[n].shields != originalShields)
-            {
-               statusUpdate( stacks[n].toString() + " shields regenerate from " + beforeRegen + " to " + stacks[n].shields + " dp" );
+               int beforeRegen = stacks[n].shields;
+               int originalShields = stacks[n].design.getShields() * stacks[n].getShipCount();
+               int regen = originalShields / 10;
+               
+               stacks[n].shields += regen;
+               if (stacks[n].shields > originalShields)
+               {
+                  stacks[n].shields = originalShields;
+               }
+               
+               if (stacks[n].shields != beforeRegen)
+               {
+                  statusUpdate( stacks[n].toString() + " shields regenerate from " + beforeRegen + " to " + stacks[n].shields + " dp" );
+               }
             }
          }
       }
    }
 
-   /**
-    * Calculate the range at which the stack would like to fight, based on battle orders 
-    */
-   protected void _calculatePreferredRange(ShipStack stack)
-   {
-      ShipDesign design = stack.design;
-      ShipDesign target = stack.target.design;
-      
-      // TODO: improve on this simplified system
-      
-      if (stack.battleOrders == ShipStack.ORDERS_DISENGAGE)
-      {
-         // Disengaging ships want to be as far as possible from their target
-         stack.preferredRange = Integer.MAX_VALUE;
-      }
-      else if (design.getMaxRange() > target.getMaxRange())
-      {
-         // We have better range, so stay out of range of their weapons
-         // Should this use "our max range", or "their max range + 1" ?
-         stack.preferredRange = design.getMaxRange();
-      }
-      else
-      {
-         // They have equal or better range, so just close to range 0
-         stack.preferredRange = 0;
-      }
-   }
+//   protected void _calculatePreferredRange(ShipStack stack)
+//   {
+//      ShipDesign design = stack.design;
+//      ShipDesign target = stack.target.design;
+//      
+//      
+//      if (stack.battleOrders == ShipStack.ORDERS_DISENGAGE)
+//      {
+//         // Disengaging ships want to be as far as possible from their target
+//         stack.preferredRange = Integer.MAX_VALUE;
+//      }
+//      else if (design.getMaxRange() > target.getMaxRange())
+//      {
+//         // We have better range, so stay out of range of their weapons
+//         // Should this use "our max range", or "their max range + 1" ?
+//         stack.preferredRange = design.getMaxRange();
+//      }
+//      else
+//      {
+//         // They have equal or better range, so just close to range 0
+//         stack.preferredRange = 0;
+//      }
+//   }
 
    /**
     * Calculate the range at which the ships would like to fight, based on battle orders 
@@ -647,7 +678,7 @@ public class BattleSimulation
    protected float getRandomFloat()
    {
       float f = randomNumberGenerator.nextFloat(); 
-      //System.out.println( "Next random: " + f );
+      //System.err.println( "Next random: " + f );
       return f;
    }
    
@@ -657,7 +688,7 @@ public class BattleSimulation
    protected int getRandomInt( int max )
    {
       int i = randomNumberGenerator.nextInt(max);
-      //System.out.println( "Next random: " + i );
+      //System.err.println( "Next random: " + i );
       return i;
    }
 
@@ -739,7 +770,7 @@ public class BattleSimulation
     */
    private void checkForDisengage(ShipStack stack)
    {
-      if (stack.battleOrders == ShipStack.ORDERS_DISENGAGE)
+      if ((stack.battleOrders == ShipStack.ORDERS_DISENGAGE) && (stack.escaped == false))
       {
          if (stack.movesMade >= DISENGAGE_MOVES)
          {
@@ -801,16 +832,25 @@ public class BattleSimulation
    {
       for (int n = 0; n < stackCount; n++)
       {
-         int moves = movesInRound(stacks[n].design.getSpeed4(),round); 
-         if (moves >= threshold)
+         if (stacks[n].getShipCount() > 0)
          {
-            if (stacks[n].battleOrders == ShipStack.ORDERS_DISENGAGE)
+            int moves = movesInRound(stacks[n].design.getSpeed4(),round); 
+            if (moves >= threshold)
             {
-               moveDisengagingStack( stacks[n] );               
-            }
-            else
-            {
-               moveStack( stacks[n] );
+               boolean disengage =  (stacks[n].battleOrders == ShipStack.ORDERS_DISENGAGE) ||
+                                    (stacks[n].design.getWeaponSlots() == 0);
+               
+               if (disengage)
+               {
+                  if (stacks[n].escaped == false)
+                  {
+                     moveDisengagingStack( stacks[n] );
+                  }
+               }
+               else
+               {
+                  moveStack( stacks[n] );
+               }
             }
          }
       }      
@@ -872,19 +912,22 @@ public class BattleSimulation
          {
             if (stacks[n].getShipCount() > 0)
             {
-	            if (distanceBetween(stack,stacks[n]) <= range)
-	            {
-	               if ((isSapper == false) || (stacks[n].shields > 0))
-	               {
-	                  double attraction = getAttractiveness( stack, slot, stacks[n] );
-	                  
-	                  if (attraction > mostAttractive)
-	                  {
-	                     mostAttractive = attraction;
-	                     target = stacks[n];
-	                  }
-	               }
-	            }
+               if (stacks[n].escaped == false)
+               {
+   	            if (distanceBetween(stack,stacks[n]) <= range)
+   	            {
+   	               if ((isSapper == false) || (stacks[n].shields > 0))
+   	               {
+   	                  double attraction = getAttractiveness( stack, slot, stacks[n] );
+   	                  
+   	                  if (attraction > mostAttractive)
+   	                  {
+   	                     mostAttractive = attraction;
+   	                     target = stacks[n];
+   	                  }
+   	               }
+   	            }
+              }
             }
          }
       }
@@ -904,9 +947,24 @@ public class BattleSimulation
       notification.eventType = BattleSimulationNotification.TYPE_FIRE;
       notification.activeStack = stack;
       notification.targetStack = target;
-      notification.message = stack.toString() + " fires " + stack.design.getWeaponName(slot) 
-      				+ " [" + (slot+1) + "] at " + target.design.getName() + " doing " + shieldDamage + " damage to shields and " 
-      				+ armourDamage + " to armour (" + kills + " kills)";
+      notification.message = stack.toString() + " fires " + stack.design.getWeaponName(slot);
+      notification.message += " [" + (slot+1) + "] at " + target.design.getName();
+      notification.message += " doing ";
+      
+      if ((shieldDamage > 0) && (armourDamage > 0))
+      {
+         notification.message += shieldDamage + " damage to shields and " + armourDamage + " to armour";
+      }
+      else if (shieldDamage > 0)
+      {
+         notification.message += shieldDamage + " damage to shields";
+      }
+      else if (armourDamage > 0)
+      {
+         notification.message += armourDamage + " damage to armour";
+      }
+      notification.message += " (" + kills + " kills)";
+      
       statusUpdate( notification );
    }
    
@@ -1022,6 +1080,8 @@ public class BattleSimulation
          {
             if (stacks[n].getShipCount() > 0)	// don't target dead stacks
             {
+               if (stacks[n].escaped == false)
+               {
 	            if (includeAlreadyTargeted || (stacks[n].targetedBy == null))
 	            {
 	               int mainWeaponSlot = stack.design.getMainWeaponSlot();
@@ -1032,7 +1092,8 @@ public class BattleSimulation
 	                  bestTarget = n;
 	                  bestAttractiveness = attractiveness;
 	               }
-	            }
+	            }                
+               }
             }
          }
       }
@@ -1202,6 +1263,11 @@ public class BattleSimulation
       event.activeStack = mover;
       event.movedFrom = new Point(oldX,oldY);
       
+      if (mover.battleOrders == ShipStack.ORDERS_DISENGAGE)
+      {
+         event.message += " - " + mover.movesMade + " / 7";
+      }
+      
       statusUpdate( event );      
    }
    
@@ -1344,7 +1410,7 @@ public class BattleSimulation
    /**
     * Returns the modification to damage due to any energy capacitors on the specified ship design
     */
-   private double getCapacitorMultiplier(ShipDesign design)
+   public static double getCapacitorMultiplier(ShipDesign design)
    {
       if (design.getCapacitors() == 0) return 1.0;
       
@@ -1362,7 +1428,7 @@ public class BattleSimulation
    /**
     * Returns the modification to damage due to any beam deflectors on the specified ship design
     */
-   private double getDeflectorMultiplier(ShipDesign design)
+   public static double getDeflectorMultiplier(ShipDesign design)
    {
       if (design.getDeflectors() == 0) return 1.0;
       
@@ -1557,6 +1623,7 @@ public class BattleSimulation
       
       props.setProperty( "StackCount", ""+stackCount );
       props.setProperty( "RandomSeed", Long.toString(randomSeed) );
+      props.setProperty( "DampenerPresent", isDampenerPresent ? "true" : "false" );
       
       for (int n = 0; n < stackCount; n++)
       {
@@ -1597,6 +1664,7 @@ public class BattleSimulation
       initStacks(stackCount);
       
       randomSeed = Utils.safeParseLong( props.getProperty( "RandomSeed" ) );
+      isDampenerPresent = ("" + props.getProperty("DampenerPresent")) == "true";
       
       for (int n = 0; n < stackCount; n++)
       {
@@ -1747,9 +1815,11 @@ public class BattleSimulation
     */
    public void reset()
    {
+      initializeRandomNumberGenerator();
+      
       for (int n = 0; n < stackCount; n++)
       {
-         stacks[n].reset();
+         stacks[n].reset(randomNumberGenerator);
       }
    }
    
@@ -1764,4 +1834,25 @@ public class BattleSimulation
          stacks[n].reset();
       }      
    }
+
+   public boolean isDampenerPresent()
+   {
+      return isDampenerPresent;
+   }
+
+   public void setDampenerPresent(boolean isDampenerPresent)
+   {
+      this.isDampenerPresent = isDampenerPresent;
+   }
+
+   public int getFinalRound()
+   {
+      return round;
+   }
+   
+   public int getStackCount()
+   {
+      return stackCount;
+   }
+   
 }

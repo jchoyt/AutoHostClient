@@ -24,6 +24,7 @@ package stars.ahc;
  */
 public class Weapon 
 {
+   public static final int TYPE_NONE = 0;
    public static final int TYPE_BEAM = 1;
    public static final int TYPE_TORPEDO = 2;
    public static final int TYPE_MISSILE = 3;

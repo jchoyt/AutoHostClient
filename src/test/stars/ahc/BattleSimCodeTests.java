@@ -32,7 +32,7 @@ import stars.ahc.plugins.battlesim.ShipStack;
  * @author Steve Leach
  *
  */
-public class BattleSimulatorTest extends TestCase
+public class BattleSimCodeTests extends TestCase
 {
    private ShipDesign blueColloidalBC, redColloidalCC, armBB, chaff;
    private ShipDesign cynicDD;
@@ -284,6 +284,8 @@ public class BattleSimulatorTest extends TestCase
       battle.addNewStack( blueColloidalBC, 50 );
       battle.addNewStack( armBB, 4 );
       
+      battle.randomSeed = 12345;
+      
       //battle.addStatusListener( consoleStatusListener );
       
       battle.simulate();
@@ -293,16 +295,17 @@ public class BattleSimulatorTest extends TestCase
       //
 
       // Missile battles with small numbers of ships are impossible to predict accurately
-      
-//      // Only 3 ArmBBs left, both heavily damaged
-//      assertEquals( 3, battle.getStack("ArmBB").shipCount );
-//
-//      // Damage won't always be exactly the same, but should be in the same region
-//      assertTrue( "ArmBBs about 65% damaged", battle.getStack("ArmBB").getDamagePercent() > 60 );
-//      assertTrue( "ArmBBs about 65% damaged", battle.getStack("ArmBB").getDamagePercent() < 70 );
-//            
-//      // Rabid Dog stack is wiped out
-//      assertEquals( 0, battle.getStack("Rabid Dog").shipCount );
+      // However, we are using a fixed random seed
+     
+      // Only 3 ArmBBs left, both heavily damaged
+      assertEquals( 2, battle.getStack("ArmBB").getShipCount() );
+
+      // Damage won't always be exactly the same, but should be in the same region
+      assertTrue( "ArmBBs about 60% damaged", battle.getStack("ArmBB").getDamagePercent() > 70 );
+      assertTrue( "ArmBBs about 60% damaged", battle.getStack("ArmBB").getDamagePercent() < 75 );
+            
+      // Rabid Dog stack is wiped out
+      assertEquals( 0, battle.getStack("Colloidal BCC").getShipCount() );
       
    }
    
@@ -353,13 +356,11 @@ public class BattleSimulatorTest extends TestCase
    
    public void testDisengageOne() throws BattleSimulationError
    {
-      ShipStack cynic = new ShipStack( cynicDD, 1 );
+      ShipStack cynic = new ShipStack( cynicDD, 1, 1 );
       cynic.battleOrders = ShipStack.ORDERS_DISENGAGE;
-      cynic.side = 1;
       
-      ShipStack staz = new ShipStack( interceptor2, 3 );
+      ShipStack staz = new ShipStack( interceptor2, 1, 2 );
       staz.owner = "others";
-      staz.side = 2;
       
       BattleSimulation battle = new BattleSimulation(2);
       battle.addStack( cynic );
@@ -368,6 +369,9 @@ public class BattleSimulatorTest extends TestCase
       //battle.addStatusListener( consoleStatusListener );
       
       battle.simulate();
+      
+      assertEquals( 1, cynic.getShipCount() );
+      assertEquals( 1, staz.getShipCount() );
    }
 
    public void testAttractivenessCalculator() throws BattleSimulationError
@@ -417,9 +421,15 @@ public class BattleSimulatorTest extends TestCase
       sim.addStack( stack1b );
       sim.addStack( stack2a );
       
+      sim.randomSeed = 12345;
+      
       //sim.addStatusListener( consoleStatusListener );
       
       sim.simulate();
+      
+      assertEquals( 1, stack1a.getShipCount() );
+      assertEquals( 3, stack1b.getShipCount() );
+      assertEquals( 6, stack2a.getShipCount() );
    }
    
    public void testMultipleSimulations() throws BattleSimulationError
@@ -449,6 +459,9 @@ public class BattleSimulatorTest extends TestCase
       sim.simulateRepeatedly( iterations );
       
       long duration = System.currentTimeMillis() - start;
+      
+      assertTrue( "100 simulations took > 0.5s", duration < 500 );
+      
 //      System.out.println( "" + iterations + " simulations in " + (duration/1000.0) + "s" );
 //      
 //      System.out.println( armBBstack.design.getName() + "... " + armBBstack.getCumulativeResults() );
@@ -604,11 +617,179 @@ public class BattleSimulatorTest extends TestCase
       bbs.owner = "B";
       bbs.side = 2;
       
-      sim.addStatusListener( consoleStatusListener );
+//      sim.addStatusListener( consoleStatusListener );
 
       sim.saveTo( System.getProperty("user.home") + File.separator +  "bb_cc_ff.sim" );
       
       sim.simulate();
       
+   }
+   
+   public void testCapsAndDeflectors()
+   {
+      ShipDesign design1 = new ShipDesign();
+      design1.setCapacitors(3*3);
+      design1.setDeflectors(0);
+      
+      ShipDesign design2 = new ShipDesign();
+      design2.setCapacitors(3*3);
+      design2.setDeflectors(4*3);      
+      
+      double damageMultiplier1 = BattleSimulation.getDeflectorMultiplier(design2) * BattleSimulation.getCapacitorMultiplier(design1);
+      
+      assertAlmostEqual( damageMultiplier1, 0.66, 0.05 );
+
+      double damageMultiplier2 = BattleSimulation.getDeflectorMultiplier(design1) * BattleSimulation.getCapacitorMultiplier(design2);
+      
+      assertAlmostEqual( damageMultiplier2, 2.35, 0.05 );
+      
+      double ratio = damageMultiplier2/damageMultiplier1;
+      
+      assertAlmostEqual( ratio, 3.57, 0.05 );
+   }
+
+   private void assertAlmostEqual(double value, double expected, double maxError)
+   {
+      assertTrue( Math.abs(value - expected) < maxError );
+   }
+   
+   public void testEnergyDampener()
+   {
+      BattleSimulation sim = new BattleSimulation();
+
+      ShipDesign design1 = new ShipDesign();
+      design1.setBattleSpeed( 1.75 );
+      sim.addNewStack( design1, 1 );
+      
+      sim.setDampenerPresent(false);
+      
+      // Base speed is 1.75
+      // Normally this gives 2 moves in round 4.
+
+      int moves = sim.movesInRound( design1.getSpeed4(), 4 );
+      
+      assertEquals( 2, moves );
+      
+      sim.setDampenerPresent(true);
+      
+      // With EDs present, speed is reduced to 0.75
+      // This gives 1 move in round 4
+      
+      moves = sim.movesInRound( design1.getSpeed4(), 4 );
+      
+      assertEquals( 1, moves );
+   }
+   
+   // Test remove weapon slot
+   public void testRemoveWeaponSlot()
+   {
+      ShipDesign design = new ShipDesign();
+      design.addWeapon( Weapon.ALPHA, 2 );
+      design.addWeapon( Weapon.BETA, 2 );
+      design.addWeapon( Weapon.DELTA, 2 );
+      
+      assertEquals( 3, design.getWeaponSlots() );
+      assertEquals( "Alpha Torpedo", design.getWeaponName(0) );
+      assertEquals( "Beta Torpedo", design.getWeaponName(1) );
+      assertEquals( "Delta Torpedo", design.getWeaponName(2) );
+      
+      design.removeWeaponSlot( 1 );
+      assertEquals( 2, design.getWeaponSlots() );
+      assertEquals( "Alpha Torpedo", design.getWeaponName(0) );
+      assertEquals( "Delta Torpedo", design.getWeaponName(1) );
+
+      design.removeWeaponSlot( 0 );
+      assertEquals( 1, design.getWeaponSlots() );
+      assertEquals( "Delta Torpedo", design.getWeaponName(0) );
+      
+      design.removeWeaponSlot( 0 );
+      assertEquals( 0, design.getWeaponSlots() );
+
+      design.addWeapon( Weapon.ALPHA, 2 );
+      design.addWeapon( Weapon.BETA, 2 );
+      design.addWeapon( Weapon.DELTA, 2 );
+   
+      assertEquals( 3, design.getWeaponSlots() );
+      assertEquals( "Alpha Torpedo", design.getWeaponName(0) );
+      assertEquals( "Beta Torpedo", design.getWeaponName(1) );
+      assertEquals( "Delta Torpedo", design.getWeaponName(2) );
+
+      design.removeWeaponSlot( 2 );
+      assertEquals( 2, design.getWeaponSlots() );
+      assertEquals( "Alpha Torpedo", design.getWeaponName(0) );
+      assertEquals( "Beta Torpedo", design.getWeaponName(1) );
+   }
+   
+   public void testRegenShields() throws BattleSimulationError
+   {
+      ShipDesign attacker = new ShipDesign();
+      attacker.setOwner( "Me" );
+      attacker.setShields( 100 );
+      attacker.setArmour( 1 );
+      attacker.setBattleSpeed( 2.5 );
+      attacker.addWeapon( Weapon.X_RAY, 1 );
+      
+      ShipDesign target = new ShipDesign();
+      target.setOwner( "You" );
+      target.setShields( 200 );
+      target.setArmour( 20 );
+      target.setRegenShields( true );
+      target.setBattleSpeed( 1.0 );
+      
+      BattleSimulation sim = new BattleSimulation();
+      ShipStack attackStack = sim.addNewStack( attacker, 1, 1 );
+      ShipStack targetStack = sim.addNewStack( target, 1, 2 );
+      
+      sim.simulate();
+      
+      // Single x-ray laser against 200 dp of regen shields; the shields will regen
+      // more damage than the laser can inflict.
+      
+      assertEquals( targetStack.getShipCount(), 1 );
+      assertEquals( targetStack.shields, 200 );
+      assertEquals( targetStack.getDamagePercent(), 0 );
+      
+      // But with only 20dp of shields, the shields drop and then the
+      // target is killed.
+      
+      target.setShields( 20 );
+      
+      sim.simulate();
+      
+      assertEquals( targetStack.getShipCount(), 0 );
+   }
+   
+   public void testBadSimulation()
+   {
+      // Try a simulation with only 1 ship stack
+      BattleSimulation sim = new BattleSimulation();
+      sim.addNewStack( armBB, 1, 1 );
+      
+      try
+      {
+         sim.simulate();
+         
+         assertTrue( "Should not get here because the sim should throw an error", false );
+      }
+      catch (BattleSimulationError e)
+      {
+         assertEquals( "There must be at least 2 ship stacks in a battle", e.getMessage() );
+      }
+   }
+   
+   public void testInitialDamage()
+   {
+      ShipDesign design = new ShipDesign();
+      design.setArmour( 1024 );
+      
+      ShipStack stack = new ShipStack( design, 6 );      
+      stack.setInitialDamagePercent( 25 );
+      
+      assertEquals( 1536, stack.getInitialDamageTotal() );
+      
+      stack = new ShipStack( design, 1 );
+      stack.setInitialDamagePercent( 50 );
+      
+      assertEquals( 512, stack.getInitialDamageTotal() );
    }
 }
