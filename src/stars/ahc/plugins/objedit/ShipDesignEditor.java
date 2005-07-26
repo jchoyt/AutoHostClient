@@ -329,6 +329,15 @@ public class ShipDesignEditor extends JPanel
       
       weaponsControls.add( new JButton(addWeaponAction) );
       
+      Action removeWeaponAction = new AbstractAction("Remove Weapon") {
+         public void actionPerformed(ActionEvent event)
+         {
+            removeWeapon();
+         }
+      };
+      
+      weaponsControls.add( new JButton(removeWeaponAction) );
+      
       weaponsControls.add( Box.createHorizontalGlue() );
       
       weaponsBox.add( weaponsControls );
@@ -345,6 +354,18 @@ public class ShipDesignEditor extends JPanel
       if (design == null) return;
       
       design.addWeapon( Weapon.COLLOIDAL_PHASER, 1 );
+      weaponsTable.revalidate();
+   }
+   
+   private void removeWeapon()
+   {
+      ShipDesign design = getCurrentDesign(true);
+      
+      if (design == null) return;
+      
+      int slot = weaponsTable.getSelectedRow();
+      design.removeWeaponSlot(slot);
+      
       weaponsTable.revalidate();
    }
    
