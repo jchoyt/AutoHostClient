@@ -85,7 +85,7 @@ import stars.ahc.plugins.objedit.ShipDesignEditor;
  */
 public class StandAloneBattleSimulator extends JFrame
 {
-   private static double    version        = 0.26;
+   private static double    version        = 0.27;
    private Action           exitAction;
    private AbstractAction   openAction;
    private AbstractAction   runSimAction;
@@ -701,10 +701,10 @@ public class StandAloneBattleSimulator extends JFrame
       {
          getFieldValues();
 
-         resultsArea.setText("Stars! Battle Simulator v" + version + "\n\n");
-
          sim.reinit();
          sim.reset();
+
+         resultsArea.setText("Stars! Battle Simulator v" + version + "\n\n");
 
          if (showDesignsField.isSelected())
          {
