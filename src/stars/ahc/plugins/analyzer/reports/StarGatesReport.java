@@ -83,8 +83,25 @@ public class StarGatesReport extends AbstractAnalyzerReport
             // Set the value of each column
             setColumnValue( "Planet", planet.getName() );
             setColumnValue( "Owner", planet.getOwner() );
-            
-            String gateText = "" + planet.getGateMass() + "/" + planet.getGateRange();
+               
+            String gateText = "";
+            if (planet.getGateMass() == -1)
+            {
+               gateText += "any";
+            }
+            else
+            {
+               gateText += planet.getGateMass();
+            }
+            gateText += "/";
+            if (planet.getGateRange() == -1)
+            {
+               gateText += "any";
+            }
+            else
+            {
+               gateText += planet.getGateRange();
+            }         
             
             setColumnValue( "Stargate", gateText );
          
