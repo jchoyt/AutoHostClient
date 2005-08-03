@@ -28,6 +28,7 @@ import javax.swing.JTextField;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
 
 import stars.ahc.ShipDesign;
 import stars.ahc.ShipHull;
@@ -306,7 +307,8 @@ public class ShipDesignEditor extends JPanel
          weaponTypeSelector.addItem( Weapon.getAllWeapons()[n].name );
       }
       
-      weaponsTable.getColumnModel().getColumn(ShipWeaponsTableModel.COL_TYPE).setCellEditor( new DefaultCellEditor(weaponTypeSelector) );
+      TableColumn typeCol = weaponsTable.getColumnModel().getColumn(ShipWeaponsTableModel.COL_TYPE);
+      typeCol.setCellEditor( new DefaultCellEditor(weaponTypeSelector) );
       
       weaponsTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
       

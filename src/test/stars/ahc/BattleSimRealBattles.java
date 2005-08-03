@@ -50,6 +50,9 @@ public class BattleSimRealBattles extends TestCase
    private ShipDesign realityHaniSmallOne;
    private ShipDesign realityHaniLittleHelper;
    private ShipDesign realityStazMasterOfNone;
+   private ShipDesign realityPenguinDolphin;
+   private ShipDesign realityDidnoidNubianB;
+   private ShipDesign realityDidnoidNubianC;
    
    {
       realityStazBadBoy = new ShipDesign( ShipDesign.HULLTYPE_NUBIAN, "Bad Boy" );
@@ -175,7 +178,44 @@ public class BattleSimRealBattles extends TestCase
       realityHaniLittleHelper.setBattleSpeed( 0.75 );
       realityHaniLittleHelper.setInitiative( 1 );
       realityHaniLittleHelper.addWeapon( Weapon.X_RAY, 1 );
-   }
+      
+      realityPenguinDolphin = new ShipDesign( ShipDesign.HULLTYPE_SCOUT, "Dolphin" );
+      realityPenguinDolphin.setOwner("Penguin");
+      realityPenguinDolphin.setMass( 28 );
+      realityPenguinDolphin.setArmour( 20 );
+      realityPenguinDolphin.setShields( 0, true );
+      realityPenguinDolphin.setBattleSpeed( 1.25 );
+      realityPenguinDolphin.setInitiative( 1 );
+
+      realityDidnoidNubianB = new ShipDesign( ShipDesign.HULLTYPE_NUBIAN, "Nubian B" );
+      realityDidnoidNubianB.setOwner("Didnoid");
+      realityDidnoidNubianB.setMass( 517 );
+      realityDidnoidNubianB.setArmour( 5000 );
+      realityDidnoidNubianB.setShields( 2520, true );
+      realityDidnoidNubianB.setBattleSpeed( 1.5 );
+      realityDidnoidNubianB.setInitiative( 32 );
+      realityDidnoidNubianB.addComputer( ShipDesign.SUPER_COMPUTER, 15 );
+      realityDidnoidNubianB.setDeflectors( 0 );
+      realityDidnoidNubianB.setCapacitors( 0 );
+      realityDidnoidNubianB.setJamming( 74 );
+      realityDidnoidNubianB.addWeapon( Weapon.ARM, 3 );
+      realityDidnoidNubianB.addWeapon( Weapon.ARM, 3 );
+      realityDidnoidNubianB.addWeapon( Weapon.ARM, 3 );
+
+      realityDidnoidNubianC = new ShipDesign( ShipDesign.HULLTYPE_NUBIAN, "Nubian C" );
+      realityDidnoidNubianC.setOwner("Didnoid");
+      realityDidnoidNubianC.setMass( 232 );
+      realityDidnoidNubianC.setArmour( 5000 );
+      realityDidnoidNubianC.setShields( 2520, true );
+      realityDidnoidNubianC.setBattleSpeed( 2.5 );
+      realityDidnoidNubianC.setInitiative( 2 );
+      realityDidnoidNubianC.setDeflectors( 6 );
+      realityDidnoidNubianC.setCapacitors( 9 );
+      realityDidnoidNubianC.setJamming( 49 );
+      realityDidnoidNubianC.addWeapon( Weapon.AMP, 3 );
+      realityDidnoidNubianC.addWeapon( Weapon.AMP, 3 );
+      realityDidnoidNubianC.addWeapon( Weapon.AMP, 3 );
+}
       
    /**
     *  Game: Reality Sux
@@ -287,4 +327,51 @@ public class BattleSimRealBattles extends TestCase
       
    }
 
+   public void testRealityStazHani2508() throws BattleSimulationError
+   {
+      BattleSimulation sim = new BattleSimulation();
+      
+      final int DIDNOID = 1;
+      final int STAZ = 2;      
+      
+      sim.addNewStack( realityStazMainLine2,     44, STAZ,  0 );
+      sim.addNewStack( realityStazB52,           29, STAZ,  0, ShipStack.ORDERS_DISENGAGE );
+      sim.addNewStack( realityStazMainLine,      10, STAZ,  0 );
+      sim.addNewStack( realityStazBadBoy,         6, STAZ,  0 );
+      
+      sim.addNewStack( realityDidnoidNubianC,     2, DIDNOID,  0 );
+      sim.addNewStack( realityDidnoidNubianC,     3, DIDNOID,  0 );
+      sim.addNewStack( realityDidnoidNubianB,     8, DIDNOID, 32 );
+      sim.addNewStack( realityDidnoidNubianC,     3, DIDNOID,  0 );
+      sim.addNewStack( realityDidnoidNubianC,     1, DIDNOID,  0 );
+      sim.addNewStack( realityDidnoidNubianC,     2, DIDNOID,  0 );
+      sim.addNewStack( realityDidnoidNubianC,     2, DIDNOID,  0 );
+      sim.addNewStack( realityDidnoidNubianC,     2, DIDNOID,  0 );
+      sim.addNewStack( realityDidnoidNubianC,     2, DIDNOID,  0 );
+      sim.addNewStack( realityDidnoidNubianB,     1, DIDNOID, 32 );
+      sim.addNewStack( realityDidnoidNubianC,     2, DIDNOID,  0 );
+      sim.addNewStack( realityDidnoidNubianC,     4, DIDNOID,  0 );
+      sim.addNewStack( realityDidnoidNubianC,     1, DIDNOID,  0 );
+      sim.addNewStack( realityDidnoidNubianB,     2, DIDNOID, 32 );
+      
+      sim.addStatusListener( consoleStatusListener );
+      
+      sim.randomSeed = 12345;
+      
+      sim.simulate();
+      
+      assertEquals( 4, sim.getFinalRound() );
+      
+      // Confirm that all the Hani ships are wiped out
+      for (int n = 0; n < sim.getStackCount(); n++)
+      {
+         ShipStack stack = sim.getStack(n);
+         
+         if (stack.side == DIDNOID)
+         {
+            assertEquals( 0, stack.getShipCount() );        
+         }  
+      }
+      
+   }
 }

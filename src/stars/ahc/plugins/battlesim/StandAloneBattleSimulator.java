@@ -20,6 +20,7 @@
 package stars.ahc.plugins.battlesim;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
@@ -73,6 +74,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 
 import stars.ahc.ShipDesign;
 import stars.ahc.Utils;
@@ -438,7 +440,21 @@ public class StandAloneBattleSimulator extends JFrame
    {
       stackTableModel = new StackTableModel();
 
-      stacksTable = new JTable(stackTableModel);
+      stacksTable = new JTable(stackTableModel) 
+      {
+         // Override prepareRenderer with a version that displays uneditable cells in gray
+         public Component prepareRenderer(TableCellRenderer renderer, int row, int column)
+         {
+            Component cell = super.prepareRenderer(renderer, row, column);
+     
+            if (( isCellSelected(row,column) == false ) && ( getModel().isCellEditable(row,column) == false ))
+            {
+                cell.setBackground( getParent().getBackground() );
+            }
+     
+            return cell;
+         }
+      };
 
       stacksTable.getColumnModel().getColumn(0).setPreferredWidth(100);
       stacksTable.getColumnModel().getColumn(1).setPreferredWidth(150);
