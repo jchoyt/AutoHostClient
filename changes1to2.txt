@@ -1,0 +1,282 @@
+Added files: autohostclient/.cvsignore:1.2
+ autohostclient/ahclone/buguni3/buguni3.m10:1.1
+ autohostclient/ahclone/buguni3/buguni3.m11:1.1
+ autohostclient/ahclone/buguni3/buguni3.status:1.2
+ autohostclient/ahclone/buguni3/buguni3.status.2521:1.1
+ autohostclient/ahclone/buguni3/buguni3.status.2522:1.1
+ autohostclient/ahclone/buguni3/buguni3.xy:1.1
+ autohostclient/ahclone/buguni3/~buguni3.status:1.1
+ autohostclient/ahclone/buguni3/staging/buguni3.m10:1.1
+ autohostclient/ahclone/buguni3/staging/buguni3.m11:1.1
+ autohostclient/ahclone/dtroubl1/dtroubl1.m10:1.1
+ autohostclient/ahclone/dtroubl1/dtroubl1.m4:1.1
+ autohostclient/ahclone/dtroubl1/dtroubl1.m5:1.1
+ autohostclient/ahclone/dtroubl1/dtroubl1.m7:1.1
+ autohostclient/ahclone/dtroubl1/dtroubl1.status:1.1
+ autohostclient/ahclone/dtroubl1/dtroubl1.xy:1.1
+ autohostclient/html/index.html:1.2 autohostclient/html/links.js:1.1
+ autohostclient/html/sah_small.jpg:1.1
+ autohostclient/images/BlurMetalDg.gif:1.1
+ autohostclient/images/BlurMetalDg6.gif:1.1
+ autohostclient/images/BlurMetalDm6.gif:1.1
+ autohostclient/images/Neon14D5.gif:1.1
+ autohostclient/images/Neon14D7.gif:1.1
+ autohostclient/images/Neon7D1.gif:1.1
+ autohostclient/images/Neon7D7.gif:1.1
+ autohostclient/images/ShipControlDe.gif:1.1
+ autohostclient/images/ShipControlDe6.gif:1.1
+ autohostclient/images/ShipControlDf.gif:1.1
+ autohostclient/images/ShipControlDh.gif:1.1
+ autohostclient/images/ShipControlDh6.gif:1.1
+ autohostclient/images/ShipControlDk6.gif:1.1
+ autohostclient/src/stars/ahc/Fleet.java:1.2
+ autohostclient/src/stars/ahcgui/BomberFleetComparator.java:1.1
+ autohostclient/src/stars/ahcgui/BomberFleetTableModel.java:1.1
+ autohostclient/src/stars/ahcgui/CloakedFleetTableModel.java:1.2
+ autohostclient/src/stars/ahcgui/Eval.java:1.3
+ autohostclient/src/stars/ahcgui/FleetTabTableModel.java:1.2
+ autohostclient/src/stars/ahcgui/LazyPanel.java:1.1
+ autohostclient/src/stars/ahcgui/ShipCountTableModel.java:1.1
+ autohostclient/src/stars/ahcgui/TableMap.java:1.1
+ autohostclient/src/stars/ahcgui/TableSorter.java:1.1
+ autohostclient/src/stars/ahcgui/WarFleetComparator.java:1.2
+ autohostclient/src/stars/ahcgui/WarFleetTableModel.java:1.1
+
+Removed files: autohostclient/html/ahc.png autohostclient/html/ahc.zip
+ autohostclient/html/ahc2.png autohostclient/html/ahclient.jar
+ autohostclient/html/ahclient_src_v1.0.zip
+
+Date: 2003/03/14 23:48:11 EST
+Author: jchoyt;
+Description:
+  added AutoHost link
+Affected files: autohostclient/html/menu.js:1.2
+
+Date: 2003/03/18 23:56:54 EST
+Author: jchoyt;
+Description:
+  updated for Sourceforge site
+Affected files: autohostclient/html/ahc.html:1.2
+  autohostclient/html/ahc_license.html:1.2 autohostclient/html/faq.html:1.2
+  autohostclient/html/gpl.html:1.2 autohostclient/html/menu.js:1.3
+
+Date: 2003/03/18 23:58:39 EST
+Author: jchoyt;
+Description:
+  initial import for Sourceforge site
+Affected files: autohostclient/html/links.js:1.1
+  autohostclient/html/sah_small.jpg:1.1
+
+Date: 2003/04/25 09:46:51 EDT
+Author: jchoyt;
+Description:
+  Added thanks to folks
+Affected files: autohostclient/html/index.html:1.2
+
+Date: 2003/07/28 22:55:20 EDT
+Author: jchoyt;
+Description:
+  1.1pre2 - new reporting system
+Affected files: autohostclient/src/test/stars/ahc/AHPollerTest.java:1.2
+  autohostclient/src/test/stars/ahc/AutoHostClientTest.java:1.2
+  autohostclient/src/test/stars/ahc/GameTest.java:1.2
+  autohostclient/src/test/stars/ahc/GamesPropertiesTest.java:1.2
+  autohostclient/src/test/stars/ahc/PlayerTest.java:1.2
+  autohostclient/src/stars/ahc/AHPoller.java:1.2
+  autohostclient/src/stars/ahc/AutoHostClient.java:1.2
+  autohostclient/src/stars/ahc/Game.java:1.2
+  autohostclient/src/stars/ahc/GamesProperties.java:1.2
+  autohostclient/src/stars/ahc/Log.java:1.2
+  autohostclient/src/stars/ahc/Player.java:1.2
+  autohostclient/src/stars/ahc/Utils.java:1.2
+  autohostclient/src/stars/ahcgui/AbstractOptionPane.java:1.2
+  autohostclient/src/stars/ahcgui/AhcFrame.java:1.2
+  autohostclient/src/stars/ahcgui/AhcGui.java:1.2
+  autohostclient/src/stars/ahcgui/GamePanelFactory.java:1.2
+  autohostclient/src/stars/ahcgui/OptionPanelFactory.java:1.2
+
+Date: 2003/08/17 23:09:30 EDT
+Author: jchoyt;
+Description:
+  changed way polling is done - much faster and better status reports
+Affected files: autohostclient/test.props:1.2
+  autohostclient/src/stars/ahc/AHPoller.java:1.3
+  autohostclient/src/stars/ahc/AutoHostClient.java:1.3
+  autohostclient/src/stars/ahc/Game.java:1.3
+  autohostclient/src/stars/ahc/GamesProperties.java:1.3
+  autohostclient/src/stars/ahc/Player.java:1.3
+  autohostclient/src/stars/ahcgui/AhcFrame.java:1.3
+  autohostclient/src/stars/ahcgui/GamePanelFactory.java:1.3
+  autohostclient/.cvsignore:1.2
+
+Date: 2004/02/16 11:25:25 EST
+Author: jchoyt;
+Description:
+  added error dialog when something goes wrong
+Affected files: autohostclient/src/stars/ahc/EssaiPostURLConnection.java:1.
+  2
+
+Date: 2004/02/16 11:26:58 EST
+Author: jchoyt;
+Description:
+  added catch for improper use of -pf
+  corrected URL for testing
+Affected files: autohostclient/src/stars/ahc/AutoHostClient.java:1.4
+
+Date: 2004/02/16 11:28:42 EST
+Author: jchoyt;
+Description:
+  added method to get a list of users by their status on AH (in, out, or dead)
+Affected files: autohostclient/src/stars/ahc/Game.java:1.4
+
+Date: 2004/02/16 11:30:25 EST
+Author: jchoyt;
+Description:
+  added method to get a list of users by their status on AH (in, out, or dead)
+  added confirmation when a download is successful
+Affected files: autohostclient/src/stars/ahcgui/GamePanelFactory.java:1.4
+
+Date: 2004/02/16 11:31:52 EST
+Author: jchoyt;
+Description:
+  Added TitleBorder around the game panels
+  Random layout cleanup
+Affected files: autohostclient/src/stars/ahcgui/AhcFrame.java:1.4
+
+Date: 2004/02/16 11:34:18 EST
+Author: jchoyt;
+Description:
+  cleaned up source code header
+Affected files: autohostclient/src/stars/ahcgui/OptionPanelFactory.java:1.3
+
+Date: 2004/02/16 11:36:01 EST
+Author: jchoyt;
+Description:
+  code  beautification
+Affected files: autohostclient/src/stars/ahc/Utils.java:1.3
+  autohostclient/src/stars/ahcgui/AhcGui.java:1.3
+
+Date: 2004/02/16 11:36:47 EST
+Author: jchoyt;
+Description:
+  added player for testing
+Affected files: autohostclient/test.props:1.3
+
+Date: 2004/02/16 13:15:14 EST
+Author: jchoyt;
+Description:
+  added for local development testing while offline.  This directory acts as a replacement for SAH and works with the test.props file
+Affected files: autohostclient/ahclone/dtroubl1/dtroubl1.m10:1.1
+  autohostclient/ahclone/dtroubl1/dtroubl1.m4:1.1
+  autohostclient/ahclone/dtroubl1/dtroubl1.m5:1.1
+  autohostclient/ahclone/dtroubl1/dtroubl1.m7:1.1
+  autohostclient/ahclone/dtroubl1/dtroubl1.status:1.1
+  autohostclient/ahclone/dtroubl1/dtroubl1.xy:1.1
+  autohostclient/ahclone/buguni3/buguni3.m10:1.1
+  autohostclient/ahclone/buguni3/buguni3.m11:1.1
+  autohostclient/ahclone/buguni3/buguni3.status.2521:1.1
+  autohostclient/ahclone/buguni3/buguni3.status.2522:1.1
+  autohostclient/ahclone/buguni3/buguni3.xy:1.1
+  autohostclient/ahclone/buguni3/~buguni3.status:1.1
+  autohostclient/ahclone/buguni3/staging/buguni3.m10:1.1
+  autohostclient/ahclone/buguni3/staging/buguni3.m11:1.1
+
+Date: 2004/02/17 21:37:53 EST
+Author: jchoyt;
+Description:
+  putting the gifs back in - where the hell did they go?
+Affected files: autohostclient/images/ShipControlDk6.gif:1.1
+  autohostclient/images/BlurMetalDg.gif:1.1
+  autohostclient/images/BlurMetalDg6.gif:1.1
+  autohostclient/images/BlurMetalDm6.gif:1.1
+  autohostclient/images/Neon14D5.gif:1.1
+  autohostclient/images/Neon14D7.gif:1.1
+  autohostclient/images/Neon7D1.gif:1.1
+  autohostclient/images/Neon7D7.gif:1.1
+  autohostclient/images/ShipControlDe.gif:1.1
+  autohostclient/images/ShipControlDe6.gif:1.1
+  autohostclient/images/ShipControlDf.gif:1.1
+  autohostclient/images/ShipControlDh.gif:1.1
+  autohostclient/images/ShipControlDh6.gif:1.1
+
+Date: 2004/02/24 06:52:10 EST
+Author: jchoyt;
+Description:
+  added Analyze turn dialog, including Cloaked ship tab and ship count, and placeholders for  warfleet and bomber fleet tabs
+Affected files: autohostclient/src/stars/ahc/AutoHostClient.java:1.5
+  autohostclient/src/stars/ahc/Player.java:1.4
+  autohostclient/src/stars/ahcgui/AhcFrame.java:1.5
+  autohostclient/src/stars/ahcgui/GamePanelFactory.java:1.5
+  autohostclient/src/stars/ahcgui/ShipCountTableModel.java:1.1
+  autohostclient/src/stars/ahcgui/TableMap.java:1.1
+  autohostclient/src/stars/ahcgui/TableSorter.java:1.1
+
+Date: 2004/02/26 11:06:12 EST
+Author: jchoyt;
+Description:
+  filled out "Analyze Turn" tabs (cloaked fleets, warship fleets, bomber fleets)
+  moved Eval from ahc to ahcgui package
+Affected files: autohostclient/test.props:1.4
+  autohostclient/ahclone/buguni3/buguni3.status:1.2
+  autohostclient/src/stars/ahcgui/BomberFleetComparator.java:1.1
+  autohostclient/src/stars/ahcgui/BomberFleetTableModel.java:1.1
+  autohostclient/src/stars/ahcgui/CloakedFleetTableModel.java:1.2
+  autohostclient/src/stars/ahcgui/LazyPanel.java:1.1
+  autohostclient/src/stars/ahcgui/WarFleetComparator.java:1.2
+  autohostclient/src/stars/ahcgui/WarFleetTableModel.java:1.1
+
+Date: 2004/02/26 11:12:42 EST
+Author: jchoyt;
+Description:
+  fixed comment pane at bottom of Analyze page
+Affected files: autohostclient/src/stars/ahcgui/Eval.java:1.2
+
+Date: 2004/03/17 07:32:01 EST
+Author: jchoyt;
+Description:
+  Smarter race names - now catching all races that start with The
+Affected files: autohostclient/src/stars/ahc/Fleet.java:1.2
+
+Date: 2004/03/17 07:39:21 EST
+Author: jchoyt;
+Description:
+  addedd "skipped" message if the number of turns skipped is shown
+Affected files: autohostclient/src/stars/ahc/Game.java:1.5
+
+Date: 2004/03/17 07:41:07 EST
+Author: jchoyt;
+Description:
+  better message on Eval page
+Affected files: autohostclient/src/stars/ahcgui/Eval.java:1.3
+
+Date: 2004/03/17 07:41:44 EST
+Author: jchoyt;
+Description:
+  fixed classes on table
+Affected files: autohostclient/src/stars/ahcgui/FleetTabTableModel.java:1.2
+
+Date: 2004/03/17 07:42:40 EST
+Author: jchoyt;
+Description:
+  better exception message when can't finish download and p and f file generation
+Affected files: autohostclient/src/stars/ahcgui/GamePanelFactory.java:1.6
+
+Date: 2004/07/22 12:15:10 EDT
+Author: jchoyt;
+Description:
+  dropped a lot of debugging that was no longer needed
+Affected files: autohostclient/src/stars/ahc/Utils.java:1.4
+
+Date: 2004/07/22 12:15:37 EDT
+Author: jchoyt;
+Description:
+  removed betaware note
+Affected files: autohostclient/src/stars/ahc/EssaiPostURLConnection.java:1.
+  3
+
+Date: 2004/07/22 12:35:08 EDT
+Author: jchoyt;
+Description:
+  changed to use wine execution
+Affected files: autohostclient/test.props:1.5
+
