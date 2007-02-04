@@ -37,7 +37,7 @@ public class AutoHostClient extends java.lang.Object
     /**
      *  Description of the Field
      */
-    public final static String VERSION = "v2.11";
+    public final static String VERSION = "v2.21";
     static String propsFile = "ahclient.props";
    private static AhcFrame mainFrame;
    private static AHPoller poller;

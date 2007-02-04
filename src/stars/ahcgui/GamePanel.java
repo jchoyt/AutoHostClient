@@ -490,6 +490,13 @@ class DownloadButton extends JButton implements ActionListener
                 File playFile = new File( game.getDirectory(), players[i].getTurnFileName() );
                 Utils.fileCopy( stagedSrc, backupDest );
                 Utils.fileCopy( stagedSrc, playFile );
+		try {
+                File playerXsrc = new File( game.getDirectory(), players[i].getXFileName() );
+                File backupXdest = new File( backup, Utils.createBackupFileName(playerXsrc) );
+		if ( playerXsrc.exists() ) Utils.fileCopy(playerXsrc, backupXdest );
+		} catch ( Exception ex) {
+			System.out.println("well shit");
+		}
                 players[i].setLastUpload( System.currentTimeMillis() );
                 Utils.genPxxFiles( game, players[i].getId(), players[i].getStarsPassword(), new File( game.getDirectory() ) );
                 Log.log( Log.MESSAGE, this, "Player " + players[i].getId() + " m-file downloaded from AutoHost" );
