@@ -39,6 +39,7 @@ public class AhcGui extends java.lang.Object
     static JLabel statusBox;
 
 
+
     /**
      *  Sets the gameCards attribute of the AhcGui object
      *
