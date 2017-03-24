@@ -79,10 +79,6 @@ import stars.ahcgui.pluginmanager.ConfigurablePlugIn;
 import stars.ahcgui.pluginmanager.MapLayer;
 import stars.ahcgui.pluginmanager.PlugInManager;
 
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
-
 /**
  * Swing frame in which the game map is displayed
  *
@@ -122,7 +118,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       }
 
       config.addChangeListener( this );		// We want to know when the map configuration changes
-      game.addUpdateListener( this );		// and when the underlying game data changes 
+      game.addUpdateListener( this );		// and when the underlying game data changes
       addWindowListener( this );			// and when the window changes
 
       setupMapFrame();
@@ -183,7 +179,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
                    cp.loadConfiguration( savedProperties );
                 }
              }
-             
+
              if (layer instanceof GameUpdateListener)
              {
                 // If the map layer implements the GameUpdateListener interface then
@@ -250,7 +246,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
       toolbar.add( refreshBtn );
 
       setupPluginButtons( toolbar );
-      
+
       mapPanel = new MapPanel( game, config );
 
       mapPanel.setMapFrame( this );
@@ -414,7 +410,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    private void setupPluginButtons(JPanel toolbar)
    {
       ArrayList plugins = PlugInManager.getPluginManager().getPlugins( MapButtonPlugin.class );
-      
+
       for (int n = 0; n < plugins.size(); n++)
       {
          try
@@ -435,7 +431,7 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
    {
       MapButtonPlugin plugin = (MapButtonPlugin)PlugInManager.getPluginManager().newInstance(pluginClass);
       plugin.initialize( null, game, this );
-      
+
       JButton button = new JButton( plugin.getButtonText() );
       button.addActionListener( new PluginButtonActionListener(plugin) );
       button.setToolTipText( plugin.getButtonToolTip() );
@@ -490,26 +486,14 @@ public class MapFrame extends JFrame implements MapConfigChangeListener, WindowL
          System.out.println( "Could not get graphics device for image" );
          return;
       }
-         
+
       mapPanel.paint( g );
 
       // Encode as a JPEG
       try
       {
-          // Create/open the output file
-          FileOutputStream fos = new FileOutputStream(file);
-          
-          // Setup a maximum quality jpeg encoder, outputting to the file
-          JPEGImageEncoder jpeg = JPEGCodec.createJPEGEncoder(fos);          
-          JPEGEncodeParam params = jpeg.getDefaultJPEGEncodeParam(img);
-          params.setQuality(1.0f,false);
-          jpeg.setJPEGEncodeParam(params);
-          
-          // Encode the jpeg image to the file
-          jpeg.encode(img);
-          
-          // Close the file
-          fos.close();
+          // write image to file
+          ImageIO.write(img, "jpeg", file);
       }
       catch (Throwable t)
       {
@@ -886,7 +870,7 @@ class PlayerTableModel extends AbstractTableModel
 }
 
 /**
- * Action listener for a plugin button 
+ * Action listener for a plugin button
  */
 class PluginButtonActionListener implements ActionListener
 {
@@ -896,7 +880,7 @@ class PluginButtonActionListener implements ActionListener
    {
       this.plugin = plugin;
    }
-   
+
    /* (non-Javadoc)
     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
     */
