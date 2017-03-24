@@ -480,7 +480,7 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
         retPane.setLayout( new BoxLayout( retPane, BoxLayout.Y_AXIS ) );
         status.setBorder( BorderFactory.createTitledBorder( "Current Status" ) );
         retPane.add( status );
-        retPane.add( new JLabel( "<html>Thanks to Ron Miller for AutoHost - http://starsautohost.org</html>" ) );
+        retPane.add( new JLabel( "<html>Thanks to Ron Miller for AutoHost - https://starsautohost.org</html>" ) );
         return retPane;
     }
 
@@ -623,4 +623,3 @@ public class AhcFrame extends javax.swing.JFrame implements NotificationListener
        utilityPanel.revalidate();
     }
 }
-

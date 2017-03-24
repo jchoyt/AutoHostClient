@@ -51,7 +51,7 @@ public class EssaiPostURLConnection
     {
         try
         {
-            URL targetUrl = new URL( "http://starsautohost.org/cgi-bin/upload.pl" );
+            URL targetUrl = new URL( "https://starsautohost.org/cgi-bin/upload.pl" );
             URLConnection conn = targetUrl.openConnection();
             conn.setDoOutput( true );
             conn.setDoInput( true );
@@ -177,4 +177,3 @@ public class EssaiPostURLConnection
         }
     }
 }
-

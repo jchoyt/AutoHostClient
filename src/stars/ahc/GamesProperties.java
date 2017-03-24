@@ -39,7 +39,7 @@ public class GamesProperties
     /**
      *  Description of the Field
      */
-    public static String AUTOHOST = "http://starsautohost.org/starout/";
+    public static String AUTOHOST = "https://starsautohost.org/starout/";
     public static boolean UPTODATE = false;
     /**
      *  Description of the Field
@@ -388,13 +388,13 @@ public class GamesProperties
                 for ( int i = 0; i < gameNames.length; i++ )
                 {
                     String gameDirectory = props.getProperty( gameNames[i] + ".GameDir" );
-                    String controller = props.getProperty( gameNames[i] + ".Controller" );                    
+                    String controller = props.getProperty( gameNames[i] + ".Controller" );
                     currentGame = new Game( gameNames[i], gameDirectory, controller );
                     currentGame.setDirectory( gameDirectory );
 
                     // Note - this lot can be moved into game.parseProperties() [SL, 2 Nov 04]
-                    
-                    
+
+
                     /*
                      *  for each game, set up the players
                      */
@@ -431,8 +431,8 @@ public class GamesProperties
                        // Steve Leach, 2 Nov 2004
                        currentGame.loadProperties();
                     }
-                       
-                    
+
+
                     games.add( currentGame );
                 }
                 if ( gameNames.length == 1 )
@@ -634,4 +634,3 @@ public class GamesProperties
  *  }
  *  }
  */
-

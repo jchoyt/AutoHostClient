@@ -2,7 +2,7 @@
  * Created on Nov 22, 2004
  *
  * Copyright (c) 2004-2005, Steve Leach
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
  *  as published by the Free Software Foundation; either version 2
@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- * 
+ *
  */
 
 package stars.ahc.plugins.battlesim;
@@ -82,7 +82,7 @@ import stars.ahc.plugins.objedit.ShipDesignEditor;
 
 /**
  * A stand-alone GUI for the BattleSimulation class
- * 
+ *
  * @author Steve Leach
  */
 public class StandAloneBattleSimulator extends JFrame
@@ -440,18 +440,18 @@ public class StandAloneBattleSimulator extends JFrame
    {
       stackTableModel = new StackTableModel();
 
-      stacksTable = new JTable(stackTableModel) 
+      stacksTable = new JTable(stackTableModel)
       {
          // Override prepareRenderer with a version that displays uneditable cells in gray
          public Component prepareRenderer(TableCellRenderer renderer, int row, int column)
          {
             Component cell = super.prepareRenderer(renderer, row, column);
-     
+
             if (( isCellSelected(row,column) == false ) && ( getModel().isCellEditable(row,column) == false ))
             {
                 cell.setBackground( getParent().getBackground() );
             }
-     
+
             return cell;
          }
       };
@@ -891,7 +891,7 @@ public class StandAloneBattleSimulator extends JFrame
       String title = "Stars! Battle Simulator v" + version;
       String text = "An Open Source Project\n" + "Lead developer: Steve Leach\n"
             + "Assistance from: LEit, Kotk, mazda, Ptolemy, Micha, et.al.\n"
-            + "Visit the Academy forum at \n    http://starsautohost.org/sahforum/ \n\n"
+            + "Visit the Academy forum at \n    https://starsautohost.org/sahforum/ \n\n"
             + "Copyright (c) 2004-2005, Steve Leach";
       JOptionPane.showMessageDialog(this, text, title, JOptionPane.PLAIN_MESSAGE);
    }
@@ -1021,7 +1021,7 @@ public class StandAloneBattleSimulator extends JFrame
          // stackEditor.setTitle( "Stack Editor" );
          // stackEditor.setLocation( 80, 80 );
          // stackEditor.setSize( 640, 480 );
-         //	         
+         //
          // stackEditor.addWindowListener( new WindowAdapter() {
          // public void windowClosing(WindowEvent e)
          // {
@@ -1036,12 +1036,12 @@ public class StandAloneBattleSimulator extends JFrame
          // stackEditor.setVisible(false);
          // }
          // };
-         //	         
+         //
          // JToolBar toolbar = new JToolBar();
          // toolbar.add( closeAction );
-         //	         
+         //
          // stackEditor.getContentPane().add( toolbar, BorderLayout.NORTH );
-         //	         
+         //
          // designEditor = new ShipDesignEditor();
          // designEditor.setupControls();
          // stackEditor.getContentPane().add( designEditor, BorderLayout.CENTER
@@ -1188,7 +1188,7 @@ class TextAreaStatusListener implements BattleSimulationListener
 
    /*
     * (non-Javadoc)
-    * 
+    *
     * @see stars.ahc.plugins.battlesim.BattleSimulationListener#handleNotification(stars.ahc.plugins.battlesim.BattleSimulationNotification)
     */
    public void handleNotification(BattleSimulationNotification notification)
@@ -1203,7 +1203,7 @@ class SimFileFilter extends FileFilter
 {
    /*
     * (non-Javadoc)
-    * 
+    *
     * @see javax.swing.filechooser.FileFilter#accept(java.io.File)
     */
    public boolean accept(File file)
@@ -1213,7 +1213,7 @@ class SimFileFilter extends FileFilter
 
    /*
     * (non-Javadoc)
-    * 
+    *
     * @see javax.swing.filechooser.FileFilter#getDescription()
     */
    public String getDescription()
@@ -1227,7 +1227,7 @@ class BkpFileFilter extends FileFilter
 {
    /*
     * (non-Javadoc)
-    * 
+    *
     * @see javax.swing.filechooser.FileFilter#accept(java.io.File)
     */
    public boolean accept(File file)
@@ -1237,7 +1237,7 @@ class BkpFileFilter extends FileFilter
 
    /*
     * (non-Javadoc)
-    * 
+    *
     * @see javax.swing.filechooser.FileFilter#getDescription()
     */
    public String getDescription()
@@ -1270,7 +1270,7 @@ class StackTableModel extends AbstractTableModel
 
    /*
     * (non-Javadoc)
-    * 
+    *
     * @see javax.swing.table.TableModel#getColumnCount()
     */
    public int getColumnCount()
@@ -1280,7 +1280,7 @@ class StackTableModel extends AbstractTableModel
 
    /*
     * (non-Javadoc)
-    * 
+    *
     * @see javax.swing.table.TableModel#getRowCount()
     */
    public int getRowCount()
@@ -1290,7 +1290,7 @@ class StackTableModel extends AbstractTableModel
 
    /*
     * (non-Javadoc)
-    * 
+    *
     * @see javax.swing.table.TableModel#getValueAt(int, int)
     */
    public Object getValueAt(int row, int col)
@@ -1453,7 +1453,7 @@ class StackEditor extends JFrame
       JPanel editPane = new JPanel();
       editPane.setBorder( new EmptyBorder(4,4,4,4) );
       editPane.setLayout( new BorderLayout() );
-      
+
       JPanel stackPane = new JPanel();
       stackPane.setBorder( new EtchedBorder() );
       stackPane.setLayout( new FlowLayout(FlowLayout.LEFT) );
@@ -1467,14 +1467,14 @@ class StackEditor extends JFrame
       stackPane.add( new JLabel("Damage %:") );
       damageField = new JTextField(2);
       stackPane.add( damageField );
-      
+
       editPane.add( stackPane, BorderLayout.NORTH );
-      
+
       designEditor = new ShipDesignEditor();
       designEditor.setBorder( new EtchedBorder() );
       designEditor.setupControls();
       editPane.add( designEditor, BorderLayout.CENTER );
-      
+
       getContentPane().add(editPane, BorderLayout.CENTER);
 
       addWindowListener(new WindowAdapter()
@@ -1493,15 +1493,15 @@ class StackEditor extends JFrame
       designEditor.getFieldValues();
       parent.refreshDesign();
    }
-   
+
    protected void getStackChanges()
    {
       int shipCount = Utils.safeParseInt( shipCountField.getText(), stack.getShipCount() );
       stack.setShipCount( shipCount );
-      
+
       int side = ((Integer)sideSpinner.getModel().getValue()).intValue();
       stack.side = side;
-      
+
       int damage = Utils.safeParseInt( damageField.getText().trim(), stack.getInitialDamagePercent() );
       stack.setInitialDamagePercent( damage );
    }

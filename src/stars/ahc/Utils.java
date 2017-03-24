@@ -126,8 +126,8 @@ public class Utils
                 dest.mkdirs();
             }
             //go get the files
-            URL servlet = new URL("http://starsautohost.org/cgi-bin/downloadturn.php?file=" + fileName );
-            Log.log( Log.DEBUG, Utils.class, "Going to http://starsautohost.org/cgi-bin/downloadturn.php?file=" + fileName );
+            URL servlet = new URL("https://starsautohost.org/cgi-bin/downloadturn.php?file=" + fileName );
+            Log.log( Log.DEBUG, Utils.class, "Going to https://starsautohost.org/cgi-bin/downloadturn.php?file=" + fileName );
             URLConnection conn=servlet.openConnection();
             conn.setDoOutput(true);
             conn.setDoInput(true);
@@ -136,7 +136,7 @@ public class Utils
             conn.setRequestProperty("Content-type","multipart/form-data; boundary=" + boundary);
             conn.setRequestProperty( "Referer", "Stars!AutohostClient" );
             conn.setRequestProperty("Cache-Control", "no-cache");
-             
+
             DataOutputStream out = new DataOutputStream(conn.getOutputStream());
             out.writeBytes("--" + boundary + "\r\n");
             // EssaiPostURLConnection.writeParam("file", fileName, out, boundary);
@@ -145,7 +145,7 @@ public class Utils
             Log.log( Log.DEBUG, Utils.class, "password = "+ password );
             out.flush();
             out.close();
-            
+
             InputStream stream = conn.getInputStream();
             BufferedInputStream in = new BufferedInputStream(stream);
             FileOutputStream file = new FileOutputStream( destination + "/" + fileName );
@@ -274,7 +274,7 @@ public class Utils
     }
 
     /**
-     * @param newExtension - the new file extension including the period 
+     * @param newExtension - the new file extension including the period
      */
     public static String changeFileExtension( File file, String newExtension )
     {
@@ -346,17 +346,17 @@ public class Utils
     {
        // TODO: check that NewReports=1, ie. it generated *.pnn rather than *.pla
        checkForNewReports( game, playerNumber );
-       
+
         String gameDir = game.getDirectory();
         String backup = game.getDirectory() + "/backup";
         File fFile = new File( gameDir, game.getFFileName( playerNumber ) );
         File pFile = new File( gameDir, game.getPFileName( playerNumber ) );
         File backupFDest = new File( backup, createBackupFileName( fFile, game.getCurrentYear() ) );
         File backupPDest = new File( backup, createBackupFileName( pFile, game.getCurrentYear() ) );
-        
+
         // Removed GUI code from this utility routine
         // Steve Leach, 22 Nov 2004
-        
+
 //        try
 //        {
             Utils.fileCopy( fFile, backupFDest );
@@ -379,16 +379,16 @@ public class Utils
    private static void checkForNewReports(Game game, String playerNumber)
    {
       String gameDir = game.getDirectory();
-      
+
       File pFile = new File( gameDir, game.getPFileName( playerNumber ) );
-      
+
       String oldReportName = game.getDirectory() + File.separator + game.getName() + ".PLA";
       File oldReport = new File( oldReportName );
-      
+
       if ((pFile.exists() == false) && (oldReport.exists()))
       {
          // User probably doesn't have NewReports = 1 in his Stars.ini
-         
+
          // TODO: decide what to do here
       }
    }
@@ -431,10 +431,10 @@ public class Utils
             {
                // ignore
             }
-            
+
             backupPxxFiles( game, playerNumber );
             return "";
-            
+
 //        }
 //        catch ( Exception e )
 //        {
@@ -468,7 +468,7 @@ public class Utils
    {
       return (int)safeParseLong(value,defaultValue);
    }
-   
+
    /**
     * Converts a string to an integer.  If the string does not contain a valid
     * integer then 0 is returned.
@@ -490,14 +490,14 @@ public class Utils
       try
       {
         // Converts to double then to long. This is good in case the stringed number was in decimal format.
-      	return (long)Double.valueOf(value.trim()).doubleValue(); 
+      	return (long)Double.valueOf(value.trim()).doubleValue();
       }
       catch (Throwable t)
       {
          return defaultValue;
-      }      
+      }
    }
-   
+
    /**
     * Returns a pseudo-random floating point value between 0 and 1.
     *
@@ -507,12 +507,12 @@ public class Utils
    {
       return random.nextFloat();
    }
-   
+
    public static int getRandomInt()
    {
       return random.nextInt();
    }
-   
+
    public static Random getRandomGenerator()
    {
       return random;
@@ -597,20 +597,20 @@ public class Utils
          return defaultValue;
       }
    }
-   
+
    public static boolean isIntDigit( char c )
    {
       if (c == '.')					return true;
       if (c == '-')					return true;
       if ((c >= '0') && (c<='9'))	return true;
-      return false;      
+      return false;
    }
    public static boolean isFloatDigit( char c )
    {
       if (c == '.')					return true;
       return isIntDigit(c);
    }
-   
+
    public static int getLeadingInt( String text, int defaultValue )
    {
       char[] a = text.toCharArray();
@@ -629,9 +629,9 @@ public class Utils
       text = new String( a, 0, digits );
       return safeParseInt( text, defaultValue );
    }
-   
+
    /**
-    * Gets a floating point number from the start of the string 
+    * Gets a floating point number from the start of the string
     */
    public static double getLeadingFloat( String text, double defaultValue )
    {
@@ -651,15 +651,15 @@ public class Utils
       text = new String( a, 0, digits );
       return safeParseFloat( text, defaultValue );
    }
-   
+
    private static final String MANY_SPACES = "                                                                       ";
-   
+
    public static String padRight( String text, int width )
    {
       if (text == null) text = "";
       return (text + MANY_SPACES).substring( 0, width );
    }
-   
+
    public static String padLeft( String text, int width)
    {
       if (text == null) text = "";
@@ -667,4 +667,3 @@ public class Utils
       return text.substring( text.length() - width );
    }
 }
-
